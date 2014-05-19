@@ -7,18 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		459894B719236D92000F9BE2 /* window_osx.m in Sources */ = {isa = PBXBuildFile; fileRef = 459894B619236D92000F9BE2 /* window_osx.m */; };
 		45B2169C1918C47A00B89D7D /* build.h in Headers */ = {isa = PBXBuildFile; fileRef = 45B216981918C47A00B89D7D /* build.h */; };
 		45B2169D1918C47A00B89D7D /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = 45B216991918C47A00B89D7D /* window.c */; };
 		45B2169E1918C47A00B89D7D /* window.h in Headers */ = {isa = PBXBuildFile; fileRef = 45B2169A1918C47A00B89D7D /* window.h */; };
 		45B2169F1918C47A00B89D7D /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = 45B2169B1918C47A00B89D7D /* types.h */; };
+		45B216A7191A08C400B89D7D /* internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 45B216A6191A08C400B89D7D /* internal.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		459894B619236D92000F9BE2 /* window_osx.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = window_osx.m; path = ../../../window/window_osx.m; sourceTree = "<group>"; };
 		45B216901918C2EC00B89D7D /* libwindow.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libwindow.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		45B216981918C47A00B89D7D /* build.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build.h; path = ../../../window/build.h; sourceTree = "<group>"; };
 		45B216991918C47A00B89D7D /* window.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = window.c; path = ../../../window/window.c; sourceTree = "<group>"; };
 		45B2169A1918C47A00B89D7D /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = window.h; path = ../../../window/window.h; sourceTree = "<group>"; };
 		45B2169B1918C47A00B89D7D /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = ../../../window/types.h; sourceTree = "<group>"; };
+		45B216A6191A08C400B89D7D /* internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = internal.h; path = ../../../window/internal.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +58,8 @@
 				45B216981918C47A00B89D7D /* build.h */,
 				45B216991918C47A00B89D7D /* window.c */,
 				45B2169A1918C47A00B89D7D /* window.h */,
+				459894B619236D92000F9BE2 /* window_osx.m */,
+				45B216A6191A08C400B89D7D /* internal.h */,
 				45B2169B1918C47A00B89D7D /* types.h */,
 			);
 			name = window;
@@ -67,6 +73,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				45B2169F1918C47A00B89D7D /* types.h in Headers */,
+				45B216A7191A08C400B89D7D /* internal.h in Headers */,
 				45B2169C1918C47A00B89D7D /* build.h in Headers */,
 				45B2169E1918C47A00B89D7D /* window.h in Headers */,
 			);
@@ -123,6 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				459894B719236D92000F9BE2 /* window_osx.m in Sources */,
 				45B2169D1918C47A00B89D7D /* window.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -404,6 +412,7 @@
 				45B216A3191953F600B89D7D /* Deploy */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

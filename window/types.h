@@ -19,10 +19,15 @@
 #include <window/build.h>
 
 
+// CONSTANTS
+const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
+
+
 // PRIMITIVE TYPES
 
 
 // OPAQUE COMPLEX TYPES
+typedef struct _window window_t;
 
 
 // COMPLEX TYPES

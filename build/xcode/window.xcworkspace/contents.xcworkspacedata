@@ -4,4 +4,7 @@
    <FileRef
       location = "group:window/window.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:window-ios/window-ios.xcodeproj">
+   </FileRef>
 </Workspace>
