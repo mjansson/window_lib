@@ -12,6 +12,7 @@
 
 #include <foundation/foundation.h>
 #include <window/window.h>
+#include <window/internal.h>
 
 
 static bool _window_initialized = false;
@@ -22,6 +23,9 @@ int window_initialize( void )
 	if( _window_initialized )
 		return 0;
 	
+	if( _window_event_initialize() < 0 )
+		return -1;
+	
 	_window_initialized = true;
 	
 	return 0;
@@ -30,6 +34,8 @@ int window_initialize( void )
 
 void window_shutdown( void )
 {
+	_window_event_shutdown();
+	
 	_window_initialized = false;
 }
 

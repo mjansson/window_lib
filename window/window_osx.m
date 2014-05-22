@@ -82,7 +82,6 @@ void window_resize( window_t* window, unsigned int width, unsigned int height )
 		return;
 			
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
-	NSScreen* screen = [nswindow screen];
 	NSRect frame_rect = [nswindow frame];
 	
 	NSRect new_rect = frame_rect;
@@ -155,7 +154,7 @@ bool window_is_minimized( window_t* window )
 
 bool window_has_focus( window_t* window )
 {
-	return true;
+	return window && window->nswindow && ( [NSApp mainWindow] == window->nswindow );
 }
 
 
@@ -178,7 +177,7 @@ bool window_is_cursor_locked( window_t* window )
 void window_set_title( window_t* window, const char* title )
 {
 	if( !window || !window->nswindow )
-		return false;
+		return;
 	
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
 	@autoreleasepool

@@ -18,6 +18,19 @@
 #if FOUNDATION_PLATFORM_IOS
 
 #include <foundation/apple.h>
+#include <objc/runtime.h>
+
+#import <Foundation/NSRunLoop.h>
+#import <UIKit/UIScreen.h>
+#import <UIKit/UIScreenMode.h>
+
+
+bool _window_app_started = false;
+bool _window_app_paused = true;
+
+
+@interface WindowKeyboardView : UIView <UIKeyInput>
+@end
 
 
 window_t* window_allocate_from_uiwindow( void* uiwindow )
@@ -30,18 +43,67 @@ window_t* window_allocate_from_uiwindow( void* uiwindow )
 
 void* window_view( window_t* window, unsigned int tag )
 {
-	return 0;
+	if( !window || !window->uiwindow )
+		return 0;
+	
+	UIWindow* uiwindow = window->uiwindow;
+	UIView* view = [uiwindow viewWithTag:tag];
+	if( !view )
+		view = [[uiwindow subviews] objectAtIndex:0];
+	return view;
 }
 
 
 void* window_layer( window_t* window, void* view )
 {
-	return 0;
+	return view ? [(UIView*)view layer] : 0;
 }
 
 
-void window_wait_for_displaylink( window_t* window )
+@interface WindowDisplayLink : NSObject
 {
+@public
+window_t*      target_window;
+window_draw_fn draw_fn;
+}
+
++(id)fromDrawFn:(window_draw_fn)fn window:(window_t*)window;
+-(id)initWithDrawFn:(window_draw_fn)fn window:(window_t*)window;;
+-(void)callDraw:(id)obj;
+
+@end
+
+@implementation WindowDisplayLink
+
+
++ (id)fromDrawFn:(window_draw_fn)fn window:(window_t *)window
+{
+    return [[self alloc] initWithDrawFn:fn window:window];
+}
+
+
+- (id)initWithDrawFn:(window_draw_fn)fn window:(window_t*)window;
+{
+	draw_fn = fn;
+	target_window = window;
+	return self;
+}
+
+
+- (void)callDraw:(id)obj
+{
+	draw_fn( target_window );
+}
+
+@end
+
+
+void window_add_displaylink( window_t* window, window_draw_fn drawfn )
+{
+	id wrapper = [WindowDisplayLink fromDrawFn:drawfn window:window];
+	id display_link = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:wrapper selector:@selector(callDraw:)];
+	[display_link setFrameInterval:1];
+	[display_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
 
@@ -93,31 +155,31 @@ void window_move( window_t* window, int x, int y )
 
 bool window_is_open( window_t* window )
 {
-	return true;
+	return _window_app_started;
 }
 
 
 bool window_is_visible( window_t* window )
 {
-	return true;
+	return !_window_app_paused;
 }
 
 
 bool window_is_maximized( window_t* window )
 {
-	return false;
+	return !_window_app_paused;
 }
 
 
 bool window_is_minimized( window_t* window )
 {
-	return false;
+	return _window_app_paused;
 }
 
 
 bool window_has_focus( window_t* window )
 {
-	return true;
+	return !_window_app_paused;
 }
 
 
@@ -146,8 +208,10 @@ int window_width( window_t* window )
 {
 	if( window && window->uiwindow )
 	{
-		NSRect rect = [(UIWindow*)window->nswindow contentRectForFrameRect:[(UIWindow*)window->nswindow frame]];
-		return (int)rect.size.width;
+		UIWindow* uiwindow = window->uiwindow;
+		CGRect rect = [uiwindow frame];
+		CGFloat scale = [uiwindow contentScaleFactor];
+		return (int)( rect.size.width * scale );
 	}
 	return 0;
 }
@@ -155,10 +219,12 @@ int window_width( window_t* window )
 
 int window_height( window_t* window )
 {
-	if( window && window->nswindow )
+	if( window && window->uiwindow )
 	{
-		NSRect rect = [(NSWindow*)window->nswindow contentRectForFrameRect:[(NSWindow*)window->nswindow frame]];
-		return (int)rect.size.height;
+		UIWindow* uiwindow = window->uiwindow;
+		CGRect rect = [uiwindow frame];
+		CGFloat scale = [uiwindow contentScaleFactor];
+		return (int)( rect.size.width * scale );
 	}
 	return 0;
 }
@@ -166,58 +232,110 @@ int window_height( window_t* window )
 
 int window_position_x( window_t* window )
 {
-	if( window && window->nswindow )
-	{
-		NSRect rect = [(NSWindow*)window->nswindow contentRectForFrameRect:[(NSWindow*)window->nswindow frame]];
-		return (int)rect.origin.x;
-	}
 	return 0;
 }
 
 
 int window_position_y( window_t* window )
 {
-	if( window && window->nswindow )
-	{
-		NSRect rect = [(NSWindow*)window->nswindow contentRectForFrameRect:[(NSWindow*)window->nswindow frame]];
-		return (int)rect.origin.y;
-	}
 	return 0;
 }
 
 
 void window_fit_to_screen( window_t* window )
 {
-	if( !window || !window->nswindow )
-		return;
-	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
-	NSScreen* screen = [nswindow screen];
-	NSRect frame_rect = [nswindow frame];
-	
-	NSUInteger style_mask = [nswindow styleMask];
-	NSUInteger resize_mask = style_mask | NSResizableWindowMask;
-	[nswindow setStyleMask:resize_mask];
-	
-	NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
-	if( ( new_rect.size.width < frame_rect.size.width ) || ( new_rect.size.height < frame_rect.size.height ) )
-	{
-		//Maintain aspect
-		float width_factor = (float)new_rect.size.width / (float)frame_rect.size.width;
-		float height_factor = (float)new_rect.size.height / (float)frame_rect.size.height;
-		
-		if( width_factor < height_factor )
-			new_rect.size.height = new_rect.size.height * width_factor;
-		else
-			new_rect.size.width = new_rect.size.width * height_factor;
-		
-		[nswindow setFrame:new_rect display:TRUE];
-		[nswindow setMinSize:new_rect.size];
-		[nswindow setMaxSize:new_rect.size];
-	}
-	
-	[nswindow setStyleMask:style_mask];
 }
+
+
+@implementation WindowKeyboardView
+
+- (void)insertText:(NSString*)text
+{
+	/*log_debugf( HASH_WINDOW, "iOS keyboard text: %s", [text UTF8String] );
+	unsigned int glyph = [text characterAtIndex:0];
+	input_event_post_key( INPUTEVENT_CHAR, glyph, 0 );
+	if( ( glyph == 10 ) || ( glyph == 13 ) )
+	{
+		input_event_post_key( INPUTEVENT_KEYDOWN, KEY_RETURN, 0 );
+		input_event_post_key( INPUTEVENT_KEYUP, KEY_RETURN, 0 );
+	}*/
+}
+
+- (void)deleteBackward
+{
+	/*log_debugf( HASH_WINDOW, "iOS keyboard backspace" );
+	input_event_post_key( INPUTEVENT_KEYDOWN, KEY_BACKSPACE, 0 );
+	input_event_post_key( INPUTEVENT_KEYUP, KEY_BACKSPACE, 0 );*/
+}
+
+- (BOOL)hasText { return YES; }
+- (BOOL)canBecomeFirstResponder { return YES; }
+
+@end
+
+
+@implementation WindowGLView
+
+
++ (Class) layerClass
+{
+    return [CAEAGLLayer class];
+}
+
+
+- (BOOL)canBecomeFirstResponder { return YES; }
+
+
+- (id) initWithFrame:(CGRect)frame
+{
+    if( ( self = [super initWithFrame:frame] ) )
+	{
+		UIScreen* main_screen = [UIScreen mainScreen];
+		CGFloat screen_width = main_screen.currentMode.size.width;
+		CGFloat screen_height = main_screen.currentMode.size.height;
+        
+        if( ( frame.size.width >= ( screen_width * 2 ) ) && ( frame.size.height >= ( screen_height * 2 ) ) )
+			self.contentScaleFactor = 2;
+		
+		log_debugf( HASH_WINDOW, "WindowGLView initWithFrame, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), screen_width, screen_height, self.contentScaleFactor );
+        CAEAGLLayer* layer = (CAEAGLLayer*)self.layer;
+        layer.opaque = TRUE;
+        if( self.contentScaleFactor > 1 )
+            layer.contentsScale = self.contentScaleFactor;
+        layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+		
+		keyboard_view = 0;
+	}
+    return self;
+}
+
+
+- (id) initWithCoder:(NSCoder*)coder
+{
+    if( ( self = [super initWithCoder:coder] ) )
+	{
+		UIScreen* main_screen = [UIScreen mainScreen];
+		CGFloat screen_width = main_screen.currentMode.size.width;
+		CGFloat screen_height = main_screen.currentMode.size.height;
+        
+		CGRect frame = [self frame];
+        if( ( frame.size.width >= ( screen_width * 2 ) ) && ( frame.size.height >= ( screen_height * 2 ) ) )
+			self.contentScaleFactor = 2;
+        
+		log_debugf( HASH_WINDOW, "WindowGLView initWithCoder, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), screen_width, screen_height, self.contentScaleFactor );
+        CAEAGLLayer* layer = (CAEAGLLayer*)self.layer;
+        layer.opaque = TRUE;
+        if( self.contentScaleFactor > 1 )
+            layer.contentsScale = self.contentScaleFactor;
+        layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+		
+		keyboard_view = 0;
+	}
+    return self;
+}
+
+
+@end
 
 
 #endif

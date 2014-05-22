@@ -1,4 +1,4 @@
-/* internal.h  -  Window library types  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
+/* internal.h  -  Window library internals  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
  * 
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
@@ -62,4 +62,12 @@ struct _window
 
 
 // UTILITY FUNCTIONS
+WINDOW_EXTERN int          _window_event_initialize( void );
+WINDOW_EXTERN void         _window_event_shutdown( void );
 
+
+// GLOBAL DATA
+#if FOUNDATION_PLATFORM_IOS
+WINDOW_EXTERN bool         _window_app_started;
+WINDOW_EXTERN bool         _window_app_paused;
+#endif

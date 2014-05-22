@@ -19,6 +19,7 @@
 
 #include <window/build.h>
 #include <window/types.h>
+#include <window/event.h>
 
 
 /*! Main entry point. Call this to bootstrap the window library
@@ -100,7 +101,7 @@ WINDOW_API window_t*           window_allocate_from_uiwindow( void* uiwindow );
 WINDOW_API void*               window_view( window_t* window, unsigned int tag ); //UIView*
 WINDOW_API void*               window_layer( window_t* window, void* view ); //CAEAGLLayer*
 
-WINDOW_API void                window_wait_for_displaylink( window_t* window );
+WINDOW_API void                window_add_displaylink( window_t* window, window_draw_fn drawfn );
 
 WINDOW_API void                window_show_keyboard( window_t* window );
 WINDOW_API void                window_hide_keyboard( window_t* window );

@@ -12,6 +12,11 @@
 
 #include <foundation/foundation.h>
 
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_IOS
+
+volatile bool _test_should_terminate = false;
+
+#endif
 
 static void* event_thread( object_t thread, void* arg )
 {
@@ -28,8 +33,13 @@ static void* event_thread( object_t thread, void* arg )
 			switch( event->id )
 			{
 				case FOUNDATIONEVENT_TERMINATE:
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_IOS
+					log_infof( HASH_TEST, "Application terminate event received" );
+					_test_should_terminate = true;
+#else
 					log_warn( HASH_TEST, WARNING_SUSPICIOUS, "Terminating tests due to event" );
 					process_exit( -2 );
+#endif
 					break;
 
 				default:
@@ -51,6 +61,8 @@ static void* event_thread( object_t thread, void* arg )
 
 static void test_log_callback( uint64_t context, int severity, const char* msg )
 {
+	if( _test_should_terminate )
+		return;
 	test_text_view_append( test_view_from_tag( delegate_uiwindow(), 1 ), msg );
 }
 
@@ -60,7 +72,7 @@ static void test_log_callback( uint64_t context, int severity, const char* msg )
 int main_initialize( void )
 {
 	application_t application = {0};
-	application.name = "Foundation library test suite";
+	application.name = "Window library test suite";
 	application.short_name = "test_all";
 	application.config_dir = "test_all";
 	application.flags = APPLICATION_UTILITY;
@@ -119,11 +131,13 @@ int main_run( void* main_arg )
 	
 	thread = thread_create( event_thread, "event_thread", THREAD_PRIORITY_NORMAL, 0 );
 	thread_start( thread, 0 );
+	while( !thread_is_running( thread ) )
+		thread_sleep( 10 );
 
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
 	
 	test_run_fn tests[] = {
-		test_window_run
+		test_window_run,
 		0
 	};
 
@@ -160,9 +174,15 @@ int main_run( void* main_arg )
 #endif
 
 	if( process_result != 0 )
-	{
 		log_warnf( HASH_TEST, WARNING_SUSPICIOUS, "Tests failed with exit code %d", process_result );
+	
+	while( !_test_should_terminate )
+	{
+		system_process_events();
+		thread_sleep( 100 );
 	}
+	
+	log_debug( HASH_TEST, "Exiting main loop" );
 	
 #else
 	
@@ -232,6 +252,8 @@ exit:
 	thread_terminate( thread );
 	thread_destroy( thread );
 	while( thread_is_running( thread ) )
+		thread_sleep( 10 );
+	while( thread_is_thread( thread ) )
 		thread_sleep( 10 );
 	
 	return process_result;
