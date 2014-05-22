@@ -11,9 +11,11 @@
  */
 
 #include <foundation/foundation.h>
+#include <window/window.h>
 
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_IOS
 
+volatile bool _test_should_start = false;
 volatile bool _test_should_terminate = false;
 
 #endif
@@ -32,6 +34,13 @@ static void* event_thread( object_t thread, void* arg )
 		{
 			switch( event->id )
 			{
+				case FOUNDATIONEVENT_START:
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_IOS
+					log_infof( HASH_TEST, "Application start event received" );
+					_test_should_start = true;
+#endif
+					break;
+					
 				case FOUNDATIONEVENT_TERMINATE:
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_IOS
 					log_infof( HASH_TEST, "Application terminate event received" );
@@ -45,6 +54,8 @@ static void* event_thread( object_t thread, void* arg )
 				default:
 					break;
 			}
+			
+			window_event_handle_foundation( event );
 		}
 
 		thread_sleep( 10 );
@@ -131,7 +142,7 @@ int main_run( void* main_arg )
 	
 	thread = thread_create( event_thread, "event_thread", THREAD_PRIORITY_NORMAL, 0 );
 	thread_start( thread, 0 );
-	while( !thread_is_running( thread ) )
+	while( !thread_is_running( thread ) || !_test_should_start )
 		thread_sleep( 10 );
 
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID

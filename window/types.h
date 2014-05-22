@@ -21,7 +21,7 @@
 
 
 // CONSTANTS
-const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
+static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
 
 
 // PRIMITIVE TYPES

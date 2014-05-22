@@ -155,31 +155,31 @@ void window_move( window_t* window, int x, int y )
 
 bool window_is_open( window_t* window )
 {
-	return _window_app_started;
+	return window && window->uiwindow && _window_app_started;
 }
 
 
 bool window_is_visible( window_t* window )
 {
-	return !_window_app_paused;
+	return window_is_open( window ) && !_window_app_paused;
 }
 
 
 bool window_is_maximized( window_t* window )
 {
-	return !_window_app_paused;
+	return window_is_open( window ) && !_window_app_paused;
 }
 
 
 bool window_is_minimized( window_t* window )
 {
-	return _window_app_paused;
+	return window_is_open( window ) && _window_app_paused;
 }
 
 
 bool window_has_focus( window_t* window )
 {
-	return !_window_app_paused;
+	return window_is_open( window ) && !_window_app_paused;
 }
 
 

@@ -11,6 +11,8 @@
  */
 
 #include <foundation/foundation.h>
+#include <foundation/delegate.h>
+#include <window/window.h>
 #include <test/test.h>
 
 
@@ -42,15 +44,64 @@ static void test_window_shutdown( void )
 }
 
 
-DECLARE_TEST( window, create )
+DECLARE_TEST( window, createdestroy )
 {
+	window_t* window;
+#if FOUNDATION_PLATFORM_MACOSX
+	window = window_allocate_from_nswindow( delegate_nswindow() );
+#elif FOUNDATION_PLATFORM_IOS
+	window = window_allocate_from_uiwindow( delegate_uiwindow() );
+#endif
+	
+	EXPECT_NE( window, 0 );
+	EXPECT_TRUE( window_is_open( window ) );
+	
+	window_deallocate( window );
+	window = 0;
+
+	EXPECT_FALSE( window_is_open( window ) );
+	
+	return 0;
+}
+
+
+DECLARE_TEST( window, sizemove )
+{
+	window_t* window;
+#if FOUNDATION_PLATFORM_MACOSX
+	window = window_allocate_from_nswindow( delegate_nswindow() );
+#elif FOUNDATION_PLATFORM_IOS
+	window = window_allocate_from_uiwindow( delegate_uiwindow() );
+#endif
+
+	window_maximize( window_t* window );
+	window_minimize( window_t* window );
+	window_restore( window_t* window );
+	window_resize( window_t* window, unsigned int width, unsigned int height );
+	window_move( window_t* window, int x, int y );
+	
+	window_is_open( window_t* window );
+	window_is_visible( window_t* window );
+	window_is_maximized( window_t* window );
+	window_is_minimized( window_t* window );
+	window_has_focus( window_t* window );
+	
+	EXPECT_NE( window, 0 );
+	EXPECT_TRUE( window_is_open( window ) );
+	EXPECT_EQ( window_adapter( window ), WINDOW_ADAPTER_DEFAULT );
+	
+	window_deallocate( window );
+	window = 0;
+	
+	EXPECT_FALSE( window_is_open( window ) );
+	
 	return 0;
 }
 
 
 static void test_window_declare( void )
 {
-	ADD_TEST( window, create );
+	ADD_TEST( window, createdestroy );
 }
 
 
