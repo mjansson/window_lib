@@ -13,7 +13,7 @@
 #include <foundation/foundation.h>
 #include <window/window.h>
 
-#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_IOS
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
 
 volatile bool _test_should_start = false;
 volatile bool _test_should_terminate = false;
@@ -136,6 +136,7 @@ int main_run( void* main_arg )
 	unsigned int iexe, exesize;
 	process_t* process = 0;
 	char* process_path = 0;
+	unsigned int* exe_flags = 0;
 #endif
 	int process_result = 0;
 	object_t thread = 0;
@@ -203,7 +204,7 @@ int main_run( void* main_arg )
 	//Find all test executables in the current executable directory
 #if FOUNDATION_PLATFORM_WINDOWS
 	pattern = "test-*.exe";
-#elif FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
+#elif FOUNDATION_PLATFORM_MACOSX
 	pattern = "test-*";
 #elif FOUNDATION_PLATFORM_POSIX
 	pattern = "test-*";
@@ -211,6 +212,21 @@ int main_run( void* main_arg )
 #  error Not implemented
 #endif
 	exe_paths = fs_matching_files( environment_executable_directory(), pattern, false );
+	array_resize( exe_flags, array_size( exe_paths ) );
+#if FOUNDATION_PLATFORM_MACOSX
+	//Also search for test-*.app
+	const char* app_pattern = "test-*.app";
+	char** subdirs = fs_subdirs( environment_executable_directory() );
+	for( int idir = 0, dirsize = array_size( subdirs ); idir < dirsize; ++idir )
+	{
+		if( string_match_pattern( subdirs[idir], app_pattern ) )
+		{
+			array_push( exe_paths, string_substr( subdirs[idir], 0, string_length( subdirs[idir] ) - 4 ) );
+			array_push( exe_flags, PROCESS_OSX_USE_OPENAPPLICATION );
+		}
+	}
+	string_array_deallocate( subdirs );
+#endif
 	for( iexe = 0, exesize = array_size( exe_paths ); iexe < exesize; ++iexe )
 	{
 		bool is_self = false;
@@ -227,7 +243,7 @@ int main_run( void* main_arg )
 
 		process_set_executable_path( process, process_path );
 		process_set_working_directory( process, environment_executable_directory() );
-		process_set_flags( process, PROCESS_ATTACHED );
+		process_set_flags( process, PROCESS_ATTACHED | exe_flags[iexe] );
 		
 		log_infof( HASH_TEST, "Running test executable: %s", exe_paths[iexe] );
 
@@ -260,6 +276,7 @@ exit:
 
 	if( exe_paths )
 		string_array_deallocate( exe_paths );
+	array_deallocate( exe_flags );
 
 #endif
 	
