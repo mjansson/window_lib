@@ -170,9 +170,9 @@
 				451C85F1192B4C5D00BA6F6D /* hashstrings.h */,
 				459894EC192375C5000F9BE2 /* internal.h */,
 				459894ED192375C5000F9BE2 /* types.h */,
-				459894EE192375C5000F9BE2 /* window_ios.m */,
 				459894EF192375C5000F9BE2 /* window.c */,
 				459894F0192375C5000F9BE2 /* window.h */,
+				459894EE192375C5000F9BE2 /* window_ios.m */,
 			);
 			name = window;
 			sourceTree = "<group>";

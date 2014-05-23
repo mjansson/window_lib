@@ -142,10 +142,13 @@ int main_run( void* main_arg )
 	
 	thread = thread_create( event_thread, "event_thread", THREAD_PRIORITY_NORMAL, 0 );
 	thread_start( thread, 0 );
-	while( !thread_is_running( thread ) || !_test_should_start )
+	while( !thread_is_running( thread ) )
 		thread_sleep( 10 );
-
+	
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
+
+	while( !_test_should_start )
+		thread_sleep( 10 );
 	
 	test_run_fn tests[] = {
 		test_window_run,

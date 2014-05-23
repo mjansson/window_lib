@@ -22,7 +22,6 @@ static application_t test_window_application( void )
 	app.name = "Window tests";
 	app.short_name = "test_window";
 	app.config_dir = "test_window";
-	app.flags = APPLICATION_UTILITY;
 	return app;
 }
 
@@ -73,23 +72,69 @@ DECLARE_TEST( window, sizemove )
 #elif FOUNDATION_PLATFORM_IOS
 	window = window_allocate_from_uiwindow( delegate_uiwindow() );
 #endif
-
-	window_maximize( window_t* window );
-	window_minimize( window_t* window );
-	window_restore( window_t* window );
-	window_resize( window_t* window, unsigned int width, unsigned int height );
-	window_move( window_t* window, int x, int y );
-	
-	window_is_open( window_t* window );
-	window_is_visible( window_t* window );
-	window_is_maximized( window_t* window );
-	window_is_minimized( window_t* window );
-	window_has_focus( window_t* window );
 	
 	EXPECT_NE( window, 0 );
 	EXPECT_TRUE( window_is_open( window ) );
-	EXPECT_EQ( window_adapter( window ), WINDOW_ADAPTER_DEFAULT );
+
+	thread_sleep( 1000 );
 	
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
+	EXPECT_TRUE( window_is_maximized( window ) );
+#else
+	EXPECT_FALSE( window_is_maximized( window ) );
+#endif
+	
+	EXPECT_TRUE( window_is_visible( window ) );
+	EXPECT_TRUE( window_has_focus( window ) );
+	
+	window_maximize( window );
+	thread_sleep( 1000 );
+	EXPECT_TRUE( window_is_maximized( window ) );
+	EXPECT_TRUE( window_has_focus( window ) );
+
+#if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
+	window_restore( window );
+	thread_sleep( 1000 );
+	EXPECT_FALSE( window_is_maximized( window ) );
+	EXPECT_TRUE( window_has_focus( window ) );
+#endif
+	
+	window_maximize( window );
+	thread_sleep( 1000 );
+	EXPECT_TRUE( window_is_maximized( window ) );
+		
+#if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
+	window_resize( window, 150, 100 );
+	thread_sleep( 1000 );
+	EXPECT_EQ( window_width( window ), 150 );
+	EXPECT_EQ( window_height( window ), 100 );
+	EXPECT_FALSE( window_is_maximized( window ) );
+	EXPECT_TRUE( window_has_focus( window ) );
+	
+	window_move( window, 10, 20 );
+	thread_sleep( 1000 );
+	EXPECT_EQ( window_position_x( window ), 10 );
+	EXPECT_EQ( window_position_y( window ), 20 );
+	EXPECT_FALSE( window_is_maximized( window ) );
+	EXPECT_TRUE( window_has_focus( window ) );
+	
+	window_minimize( window );
+	thread_sleep( 1000 );
+	EXPECT_FALSE( window_is_maximized( window ) );
+	EXPECT_FALSE( window_has_focus( window ) );
+
+	window_restore( window );
+	thread_sleep( 1000 );
+	EXPECT_FALSE( window_is_maximized( window ) );
+	EXPECT_FALSE( window_is_minimized( window ) );
+	EXPECT_TRUE( window_has_focus( window ) );
+	
+	window_minimize( window );
+	thread_sleep( 1000 );
+	EXPECT_FALSE( window_is_maximized( window ) );
+	EXPECT_TRUE( window_is_minimized( window ) );
+#endif
+		
 	window_deallocate( window );
 	window = 0;
 	
@@ -102,6 +147,7 @@ DECLARE_TEST( window, sizemove )
 static void test_window_declare( void )
 {
 	ADD_TEST( window, createdestroy );
+	ADD_TEST( window, sizemove );
 }
 
 

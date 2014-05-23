@@ -15,12 +15,13 @@
 		451C8652192C81AB00BA6F6D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C864F192C81AB00BA6F6D /* Carbon.framework */; };
 		451C8653192C81AB00BA6F6D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C8650192C81AB00BA6F6D /* Cocoa.framework */; };
 		451C8654192C81AB00BA6F6D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C8651192C81AB00BA6F6D /* CoreFoundation.framework */; };
-		451C8665192C829000BA6F6D /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 451C8664192C829000BA6F6D /* main.c */; };
-		451C866B192D109300BA6F6D /* libwindow.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 45B216901918C2EC00B89D7D /* libwindow.a */; };
-		451C866C192D109300BA6F6D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C864F192C81AB00BA6F6D /* Carbon.framework */; };
-		451C866D192D109300BA6F6D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C8650192C81AB00BA6F6D /* Cocoa.framework */; };
-		451C866E192D109300BA6F6D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C8651192C81AB00BA6F6D /* CoreFoundation.framework */; };
 		459894B719236D92000F9BE2 /* window_osx.m in Sources */ = {isa = PBXBuildFile; fileRef = 459894B619236D92000F9BE2 /* window_osx.m */; };
+		45AC9DD9192F298B00FBC314 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 451C8650192C81AB00BA6F6D /* Cocoa.framework */; };
+		45AC9E0F192F2D1100FBC314 /* test-window-osx.plist in Resources */ = {isa = PBXBuildFile; fileRef = 45AC9E0E192F2D1100FBC314 /* test-window-osx.plist */; };
+		45AC9E11192F302B00FBC314 /* test-osx.xib in Resources */ = {isa = PBXBuildFile; fileRef = 45AC9E10192F302B00FBC314 /* test-osx.xib */; };
+		45AC9E12192F312E00FBC314 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 451C8664192C829000BA6F6D /* main.c */; };
+		45AC9E17192F314400FBC314 /* libwindow.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 45B216901918C2EC00B89D7D /* libwindow.a */; };
+		45AC9E19192F48EA00FBC314 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45AC9E18192F48EA00FBC314 /* Images.xcassets */; };
 		45B2169C1918C47A00B89D7D /* build.h in Headers */ = {isa = PBXBuildFile; fileRef = 45B216981918C47A00B89D7D /* build.h */; };
 		45B2169D1918C47A00B89D7D /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = 45B216991918C47A00B89D7D /* window.c */; };
 		45B2169E1918C47A00B89D7D /* window.h in Headers */ = {isa = PBXBuildFile; fileRef = 45B2169A1918C47A00B89D7D /* window.h */; };
@@ -36,33 +37,24 @@
 			remoteGlobalIDString = 45B2168F1918C2EC00B89D7D;
 			remoteInfo = window;
 		};
-		451C8667192D107D00BA6F6D /* PBXContainerItemProxy */ = {
+		45AC9E13192F313800FBC314 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 45B216881918C2EC00B89D7D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 45B2168F1918C2EC00B89D7D;
 			remoteInfo = window;
 		};
-		451C8669192D108200BA6F6D /* PBXContainerItemProxy */ = {
+		45AC9E15192F313D00FBC314 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 45B216881918C2EC00B89D7D /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 451C8658192C827800BA6F6D;
+			remoteGlobalIDString = 45AC9DD7192F298B00FBC314;
 			remoteInfo = "test-window";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		451C863D192C803900BA6F6D /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-		451C8657192C827800BA6F6D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -82,9 +74,16 @@
 		451C864F192C81AB00BA6F6D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		451C8650192C81AB00BA6F6D /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		451C8651192C81AB00BA6F6D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		451C8659192C827800BA6F6D /* test-window */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "test-window"; sourceTree = BUILT_PRODUCTS_DIR; };
 		451C8664192C829000BA6F6D /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../test/window/main.c; sourceTree = "<group>"; };
 		459894B619236D92000F9BE2 /* window_osx.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = window_osx.m; path = ../../../window/window_osx.m; sourceTree = "<group>"; };
+		45AC9DD8192F298B00FBC314 /* test-window.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "test-window.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		45AC9DDB192F298B00FBC314 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		45AC9DDC192F298B00FBC314 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		45AC9DDD192F298B00FBC314 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		45AC9DF7192F298C00FBC314 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		45AC9E0E192F2D1100FBC314 /* test-window-osx.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "test-window-osx.plist"; sourceTree = "<group>"; };
+		45AC9E10192F302B00FBC314 /* test-osx.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "test-osx.xib"; path = "../../../test/window/test-osx.xib"; sourceTree = "<group>"; };
+		45AC9E18192F48EA00FBC314 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ../../../test/window/Images.xcassets; sourceTree = "<group>"; };
 		45B216901918C2EC00B89D7D /* libwindow.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libwindow.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		45B216981918C47A00B89D7D /* build.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build.h; path = ../../../window/build.h; sourceTree = "<group>"; };
 		45B216991918C47A00B89D7D /* window.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = window.c; path = ../../../window/window.c; sourceTree = "<group>"; };
@@ -105,14 +104,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		451C8656192C827800BA6F6D /* Frameworks */ = {
+		45AC9DD5192F298B00FBC314 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				451C866B192D109300BA6F6D /* libwindow.a in Frameworks */,
-				451C866C192D109300BA6F6D /* Carbon.framework in Frameworks */,
-				451C866D192D109300BA6F6D /* Cocoa.framework in Frameworks */,
-				451C866E192D109300BA6F6D /* CoreFoundation.framework in Frameworks */,
+				45AC9E17192F314400FBC314 /* libwindow.a in Frameworks */,
+				45AC9DD9192F298B00FBC314 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +143,9 @@
 		451C863A192C800900BA6F6D /* window */ = {
 			isa = PBXGroup;
 			children = (
+				45AC9E18192F48EA00FBC314 /* Images.xcassets */,
+				45AC9E0E192F2D1100FBC314 /* test-window-osx.plist */,
+				45AC9E10192F302B00FBC314 /* test-osx.xib */,
 				451C8664192C829000BA6F6D /* main.c */,
 			);
 			name = window;
@@ -157,8 +157,20 @@
 				451C864F192C81AB00BA6F6D /* Carbon.framework */,
 				451C8650192C81AB00BA6F6D /* Cocoa.framework */,
 				451C8651192C81AB00BA6F6D /* CoreFoundation.framework */,
+				45AC9DF7192F298C00FBC314 /* XCTest.framework */,
+				45AC9DDA192F298B00FBC314 /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		45AC9DDA192F298B00FBC314 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				45AC9DDB192F298B00FBC314 /* AppKit.framework */,
+				45AC9DDC192F298B00FBC314 /* CoreData.framework */,
+				45AC9DDD192F298B00FBC314 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
 		45B216871918C2EC00B89D7D = {
@@ -177,7 +189,7 @@
 			children = (
 				45B216901918C2EC00B89D7D /* libwindow.a */,
 				451C863F192C803900BA6F6D /* test-all */,
-				451C8659192C827800BA6F6D /* test-window */,
+				45AC9DD8192F298B00FBC314 /* test-window.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -228,7 +240,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				451C866A192D108200BA6F6D /* PBXTargetDependency */,
+				45AC9E16192F313D00FBC314 /* PBXTargetDependency */,
 				451C864E192C814200BA6F6D /* PBXTargetDependency */,
 			);
 			name = "test-all";
@@ -236,23 +248,23 @@
 			productReference = 451C863F192C803900BA6F6D /* test-all */;
 			productType = "com.apple.product-type.tool";
 		};
-		451C8658192C827800BA6F6D /* test-window */ = {
+		45AC9DD7192F298B00FBC314 /* test-window */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 451C865F192C827800BA6F6D /* Build configuration list for PBXNativeTarget "test-window" */;
+			buildConfigurationList = 45AC9E04192F298C00FBC314 /* Build configuration list for PBXNativeTarget "test-window" */;
 			buildPhases = (
-				451C8655192C827800BA6F6D /* Sources */,
-				451C8656192C827800BA6F6D /* Frameworks */,
-				451C8657192C827800BA6F6D /* CopyFiles */,
+				45AC9DD4192F298B00FBC314 /* Sources */,
+				45AC9DD5192F298B00FBC314 /* Frameworks */,
+				45AC9DD6192F298B00FBC314 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				451C8668192D107D00BA6F6D /* PBXTargetDependency */,
+				45AC9E14192F313800FBC314 /* PBXTargetDependency */,
 			);
 			name = "test-window";
 			productName = "test-window";
-			productReference = 451C8659192C827800BA6F6D /* test-window */;
-			productType = "com.apple.product-type.tool";
+			productReference = 45AC9DD8192F298B00FBC314 /* test-window.app */;
+			productType = "com.apple.product-type.application";
 		};
 		45B2168F1918C2EC00B89D7D /* window */ = {
 			isa = PBXNativeTarget;
@@ -286,6 +298,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 45B216871918C2EC00B89D7D;
 			productRefGroup = 45B216911918C2EC00B89D7D /* Products */;
@@ -294,10 +307,23 @@
 			targets = (
 				45B2168F1918C2EC00B89D7D /* window */,
 				451C863E192C803900BA6F6D /* test-all */,
-				451C8658192C827800BA6F6D /* test-window */,
+				45AC9DD7192F298B00FBC314 /* test-window */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		45AC9DD6192F298B00FBC314 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45AC9E19192F48EA00FBC314 /* Images.xcassets in Resources */,
+				45AC9E11192F302B00FBC314 /* test-osx.xib in Resources */,
+				45AC9E0F192F2D1100FBC314 /* test-window-osx.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		451C863B192C803900BA6F6D /* Sources */ = {
@@ -308,11 +334,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		451C8655192C827800BA6F6D /* Sources */ = {
+		45AC9DD4192F298B00FBC314 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				451C8665192C829000BA6F6D /* main.c in Sources */,
+				45AC9E12192F312E00FBC314 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,15 +360,15 @@
 			target = 45B2168F1918C2EC00B89D7D /* window */;
 			targetProxy = 451C864D192C814200BA6F6D /* PBXContainerItemProxy */;
 		};
-		451C8668192D107D00BA6F6D /* PBXTargetDependency */ = {
+		45AC9E14192F313800FBC314 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 45B2168F1918C2EC00B89D7D /* window */;
-			targetProxy = 451C8667192D107D00BA6F6D /* PBXContainerItemProxy */;
+			targetProxy = 45AC9E13192F313800FBC314 /* PBXContainerItemProxy */;
 		};
-		451C866A192D108200BA6F6D /* PBXTargetDependency */ = {
+		45AC9E16192F313D00FBC314 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 451C8658192C827800BA6F6D /* test-window */;
-			targetProxy = 451C8669192D108200BA6F6D /* PBXContainerItemProxy */;
+			target = 45AC9DD7192F298B00FBC314 /* test-window */;
+			targetProxy = 45AC9E15192F313D00FBC314 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -383,47 +409,67 @@
 			};
 			name = Deploy;
 		};
-		451C8660192C827800BA6F6D /* Debug */ = {
+		45AC9E05192F298C00FBC314 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/debug;
+				INFOPLIST_FILE = "../window/test-window-osx.plist";
 				OTHER_LDFLAGS = (
 					"-ltest",
 					"-lfoundation",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
-		451C8661192C827800BA6F6D /* Release */ = {
+		45AC9E06192F298C00FBC314 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/release;
+				INFOPLIST_FILE = "../window/test-window-osx.plist";
 				OTHER_LDFLAGS = (
 					"-ltest",
 					"-lfoundation",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
 		};
-		451C8662192C827800BA6F6D /* Profile */ = {
+		45AC9E07192F298C00FBC314 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/profile;
+				INFOPLIST_FILE = "../window/test-window-osx.plist";
 				OTHER_LDFLAGS = (
 					"-ltest",
 					"-lfoundation",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Profile;
 		};
-		451C8663192C827800BA6F6D /* Deploy */ = {
+		45AC9E08192F298C00FBC314 /* Deploy */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/deploy;
+				INFOPLIST_FILE = "../window/test-window-osx.plist";
 				OTHER_LDFLAGS = (
 					"-ltest",
 					"-lfoundation",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Deploy;
 		};
@@ -708,16 +754,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		451C865F192C827800BA6F6D /* Build configuration list for PBXNativeTarget "test-window" */ = {
+		45AC9E04192F298C00FBC314 /* Build configuration list for PBXNativeTarget "test-window" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				451C8660192C827800BA6F6D /* Debug */,
-				451C8661192C827800BA6F6D /* Release */,
-				451C8662192C827800BA6F6D /* Profile */,
-				451C8663192C827800BA6F6D /* Deploy */,
+				45AC9E05192F298C00FBC314 /* Debug */,
+				45AC9E06192F298C00FBC314 /* Release */,
+				45AC9E07192F298C00FBC314 /* Profile */,
+				45AC9E08192F298C00FBC314 /* Deploy */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 		45B2168B1918C2EC00B89D7D /* Build configuration list for PBXProject "window" */ = {
 			isa = XCConfigurationList;

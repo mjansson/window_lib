@@ -51,8 +51,11 @@ void window_maximize( window_t* window )
     if( !window || !window->nswindow )
         return;
 	
+	if( window_is_maximized( window ) )
+		return;
+	
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
-	[nswindow performZoom:nil];
+	[nswindow zoom:nil];
 }
 
 
@@ -62,7 +65,7 @@ void window_minimize( window_t* window )
         return;
 	
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
-	[nswindow performMiniaturize:nil];
+	[nswindow miniaturize:nil];
 }
 
 
@@ -72,7 +75,10 @@ void window_restore( window_t* window )
         return;
 	
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
-	[nswindow deminiaturize:nil];
+	if( window_is_minimized( window ) )
+		[nswindow deminiaturize:nil];
+	else if( window_is_maximized( window ) )
+		[nswindow zoom:nil];
 }
 
 
@@ -80,8 +86,11 @@ void window_resize( window_t* window, unsigned int width, unsigned int height )
 {
 	if( !window || !window->nswindow )
 		return;
-			
+				
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	if( window_is_maximized( window ) )
+		[nswindow zoom:nil];
+	
 	NSRect frame_rect = [nswindow frame];
 	
 	NSRect new_rect = frame_rect;
@@ -95,8 +104,6 @@ void window_resize( window_t* window, unsigned int width, unsigned int height )
 		[nswindow setStyleMask:resize_mask];
 		
 		[nswindow setFrame:new_rect display:TRUE];
-		[nswindow setMinSize:new_rect.size];
-		[nswindow setMaxSize:new_rect.size];
 		
 		[nswindow setStyleMask:style_mask];
 	}
@@ -110,7 +117,7 @@ void window_move( window_t* window, int x, int y )
 	
 	NSWindow* nswindow = (NSWindow*)window->nswindow;
 	NSPoint pt = { x, y };
-	[nswindow setFrameTopLeftPoint:pt];
+	[nswindow setFrameOrigin:pt];
 }
 
 
@@ -257,8 +264,6 @@ void window_fit_to_screen( window_t* window )
 			new_rect.size.width = new_rect.size.width * height_factor;
 		
 		[nswindow setFrame:new_rect display:TRUE];
-		[nswindow setMinSize:new_rect.size];
-		[nswindow setMaxSize:new_rect.size];
 	}
 	
 	[nswindow setStyleMask:style_mask];
