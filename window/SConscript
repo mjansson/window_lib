@@ -1,0 +1,42 @@
+
+import os.path
+
+Import("env")
+
+
+# SOURCES
+
+windowsources = [
+
+	'event.c', 'window.c', 'window_windows.c', 'window_android.c', 'window_linux.c'
+
+	]
+
+windowheaders = [
+
+	'build.h', 'event.h', 'hashstrings.h', 'internal.h', 'types.h', 'window.h'
+
+	]
+
+
+# ADD INTERNAL FLAGS
+
+libenv = env.Clone()
+libenv.Append( CPPDEFINES=['WINDOW_COMPILE=1'] )
+
+
+# OUTPUTS
+
+env['windowlib'] = libenv.StaticLibrary( 'window', windowsources )
+
+
+# DEPENDENCIES
+
+#if env['toolset'] == 'gnu':
+
+#	libenv.Depends( [ os.path.splitext( x )[0] + '.o' for x in windowsources ], '#/src/window.h.gch' )
+
+
+# INSTALLS
+
+libenv.AddPostAction( 'window', libenv.Install( '#lib/${platform}${platformsuffix}/${buildprofile}', [ env['windowlib'] ] ) )

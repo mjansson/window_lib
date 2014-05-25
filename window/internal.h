@@ -18,6 +18,11 @@
 #include <foundation/platform.h>
 #include <window/types.h>
 
+#if FOUNDATION_PLATFORM_LINUX
+#  include <X11/Xlib.h>
+#  include <X11/Xutil.h>
+#  include <X11/extensions/xf86vmode.h>
+#endif
 
 // PRIMITIVE TYPES
 

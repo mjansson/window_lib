@@ -6,11 +6,11 @@ opts.AddVariables(
 	EnumVariable( 'config',         'Build configuration', 'debug', allowed_values=( 'debug', 'release', 'profile', 'deploy' ) ),
 	EnumVariable( 'arch',           'Architecture to compile for', '', allowed_values=( '', 'x86', 'x86_64' ) ),
 	EnumVariable( 'sse',            'SSE instruction set to use', '2', allowed_values=( '2', '3', '4' ) ),
-	EnumVariable( 'platform',       'Platform to compile for', '', allowed_values=( '', 'linux', 'win32', 'win64', 'macosx', 'raspberrypi' ) ),
+	EnumVariable( 'platform',       'Platform to compile for', '', allowed_values=( '', 'linux', 'win32', 'win64', 'macosx', 'raspberrypi', 'ios', 'android' ) ),
 	( 'libsuffix',                  'Extra library name suffix', '' ),
 	EnumVariable( 'tools',          'Tools to use to build', 'gnu', allowed_values=( '', 'intel', 'gnu', 'msvc', 'clang' ) ),
 	( 'includepath',                'Extra system include path', '' ),
-	( 'foundatiompath',             'Path to foundation library', '' ),
+	( 'foundationpath',             'Path to foundation library', '' ),
 )
 
 baseenv = Environment( variables=opts )
@@ -79,6 +79,15 @@ if env['PLATFORM'] == 'posix':
 	#	env['CC'] = 'clang'
 	#	env['CXX'] = 'clang++'
 	#	env['LD'] = 'llvm-ld'
+if env['PLATFORM'] == 'darwin':
+	if env['platform'] == '':
+		env['platform'] = 'osx'
+	if env['TARGET_ARCH'] != None:
+		env['arch'] = env['TARGET_ARCH']
+	else:
+		env['arch'] = env['HOST_ARCH']
+	env['arch'] = env['HOST_ARCH']
+	env['ENV']['TERM'] = os.environ['TERM']
 if env['TARGET_ARCH'] == 'x86' and env['arch'] != 'x86_64':
 	env['arch'] = 'x86'
 if env['TARGET_ARCH'] == 'i686' and env['arch'] != 'x86_64':
