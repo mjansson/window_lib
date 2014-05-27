@@ -28,6 +28,8 @@
 bool _window_app_started = false;
 bool _window_app_paused = true;
 
+volatile int _dummy_window_class_reference = 0;
+
 
 @interface WindowKeyboardView : UIView <UIKeyInput>
 @end
@@ -46,17 +48,19 @@ void* window_view( window_t* window, unsigned int tag )
 	if( !window || !window->uiwindow )
 		return 0;
 	
-	UIWindow* uiwindow = window->uiwindow;
+	UIWindow* uiwindow = (__bridge UIWindow*)(window->uiwindow);
 	UIView* view = [uiwindow viewWithTag:tag];
 	if( !view )
+		view = [[uiwindow subviews] objectAtIndex:tag];
+	if( !view )
 		view = [[uiwindow subviews] objectAtIndex:0];
-	return view;
+	return (__bridge void*)(view);
 }
 
 
 void* window_layer( window_t* window, void* view )
 {
-	return view ? [(UIView*)view layer] : 0;
+	return (__bridge void*)(view ? [(__bridge UIView*)view layer] : 0);
 }
 
 
@@ -67,6 +71,7 @@ window_t*      target_window;
 window_draw_fn draw_fn;
 }
 
++(void)referenceClass;
 +(id)fromDrawFn:(window_draw_fn)fn window:(window_t*)window;
 -(id)initWithDrawFn:(window_draw_fn)fn window:(window_t*)window;;
 -(void)callDraw:(id)obj;
@@ -75,6 +80,11 @@ window_draw_fn draw_fn;
 
 @implementation WindowDisplayLink
 
++ (void)referenceClass
+{
+	log_debugf( 0, "WindowDisplayLink class referenced" );
+	++_dummy_window_class_reference;
+}
 
 + (id)fromDrawFn:(window_draw_fn)fn window:(window_t *)window
 {
@@ -208,7 +218,7 @@ int window_width( window_t* window )
 {
 	if( window && window->uiwindow )
 	{
-		UIWindow* uiwindow = window->uiwindow;
+		UIWindow* uiwindow = (__bridge UIWindow*)(window->uiwindow);
 		CGRect rect = [uiwindow frame];
 		CGFloat scale = [uiwindow contentScaleFactor];
 		return (int)( rect.size.width * scale );
@@ -221,7 +231,7 @@ int window_height( window_t* window )
 {
 	if( window && window->uiwindow )
 	{
-		UIWindow* uiwindow = window->uiwindow;
+		UIWindow* uiwindow = (__bridge UIWindow*)(window->uiwindow);
 		CGRect rect = [uiwindow frame];
 		CGFloat scale = [uiwindow contentScaleFactor];
 		return (int)( rect.size.width * scale );
@@ -249,6 +259,12 @@ void window_fit_to_screen( window_t* window )
 
 @implementation WindowKeyboardView
 
++ (void)referenceClass
+{
+	log_debugf( 0, "WindowKeyboardView class referenced" );
+	++_dummy_window_class_reference;
+}
+
 - (void)insertText:(NSString*)text
 {
 	/*log_debugf( HASH_WINDOW, "iOS keyboard text: %s", [text UTF8String] );
@@ -275,6 +291,13 @@ void window_fit_to_screen( window_t* window )
 
 
 @implementation WindowGLView
+
+
++ (void)referenceClass
+{
+	log_debugf( 0, "WindowGLView class referenced" );
+	++_dummy_window_class_reference;
+}
 
 
 + (Class) layerClass
@@ -336,6 +359,14 @@ void window_fit_to_screen( window_t* window )
 
 
 @end
+
+
+void _window_class_reference( void )
+{
+	[WindowDisplayLink referenceClass];
+	[WindowKeyboardView referenceClass];
+	[WindowGLView referenceClass];
+}
 
 
 #endif

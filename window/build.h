@@ -20,11 +20,7 @@
 #include <foundation/platform.h>
 
 
-#if !defined( WINDOW_COMPILE )
-#  define WINDOW_COMPILE 0
-#endif
-
-#if WINDOW_COMPILE
+#if defined( WINDOW_COMPILE ) && WINDOW_COMPILE
 #  ifdef __cplusplus
 #  define WINDOW_EXTERN extern "C"
 #  define WINDOW_API extern "C"

@@ -33,6 +33,22 @@ typedef struct _window window_t;
 
 // COMPLEX TYPES
 
+#if FOUNDATION_PLATFORM_MACOSX
+#  ifdef __OBJC__
+
+#include <foundation/apple.h>
+#import <AppKit/NSView.h>
+
+@interface WindowGLView : NSView
+{
+@public
+}
+
+@end
+
+#  endif
+#endif
+
 #if FOUNDATION_PLATFORM_IOS
 #  ifdef __OBJC__
 

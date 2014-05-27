@@ -28,6 +28,10 @@ int window_initialize( void )
 	
 	_window_initialized = true;
 	
+#if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
+	_window_class_reference();
+#endif
+
 	return 0;
 }
 

@@ -20,6 +20,35 @@
 #include <foundation/apple.h>
 
 
+volatile int _dummy_window_class_reference = 0;
+
+
+@implementation WindowGLView
+
++ (void)referenceClass
+{
+	log_debugf( 0, "WindowGLView class referenced" );
+	++_dummy_window_class_reference;
+}
+
+- (BOOL)acceptsFirstResponder
+{
+	return YES;
+}
+
+- (BOOL)acceptsFirstMouse
+{
+	return YES;
+}
+
+- (BOOL)isOpaque
+{
+    return YES;
+}
+
+@end
+
+
 window_t* window_allocate_from_nswindow( void* nswindow )
 {
 	window_t* window = memory_allocate_zero( sizeof( window_t ), 0, MEMORY_PERSISTENT );
@@ -267,6 +296,12 @@ void window_fit_to_screen( window_t* window )
 	}
 	
 	[nswindow setStyleMask:style_mask];
+}
+
+
+void _window_class_reference( void )
+{
+	[WindowGLView referenceClass];
 }
 
 

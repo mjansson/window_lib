@@ -70,6 +70,10 @@ struct _window
 WINDOW_EXTERN int          _window_event_initialize( void );
 WINDOW_EXTERN void         _window_event_shutdown( void );
 
+#if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
+WINDOW_EXTERN void         _window_class_reference( void );
+#endif
+
 
 // GLOBAL DATA
 #if FOUNDATION_PLATFORM_IOS

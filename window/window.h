@@ -85,7 +85,7 @@ WINDOW_API unsigned int        window_screen_height( unsigned int adapter );
 #elif FOUNDATION_PLATFORM_MACOSX
 
 WINDOW_API window_t*           window_allocate_from_nswindow( void* nswindow );
-WINDOW_API void*               window_content_view( window_t* window );
+WINDOW_API void*               window_content_view( window_t* window ); //NSView*
 
 #elif FOUNDATION_PLATFORM_LINUX
 
