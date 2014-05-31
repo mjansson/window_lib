@@ -25,7 +25,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2014 Rampant Pixels AB. All rights reserved.</string>
 	<key>NSMainNibFile</key>
-	<string>test-osx</string>
+	<string>test-window</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

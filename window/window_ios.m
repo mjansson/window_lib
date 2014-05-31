@@ -82,7 +82,7 @@ window_draw_fn draw_fn;
 
 + (void)referenceClass
 {
-	log_debugf( 0, "WindowDisplayLink class referenced" );
+	log_debugf( HASH_WINDOW, "WindowDisplayLink class referenced" );
 	++_dummy_window_class_reference;
 }
 
@@ -261,7 +261,7 @@ void window_fit_to_screen( window_t* window )
 
 + (void)referenceClass
 {
-	log_debugf( 0, "WindowKeyboardView class referenced" );
+	log_debugf( HASH_WINDOW, "WindowKeyboardView class referenced" );
 	++_dummy_window_class_reference;
 }
 
@@ -295,7 +295,7 @@ void window_fit_to_screen( window_t* window )
 
 + (void)referenceClass
 {
-	log_debugf( 0, "WindowGLView class referenced" );
+	log_debugf( HASH_WINDOW, "WindowGLView class referenced" );
 	++_dummy_window_class_reference;
 }
 
@@ -317,8 +317,12 @@ void window_fit_to_screen( window_t* window )
 		CGFloat screen_width = main_screen.currentMode.size.width;
 		CGFloat screen_height = main_screen.currentMode.size.height;
         
-        if( ( frame.size.width >= ( screen_width * 2 ) ) && ( frame.size.height >= ( screen_height * 2 ) ) )
-			self.contentScaleFactor = 2;
+        if( ( frame.size.width < screen_width ) && ( frame.size.height < screen_height ) )
+        {
+            int wscale = (int)( 0.5 + ( screen_width / frame.size.width ) );
+            int hscale = (int)( 0.5 + ( screen_height / frame.size.height ) );
+			self.contentScaleFactor = ( wscale > hscale ) ? wscale : hscale;
+        }
 		
 		log_debugf( HASH_WINDOW, "WindowGLView initWithFrame, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), screen_width, screen_height, self.contentScaleFactor );
         CAEAGLLayer* layer = (CAEAGLLayer*)self.layer;
@@ -341,11 +345,15 @@ void window_fit_to_screen( window_t* window )
 		CGFloat screen_width = main_screen.currentMode.size.width;
 		CGFloat screen_height = main_screen.currentMode.size.height;
         
-		CGRect frame = [self frame];
-        if( ( frame.size.width >= ( screen_width * 2 ) ) && ( frame.size.height >= ( screen_height * 2 ) ) )
-			self.contentScaleFactor = 2;
+		CGRect frame = [main_screen applicationFrame];
+        if( ( frame.size.width < screen_width ) && ( frame.size.height < screen_height ) )
+        {
+            int wscale = (int)( 0.5 + ( screen_width / frame.size.width ) );
+            int hscale = (int)( 0.5 + ( screen_height / frame.size.height ) );
+			self.contentScaleFactor = ( wscale > hscale ) ? wscale : hscale;
+        }
         
-		log_debugf( HASH_WINDOW, "WindowGLView initWithCoder, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), screen_width, screen_height, self.contentScaleFactor );
+		log_debugf( HASH_WINDOW, "WindowGLView initWithCoder, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), (int)screen_width, (int)screen_height, self.contentScaleFactor );
         CAEAGLLayer* layer = (CAEAGLLayer*)self.layer;
         layer.opaque = TRUE;
         if( self.contentScaleFactor > 1 )
