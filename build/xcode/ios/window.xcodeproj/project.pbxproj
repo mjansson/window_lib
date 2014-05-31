@@ -456,7 +456,7 @@
 				451C86A6192D11BD00BA6F6D /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Deploy;
 		};
 		459894E419237529000F9BE2 /* Build configuration list for PBXNativeTarget "window" */ = {
 			isa = XCConfigurationList;
@@ -467,7 +467,7 @@
 				451C86A7192D11BD00BA6F6D /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Deploy;
 		};
 /* End XCConfigurationList section */
 	};
