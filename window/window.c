@@ -31,6 +31,10 @@ int window_initialize( void )
 #if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
 	_window_class_reference();
 #endif
+	
+#if FOUNDATION_PLATFORM_IOS
+	_window_native_initialize();
+#endif
 
 	return 0;
 }
@@ -38,6 +42,10 @@ int window_initialize( void )
 
 void window_shutdown( void )
 {
+#if FOUNDATION_PLATFORM_IOS
+	_window_native_shutdown();
+#endif
+	
 	_window_event_shutdown();
 	
 	_window_initialized = false;

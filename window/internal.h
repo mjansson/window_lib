@@ -74,6 +74,11 @@ WINDOW_EXTERN void         _window_event_shutdown( void );
 WINDOW_EXTERN void         _window_class_reference( void );
 #endif
 
+#if FOUNDATION_PLATFORM_IOS
+WINDOW_EXTERN void         _window_native_initialize( void );
+WINDOW_EXTERN void         _window_native_shutdown( void );
+#endif
+
 
 // GLOBAL DATA
 #if FOUNDATION_PLATFORM_IOS

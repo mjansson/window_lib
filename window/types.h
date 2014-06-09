@@ -24,6 +24,9 @@
 static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
 
 
+// ENUMERATIONS
+
+
 // PRIMITIVE TYPES
 
 

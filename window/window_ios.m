@@ -35,6 +35,16 @@ volatile int _dummy_window_class_reference = 0;
 @end
 
 
+void _window_native_initialize( void )
+{
+}
+
+
+void _window_native_shutdown( void )
+{
+}
+
+
 window_t* window_allocate_from_uiwindow( void* uiwindow )
 {
 	window_t* window = memory_allocate_zero( sizeof( window_t ), 0, MEMORY_PERSISTENT );
@@ -61,6 +71,30 @@ void* window_view( window_t* window, unsigned int tag )
 void* window_layer( window_t* window, void* view )
 {
 	return (__bridge void*)(view ? [(__bridge UIView*)view layer] : 0);
+}
+
+
+int window_view_width( window_t* window, void* view )
+{
+	if( view )
+	{
+		CGRect rect = [(__bridge UIView*)view frame];
+		CGFloat scale = [(__bridge UIView*)view contentScaleFactor];
+		return (int)( rect.size.width * scale );
+	}
+	return 0;
+}
+
+
+int window_view_height( window_t* window, void* view )
+{
+	if( view )
+	{
+		CGRect rect = [(__bridge UIView*)view frame];
+		CGFloat scale = [(__bridge UIView*)view contentScaleFactor];
+		return (int)( rect.size.height * scale );
+	}
+	return 0;
 }
 
 
@@ -234,7 +268,7 @@ int window_height( window_t* window )
 		UIWindow* uiwindow = (__bridge UIWindow*)(window->uiwindow);
 		CGRect rect = [uiwindow frame];
 		CGFloat scale = [uiwindow contentScaleFactor];
-		return (int)( rect.size.width * scale );
+		return (int)( rect.size.height * scale );
 	}
 	return 0;
 }
@@ -363,6 +397,18 @@ void window_fit_to_screen( window_t* window )
 		keyboard_view = 0;
 	}
     return self;
+}
+
+
+- (void)didMoveToWindow
+{
+	if( [self window] )
+		[self window].contentScaleFactor = self.contentScaleFactor;
+}
+
+
+- (void)dealloc
+{
 }
 
 
