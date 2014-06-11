@@ -324,7 +324,7 @@ void window_fit_to_screen( window_t* window )
 @end
 
 
-@implementation WindowGLView
+@implementation WindowView
 
 
 + (void)referenceClass
@@ -415,11 +415,45 @@ void window_fit_to_screen( window_t* window )
 @end
 
 
+@implementation WindowViewController
+
+@synthesize hideStatusBar;
+
+
++ (void)referenceClass
+{
+	log_debugf( HASH_WINDOW, "GLViewController class referenced" );
+	++_dummy_window_class_reference;
+}
+
+
+- (void)viewDidLoad
+{
+	if( self.hideStatusBar )
+	{
+		if( [self respondsToSelector:@selector(setNeedsStatusBarAppearanceUpdate)] )
+			[self setNeedsStatusBarAppearanceUpdate];
+		else
+			[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+	}
+}
+
+
+- (BOOL)prefersStatusBarHidden
+{
+    return self.hideStatusBar;
+}
+
+
+@end
+
+
 void _window_class_reference( void )
 {
 	[WindowDisplayLink referenceClass];
 	[WindowKeyboardView referenceClass];
-	[WindowGLView referenceClass];
+	[WindowView referenceClass];
+	[WindowViewController referenceClass];
 }
 
 

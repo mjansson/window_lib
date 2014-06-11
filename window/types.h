@@ -42,11 +42,18 @@ typedef struct _window window_t;
 #include <foundation/apple.h>
 #import <AppKit/NSView.h>
 
-@interface WindowGLView : NSView
+@interface WindowView : NSView
 {
 @public
 }
++ (void)referenceClass;
+@end
 
+@interface WindowViewController : NSViewController
+{
+@public
+}
++ (void)referenceClass;
 @end
 
 #  endif
@@ -60,7 +67,7 @@ typedef struct _window window_t;
 /*! This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.
     The view content is basically an EAGL surface you render your OpenGL scene into.
     Note that setting the view non-opaque will only work if the EAGL surface has an alpha channel. */
-@interface WindowGLView : UIView
+@interface WindowView : UIView
 {
 @public
 	id       display_link;
@@ -69,7 +76,16 @@ typedef struct _window window_t;
 	tick_t   begin_touch_time;
 	UIView*  keyboard_view;
 }
++ (void)referenceClass;
+@end
 
+/*! A view controller for a single view that optionally hides the status bar */
+@interface WindowViewController : UIViewController
+{
+@public
+}
+@property (nonatomic) BOOL hideStatusBar;
++ (void)referenceClass;
 @end
 
 #  endif

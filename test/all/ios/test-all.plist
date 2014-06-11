@@ -56,7 +56,9 @@
 	<key>NSMainNibFile</key>
 	<string>test-all</string>
 	<key>UIStatusBarHidden</key>
-	<false/>
+	<true/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

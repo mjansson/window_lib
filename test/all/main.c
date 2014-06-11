@@ -88,7 +88,7 @@ int main_initialize( void )
 	application.config_dir = "test_all";
 	application.flags = APPLICATION_UTILITY;
 
-	log_set_suppress( 0, ERRORLEVEL_DEBUG );
+	log_set_suppress( 0, ERRORLEVEL_INFO );
 	
 #if FOUNDATION_PLATFORM_IOS
 	log_set_callback( test_log_callback );

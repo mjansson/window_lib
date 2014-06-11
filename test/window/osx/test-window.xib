@@ -16,7 +16,7 @@
             <connections>
                 <outlet property="window" destination="F0z-JX-Cv5" id="Ga6-fD-puS"/>
             </connections>
-	</customObject>
+        </customObject>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
             <items>
@@ -54,13 +54,22 @@
         </menu>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="240" width="480" height="270"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="778"/>
-            <view key="contentView" id="se5-gp-TjO">
+            <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1028"/>
+            <view key="contentView" id="se5-gp-TjO" customClass="WindowView">
                 <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
+            <connections>
+                <outlet property="menu" destination="AYu-sK-qS6" id="H4V-Yg-aPA"/>
+            </connections>
         </window>
+        <viewController id="L3M-dY-Omf" customClass="WindowViewController">
+            <connections>
+                <outlet property="view" destination="se5-gp-TjO" id="bdL-b8-goq"/>
+            </connections>
+        </viewController>
     </objects>
 </document>

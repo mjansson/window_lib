@@ -23,11 +23,11 @@
 volatile int _dummy_window_class_reference = 0;
 
 
-@implementation WindowGLView
+@implementation WindowView
 
 + (void)referenceClass
 {
-	log_debugf( 0, "WindowGLView class referenced" );
+	log_debugf( 0, "WindowView class referenced" );
 	++_dummy_window_class_reference;
 }
 
@@ -44,6 +44,17 @@ volatile int _dummy_window_class_reference = 0;
 - (BOOL)isOpaque
 {
     return YES;
+}
+
+@end
+
+
+@implementation WindowViewController
+
++ (void)referenceClass
+{
+	log_debugf( 0, "WindowViewController class referenced" );
+	++_dummy_window_class_reference;
 }
 
 @end
@@ -301,7 +312,8 @@ void window_fit_to_screen( window_t* window )
 
 void _window_class_reference( void )
 {
-	[WindowGLView referenceClass];
+	[WindowView referenceClass];
+	[WindowViewController referenceClass];
 }
 
 
