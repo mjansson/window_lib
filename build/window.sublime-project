@@ -1,0 +1,29 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "../window"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "../test"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "../tools"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "../doc"
+		}
+	],
+	"build_systems":
+	[
+		{
+			"name": "Ninja",
+			"shell_cmd": "ninja",
+			"working_dir": "${project_path:${folder:${file_path}}}/..",
+		}
+	]
+}

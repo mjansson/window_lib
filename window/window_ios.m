@@ -47,7 +47,7 @@ void _window_native_shutdown( void )
 
 window_t* window_allocate_from_uiwindow( void* uiwindow )
 {
-	window_t* window = memory_allocate_zero( sizeof( window_t ), 0, MEMORY_PERSISTENT );
+	window_t* window = memory_allocate( 0, sizeof( window_t ), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED );
 	window->uiwindow = uiwindow;
 	return window;
 }

@@ -62,7 +62,7 @@ volatile int _dummy_window_class_reference = 0;
 
 window_t* window_allocate_from_nswindow( void* nswindow )
 {
-	window_t* window = memory_allocate_zero( sizeof( window_t ), 0, MEMORY_PERSISTENT );
+	window_t* window = memory_allocate( 0, sizeof( window_t ), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED );
 	window->nswindow = nswindow;
 	return window;
 }
@@ -70,7 +70,7 @@ window_t* window_allocate_from_nswindow( void* nswindow )
 
 void* window_content_view( window_t* window )
 {
-	return window && window->nswindow ? [(NSWindow*)window->nswindow contentView] : 0;
+	return (__bridge void *)(window && window->nswindow ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
 }
 
 
@@ -94,7 +94,7 @@ void window_maximize( window_t* window )
 	if( window_is_maximized( window ) )
 		return;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	[nswindow zoom:nil];
 }
 
@@ -104,7 +104,7 @@ void window_minimize( window_t* window )
     if( !window || !window->nswindow )
         return;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	[nswindow miniaturize:nil];
 }
 
@@ -114,7 +114,7 @@ void window_restore( window_t* window )
     if( !window || !window->nswindow )
         return;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	if( window_is_minimized( window ) )
 		[nswindow deminiaturize:nil];
 	else if( window_is_maximized( window ) )
@@ -127,7 +127,7 @@ void window_resize( window_t* window, unsigned int width, unsigned int height )
 	if( !window || !window->nswindow )
 		return;
 				
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	if( window_is_maximized( window ) )
 		[nswindow zoom:nil];
 	
@@ -155,7 +155,7 @@ void window_move( window_t* window, int x, int y )
 	if( !window || !window->nswindow )
 		return;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	NSPoint pt = { x, y };
 	[nswindow setFrameOrigin:pt];
 }
@@ -174,7 +174,7 @@ bool window_is_visible( window_t* window )
 	if( !window || !window->nswindow )
 		return false;
 
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	return [nswindow isVisible];
 }
 
@@ -184,7 +184,7 @@ bool window_is_maximized( window_t* window )
 	if( !window || !window->nswindow )
 		return false;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	return [nswindow isZoomed];
 }
 
@@ -194,14 +194,14 @@ bool window_is_minimized( window_t* window )
 	if( !window || !window->nswindow )
 		return false;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	return [nswindow isMiniaturized];
 }
 
 
 bool window_has_focus( window_t* window )
 {
-	return window && window->nswindow && ( [NSApp mainWindow] == window->nswindow );
+	return window && window->nswindow && ( [NSApp mainWindow] == (__bridge NSWindow *)(window->nswindow) );
 }
 
 
@@ -226,7 +226,7 @@ void window_set_title( window_t* window, const char* title )
 	if( !window || !window->nswindow )
 		return;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	@autoreleasepool
 	{
 		[nswindow setTitle:[NSString stringWithUTF8String:title]];
@@ -238,7 +238,7 @@ int window_width( window_t* window )
 {
 	if( window && window->nswindow )
 	{
-		NSRect rect = [(NSWindow*)window->nswindow contentRectForFrameRect:[(NSWindow*)window->nswindow frame]];
+		NSRect rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
 		return (int)rect.size.width;
 	}
 	return 0;
@@ -249,7 +249,7 @@ int window_height( window_t* window )
 {
 	if( window && window->nswindow )
 	{
-		NSRect rect = [(NSWindow*)window->nswindow contentRectForFrameRect:[(NSWindow*)window->nswindow frame]];
+		NSRect rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
 		return (int)rect.size.height;
 	}
 	return 0;
@@ -260,7 +260,7 @@ int window_position_x( window_t* window )
 {
 	if( window && window->nswindow )
 	{
-		NSRect rect = [(NSWindow*)window->nswindow frame];
+		NSRect rect = [(__bridge NSWindow*)window->nswindow frame];
 		return (int)rect.origin.x;
 	}
 	return 0;
@@ -271,7 +271,7 @@ int window_position_y( window_t* window )
 {
 	if( window && window->nswindow )
 	{
-		NSRect rect = [(NSWindow*)window->nswindow frame];
+		NSRect rect = [(__bridge NSWindow*)window->nswindow frame];
 		return (int)rect.origin.y;
 	}
 	return 0;
@@ -283,7 +283,7 @@ void window_fit_to_screen( window_t* window )
 	if( !window || !window->nswindow )
 		return;
 	
-	NSWindow* nswindow = (NSWindow*)window->nswindow;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	NSScreen* screen = [nswindow screen];
 	NSRect frame_rect = [nswindow frame];
 	
