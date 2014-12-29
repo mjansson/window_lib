@@ -12,11 +12,6 @@
 
 #pragma once
 
-/*! \file build.h
-    Build setup. Configurations can be made with various BUILD_ENABLE_[...] at the end of this file. There are also
-	a number of BUILD_SIZE_[...] defines for preallocated buffer sizes used.
-	*/
-
 #include <foundation/platform.h>
 
 
@@ -37,3 +32,4 @@
 #  define WINDOW_API extern
 #  endif
 #endif
+
