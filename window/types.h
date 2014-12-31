@@ -12,29 +12,15 @@
 
 #pragma once
 
-/*! \file types.h
-    Window types */
-
 #include <foundation/platform.h>
 #include <window/build.h>
 #include <window/hashstrings.h>
 
 
-// CONSTANTS
 static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
 
+typedef struct window_t window_t;
 
-// ENUMERATIONS
-
-
-// PRIMITIVE TYPES
-
-
-// OPAQUE COMPLEX TYPES
-typedef struct _window window_t;
-
-
-// COMPLEX TYPES
 
 #if FOUNDATION_PLATFORM_MACOSX
 #  ifdef __OBJC__
@@ -44,14 +30,14 @@ typedef struct _window window_t;
 
 @interface WindowView : NSView
 {
-@public
+	@public
 }
 + (void)referenceClass;
 @end
 
 @interface WindowViewController : NSViewController
 {
-@public
+	@public
 }
 + (void)referenceClass;
 @end
@@ -64,12 +50,9 @@ typedef struct _window window_t;
 
 #include <foundation/apple.h>
 
-/*! This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.
-    The view content is basically an EAGL surface you render your OpenGL scene into.
-    Note that setting the view non-opaque will only work if the EAGL surface has an alpha channel. */
 @interface WindowView : UIView
 {
-@public
+	@public
 	id       display_link;
 	CGPoint  begin_touch;
 	CGPoint  last_touch;
@@ -79,10 +62,9 @@ typedef struct _window window_t;
 + (void)referenceClass;
 @end
 
-/*! A view controller for a single view that optionally hides the status bar */
 @interface WindowViewController : UIViewController
 {
-@public
+	@public
 }
 @property (nonatomic) BOOL hideStatusBar;
 + (void)referenceClass;
@@ -92,10 +74,5 @@ typedef struct _window window_t;
 #endif
 
 
-// FUNCTION TYPES
-
 typedef void (* window_draw_fn)( window_t* window );
-
-
-// UTILITY FUNCTIONS
 

@@ -12,8 +12,6 @@
 
 #pragma once
 
-/*! \file internal.h
-    Window internal types */
 
 #include <foundation/platform.h>
 #include <window/types.h>
@@ -24,11 +22,8 @@
 #  include <X11/extensions/xf86vmode.h>
 #endif
 
-// PRIMITIVE TYPES
 
-
-// OPAQUE COMPLEX TYPES
-struct _window
+struct window_t
 {
 #if FOUNDATION_PLATFORM_WINDOWS
 	unsigned int           adapter;
@@ -63,10 +58,6 @@ struct _window
 };
 
 
-// COMPLEX TYPES
-
-
-// UTILITY FUNCTIONS
 WINDOW_EXTERN int          _window_event_initialize( void );
 WINDOW_EXTERN void         _window_event_shutdown( void );
 
@@ -79,8 +70,6 @@ WINDOW_EXTERN void         _window_native_initialize( void );
 WINDOW_EXTERN void         _window_native_shutdown( void );
 #endif
 
-
-// GLOBAL DATA
 #if FOUNDATION_PLATFORM_IOS
 WINDOW_EXTERN bool         _window_app_started;
 WINDOW_EXTERN bool         _window_app_paused;

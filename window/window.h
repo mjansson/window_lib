@@ -1,4 +1,4 @@
-/* window  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
+/* window.h  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
  * 
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
@@ -12,9 +12,6 @@
 
 #pragma once
 
-/*! \file window
-    Wrapper for window library headers and main entry/exit points */
-
 #include <foundation/platform.h>
 
 #include <window/build.h>
@@ -22,17 +19,8 @@
 #include <window/event.h>
 
 
-/*! Main entry point. Call this to bootstrap the window library
-    and initialize all functionality.
-    \return                    0 if initialization successful, <0 if error */
 WINDOW_API int                 window_initialize( void );
-
-/*! Main exit point. Call this to cleanup the window library
-    and terminate all functionality. */
 WINDOW_API void                window_shutdown( void );
-
-/*! Query if window library is initialized properly
-    \return                    true if initialized, false if not */
 WINDOW_API bool                window_is_initialized( void );
 
 
@@ -66,9 +54,6 @@ WINDOW_API int                 window_height( window_t* window );
 WINDOW_API int                 window_position_x( window_t* window );
 WINDOW_API int                 window_position_y( window_t* window );
 
-/*! Constrain the window size and position to be fully visible on the current screen/adapter,
-	while maintaining the current aspect ratio of the window in the process.
-    \param window              Window to constrain */
 WINDOW_API void                window_fit_to_screen( window_t* window );
 
 #if FOUNDATION_PLATFORM_WINDOWS

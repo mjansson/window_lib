@@ -1,0 +1,32 @@
+
+/*!
+
+\file types.h
+\brief Window types
+\details Window types.
+
+
+\var WINDOW_ADAPTER_DEFAULT
+\brief Default adapter ID
+\details Default adapter ID.
+
+
+\class WindowView
+\brief Window view type
+\details This class wraps the CAEAGLLayer from CoreAnimation into a convenient NSView/UIView subclass.
+The view content is basically an AGL/EAGL surface you render your OpenGL content onto.
+Note that setting the view non-opaque will only work if the AGL/EAGL surface has an alpha channel.
+
+
+\class WindowViewController
+\brief Window controller
+\details Convenience window view controller for a single WindowView view. On iOS it can also optionally
+hide the status bar.
+
+
+\var window_draw_fn
+\brief Window draw callback
+\details Window draw callback.
+\param window Window to draw
+
+*/

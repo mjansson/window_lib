@@ -34,7 +34,7 @@ void* window_display( window_t* window )
 
 int window_screen( window_t* window )
 {
-	return 0;
+	return -1;
 }
 
 

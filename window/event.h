@@ -12,24 +12,13 @@
 
 #pragma once
 
-/*! \file types.h
-    Window types */
-
 #include <foundation/platform.h>
 #include <foundation/types.h>
 
 #include <window/types.h>
 
 
-/*! Process window events. You should call this once every loop iteration in your main loop */
-WINDOW_API void                   window_event_process( void );
-
-/*! Get window event stream
-    \return                       System event stream */
-WINDOW_API event_stream_t*        window_event_stream( void );
-
-/*! Send a foundation system event to the window library to handle. You should ideally let the window
-    system listen to all foundation events for full functionality.
-    \param event                  Event */
-WINDOW_API void                   window_event_handle_foundation( event_t* event );
+WINDOW_API void              window_event_process( void );
+WINDOW_API event_stream_t*   window_event_stream( void );
+WINDOW_API void              window_event_handle_foundation( event_t* event );
 
