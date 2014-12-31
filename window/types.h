@@ -62,7 +62,6 @@ typedef struct window_t window_t;
 + (void)referenceClass;
 @end
 
-/*! A view controller for a single view that optionally hides the status bar */
 @interface WindowViewController : UIViewController
 {
 	@public

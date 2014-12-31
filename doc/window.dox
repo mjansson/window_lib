@@ -1,121 +1,305 @@
-/* window  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
- *
- * https://github.com/rampantpixels/window_lib
- *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
- *
- */
 
-#pragma once
+/*!
 
-/*! \file window
-    Wrapper for window library headers and main entry/exit points */
-
-#include <foundation/platform.h>
-
-#include <window/build.h>
-#include <window/types.h>
-#include <window/event.h>
+\file window.h
+\brief Window handling
+\details Window handling functions. Wrapper for window library headers and main entry/exit points.
 
 
-/*! Main entry point. Call this to bootstrap the window library
-    and initialize all functionality.
-    \return                    0 if initialization successful, <0 if error */
-WINDOW_API int                 window_initialize( void );
+\fn int window_initialize( void )
+\brief Initialize window library
+\details Main entry point. Call this to bootstrap the window library and initialize all functionality.
+\return 0 if initialization successful, <0 if error
 
-/*! Main exit point. Call this to cleanup the window library
-    and terminate all functionality. */
-WINDOW_API void                window_shutdown( void );
+\fn void window_shutdown( void )
+\brief Shutdown window library
+\details Main exit point. Call this to cleanup the window library and terminate all functionality.
 
-/*! Query if window library is initialized properly
-    \return                    true if initialized, false if not */
-WINDOW_API bool                window_is_initialized( void );
+\fn bool window_is_initialized( void )
+\brief Query if initialized
+\details Query if window library is initialized properly
+\return true if initialized, false if not
 
+\fn void window_deallocate( window_t* window )
+\brief Deallocate and destroy window
+\details Deallocate window object and destroy window if created by the window library.
+\param window Window
 
-WINDOW_API void                window_deallocate( window_t* window );
+\fn unsigned int window_adapter( window_t* window )
+\brief Get window adapter
+\details Get the adapter ID the window is associated with.
+\param window Window
+\return Adapter ID
 
-WINDOW_API unsigned int        window_adapter( window_t* window );
+\fn void window_maximize( window_t* window )
+\brief Maximize window
+\details Maximize window.
+\param window Window
 
-WINDOW_API void                window_maximize( window_t* window );
-WINDOW_API void                window_minimize( window_t* window );
-WINDOW_API void                window_restore( window_t* window );
-WINDOW_API void                window_resize( window_t* window, unsigned int width, unsigned int height );
-WINDOW_API void                window_move( window_t* window, int x, int y );
+\fn void window_minimize( window_t* window )
+\brief Minimize window
+\details Minimize window.
+\param window Window
 
-WINDOW_API bool                window_is_open( window_t* window );
-WINDOW_API bool                window_is_visible( window_t* window );
-WINDOW_API bool                window_is_maximized( window_t* window );
-WINDOW_API bool                window_is_minimized( window_t* window );
-WINDOW_API bool                window_has_focus( window_t* window );
+\fn void window_restore( window_t* window )
+\brief Restore window
+\details Restore window to the view state prior to minimization.
+\param window Window
 
-WINDOW_API void                window_show_cursor( window_t* window, bool show, bool lock );
-WINDOW_API void                window_set_cursor_pos( window_t* window, int x, int y );
-WINDOW_API bool                window_is_cursor_locked( window_t* window );
-//WINDOW_API unsigned int      window_create_cursor( window_t* window, image_t* image, unsigned int xofs, unsigned int yofs, unsigned int width, unsigned int height );
-//WINDOW_API void              window_set_cursor( window_t* window, unsigned int id );
-//WINDOW_API unsigned int      window_get_cursor( window_t* window );
+\fn void window_resize( window_t* window, unsigned int width, unsigned int height )
+\brief Resize window
+\details Resize window.
+\param window Window
+\param widht New width
+\param height New height
 
-WINDOW_API void                window_set_title( window_t* window, const char* title );
+\fn void window_move( window_t* window, int x, int y )
+\brief Move window
+\details Move window.
+\param window Window
+\param x New x coordinate
+\param y New y coordinate
 
-WINDOW_API int                 window_width( window_t* window );
-WINDOW_API int                 window_height( window_t* window );
-WINDOW_API int                 window_position_x( window_t* window );
-WINDOW_API int                 window_position_y( window_t* window );
+\fn bool window_is_open( window_t* window )
+\brief Query if open
+\details Query if window is open
+\param window Window
+\return true if window is open, false if not
 
-/*! Constrain the window size and position to be fully visible on the current screen/adapter,
-	while maintaining the current aspect ratio of the window in the process.
-    \param window              Window to constrain */
-WINDOW_API void                window_fit_to_screen( window_t* window );
+\fn bool window_is_visible( window_t* window )
+\brief Query if visible
+\details Query if window is visible.
+\param window Window
+\return true if visible, false if not
 
-#if FOUNDATION_PLATFORM_WINDOWS
+\fn bool window_is_maximized( window_t* window )
+\brief Query if maximized
+\details Query if window is maximized.
+\param window Window
+\return true if maximized, false if not
 
-WINDOW_API window_t*           window_create( unsigned int adapter, const char* title, unsigned int width, unsigned int height, bool show );
-WINDOW_API window_t*           window_allocate_from_hwnd( void* hwnd );
-WINDOW_API void*               window_hwnd( window_t* window );
-WINDOW_API void*               window_hinstance( window_t* window );
-WINDOW_API void*               window_hdc( window_t* window );
-WINDOW_API void                window_release_hdc( void* hwnd, void* hdc );
-WINDOW_API unsigned int        window_screen_width( unsigned int adapter );
-WINDOW_API unsigned int        window_screen_height( unsigned int adapter );
+\fn bool window_is_minimized( window_t* window )
+\brief Query if minimized
+\details Query if window is minimized.
+\param window Window
+\return true if minimized, false if not
 
-#elif FOUNDATION_PLATFORM_MACOSX
+\fn bool window_has_focus( window_t* window )
+\brief Query if focused
+\details Query if window has focus.
+\param window Window
+\return true if focused, false if not
 
-WINDOW_API window_t*           window_allocate_from_nswindow( void* nswindow );
-WINDOW_API void*               window_content_view( window_t* window ); //NSView*
+\fn void window_show_cursor( window_t* window, bool show, bool lock )
+\brief Show cursor
+\details Show cursor when inside the window and optionally lock it in place to prevent it from leaving the window.
+\param window Window
+\param show Show flag, show the cursor if true, hide if false
+\param lock Lock flag, lock the cursor at the center of the window if true, release if false
 
-#elif FOUNDATION_PLATFORM_LINUX
+\fn void window_set_cursor_pos( window_t* window, int x, int y )
+\brief Move cursor
+\details Move the cursor to the specified position inside the window.
+\param window Window
+\param x X coordinate in window coordinate system
+\param y Y coordinate in window coordinate system
 
-WINDOW_API window_t*           window_create( unsigned int adapter, const char* title, unsigned int width, unsigned int height, bool show );
-WINDOW_API void*               window_display( window_t* window );
-WINDOW_API int                 window_screen( window_t* window );
-WINDOW_API int                 window_drawable( window_t* window );
-WINDOW_API void*               window_visual( window_t* window );
+\fn bool window_is_cursor_locked( window_t* window )
+\brief Query if cursor locked
+\details Query if the cursor is locked inside the window.
+\param window Window
+\return true if cursor is locked inside the window, false if not
 
-#elif FOUNDATION_PLATFORM_IOS
+\fn void window_set_title( window_t* window, const char* title )
+\brief Set window title
+\details Set window title bar name.
+\param window Window
+\param title New window title
 
-WINDOW_API window_t*           window_allocate_from_uiwindow( void* uiwindow );
-WINDOW_API void*               window_view( window_t* window, unsigned int tag ); //UIView*
-WINDOW_API void*               window_layer( window_t* window, void* view ); //CAEAGLLayer*
+\fn int window_width( window_t* window )
+\brief Get content width
+\details Get width of window content area.
+\param window Window
+\return Width of window, 0 if invalid or not open window
 
-WINDOW_API int                 window_view_width( window_t* window, void* view );
-WINDOW_API int                 window_view_height( window_t* window, void* view );
+\fn int window_height( window_t* window )
+\brief Get content height
+\details Get Height of window content area.
+\param window Window
+\return Height of window, 0 if invalid or not open window
 
-WINDOW_API void                window_add_displaylink( window_t* window, window_draw_fn drawfn );
+\fn int window_position_x( window_t* window )
+\brief Get x position
+\details Get x coordinate of window position in windowing system units.
+\param window Window
+\return Window x position
 
-WINDOW_API void                window_show_keyboard( window_t* window );
-WINDOW_API void                window_hide_keyboard( window_t* window );
+\fn int window_position_y( window_t* window )
+\brief Get y position
+\details Get y coordinate of window position in windowing system units.
+\param window Window
+\return Window y position
 
-#elif FOUNDATION_PLATFORM_ANDROID
+\fn void window_fit_to_screen( window_t* window )
+\brief Constrain window to screen
+\details Constrain the window size and position to be fully visible on the current screen/adapter,
+while maintaining the current aspect ratio of the window in the process.
+\param window Window
 
-WINDOW_API window_t*           window_allocate_from_native( void* window );
-WINDOW_API void*               window_native( window_t* window );
-WINDOW_API void*               window_display( window_t* window );
+\fn window_t* window_create( unsigned int adapter, const char* title, unsigned int width, unsigned int height, bool show )
+\brief Create new window (Windows/Linux only)
+\details Create a new window with the given properties (Windows/Linux only).
+\param adapter Adapter ID (use WINDOW_ADAPTER_DEFAULT for default)
+\param title Window title
+\param width Width
+\param height Height
+\param show Make window visible on creation if true or create invisible if false
+\return Window
 
-WINDOW_API void                window_show_keyboard( window_t* window );
-WINDOW_API void                window_hide_keyboard( window_t* window );
+\fn window_t* window_allocate_from_hwnd( void* hwnd )
+\brief Allocate window from native handle (Windows only)
+\details Allocate a window object using a native window handle for a pre-created window (Windows only).
+\param hwnd Window handle
+\return Window
 
-#endif
+\fn void* window_hwnd( window_t* window )
+\brief Get window handle (Windows only)
+\details Get window handle (Windows only).
+\param window Window
+\return Native window handle, null if window is not open or invalid
+
+\fn void* window_hinstance( window_t* window )
+\brief Get application instance (Windows only)
+\details Get application instance that created the given window (Windows only).
+\param window Window
+\return Application instance handle, null if window is not open or invalid
+
+\fn void* window_hdc( window_t* window )
+\brief Get device context (Windows only)
+\details Get a device context for the given window (Windows only). You must call window_release_hdc to release the context once all operations have been completed.
+\param window Window
+\return Device context, null if window is not open or invalid
+
+\fn void window_release_hdc( void* hwnd, void* hdc )
+\brief Release device context (Windows only)
+\details Release a device context previously obtained from a call to window_hdc (Windows only).
+\param hwnd Native window handle
+\param hdc Device context
+
+\fn unsigned int window_screen_width( unsigned int adapter )
+\brief Get screen width (Windows only)
+\details Get screen width in pixels of the given adapter (Windows only).
+\param adapter Adapter ID
+\return Screen width in pixels
+
+\fn unsigned int window_screen_height( unsigned int adapter )
+\brief Get screen height (Windows only)
+\details Get screen height in pixels of the given adapter (Windows only).
+\param adapter
+\return Screen height in pixels
+
+\fn window_t* window_allocate_from_nswindow( void* nswindow )
+\brief Allocate window from native window (MacOSX only)
+\details Allocate a window object using a native window (MacOSX only).
+\param nswindow Window (NSWindow*)
+\return Window
+
+\fn void* window_content_view( window_t* window )
+\brief Get content view (MacOSX only)
+\details Get content view (MacOSX only).
+\param window Window
+\return Content view (NSView*), null if invalid window or not open
+
+\fn void* window_display( window_t* window )
+\brief Get window display (Linux only)
+\details Get the display where the given window is located (Linux only).
+\param window Window
+\return Display (Display*), null if invalid window or not open
+
+\fn int window_screen( window_t* window )
+\brief Get window screen (Linux only)
+\details get the screen where the given window is located (Linux only).
+\param window Window
+\return Screen index, -1 if invalid window or not open
+
+\fn int window_drawable( window_t* window )
+\brief Get window drawable (Linux only)
+\details Get drawable for the given window (Linux only).
+\param window Window
+\return Drawable, 0 if invalid window or not open
+
+\fn void* window_visual( window_t* window )
+\brief Get window visual (Linux only)
+\details Get visual for the given window (Linux only).
+\param window Window
+\return Visual (Visual*), null if invalid window or not open
+
+\fn window_t* window_allocate_from_uiwindow( void* uiwindow )
+\brief Allocate window from native window (iOS only)
+\details Allocate a window object using a native window (iOS only).
+\param uiwindow Window (UIWindow*)
+\return Window
+
+\fn void* window_view( window_t* window, unsigned int tag )
+\brief Get content view (iOS only)
+\details Get content view (iOS only).
+\param window Window
+\param tag View tag
+\return Content view with the given tag (UIView*), null if invalid window/tag or not open
+
+\fn void* window_layer( window_t* window, void* view )
+\brief Get view EAGL layer (iOS only)
+\details Get the EAGL layer for the given view (iOS only).
+\param window Window
+\param view View
+\return EAGL layer (CAEAGLLayer*), null if invalid window/view or not open
+
+\fn int window_view_width( window_t* window, void* view )
+\brief Get view width (iOS only)
+\details Get view width in pixels (iOS only).
+\param window Window
+\param view View
+\return View width in pixels
+
+\fn int window_view_height( window_t* window, void* view )
+\brief Get view height (iOS only)
+\details Get view height in pixels (iOS only).
+\param window Window
+\param view View
+\return View height in pixels
+
+\fn void window_add_displaylink( window_t* window, window_draw_fn drawfn )
+\brief Add display link (iOS only)
+\details Add display link for draw callbacks (iOS only).
+\param window Window
+\param drawfn Draw function to call on display link updates
+
+\fn void window_show_keyboard( window_t* window )
+\brief Show software keyboard (iOS/Android only)
+\details Show the software keyboard (iOS/Android only).
+\param window Window
+
+\fn void window_hide_keyboard( window_t* window )
+\brief Hide software keyboard (iOS/Android only)
+\details Hide the software keyboard (iOS/Android only).
+\param window Window
+
+\fn window_t* window_allocate_from_native( void* window )
+\brief Allocate from native window (Android only)
+\details Allocate a window object using a native window (Android only).
+\param window Native window
+\return Window
+
+\fn void* window_native( window_t* window )
+\brief Get native window (Android only)
+\details Get native window (Android only).
+\param window Window
+\return Native window, null if invalid window or not open
+
+\fn void* window_display( window_t* window )
+\brief Get display (Android only)
+\details Get display window is located on (Android only).
+\param window Window
+\return Display, null if invalid window or not open
+
+*/

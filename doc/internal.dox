@@ -1,87 +1,129 @@
-/* internal.h  -  Window library internals  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
- *
- * https://github.com/rampantpixels/window_lib
- *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
- *
- */
 
-#pragma once
+/!*
 
-/*! \file internal.h
-    Window internal types */
+\file internal.h
+\brief Internal functions and data types
+\details Internal functions and data types not intended for external access as these definitions could change at any point.
 
-#include <foundation/platform.h>
-#include <window/types.h>
+\typedef window_t
+\brief Window data
+\details Opaque window type with all platform specific data.
 
-#if FOUNDATION_PLATFORM_LINUX
-#  include <X11/Xlib.h>
-#  include <X11/Xutil.h>
-#  include <X11/extensions/xf86vmode.h>
-#endif
+\var window_t::adapter
+\brief Adapter the window is displayed on
+\details Adapter the window is displayed on. Also used when maximizing or going fullscreen to determine which adapter to use.
 
-// PRIMITIVE TYPES
+\var window_t::hwnd
+\brief Window handle
+\details Window handle.
+
+\var window_t::hinstance
+\brief Application instance handle
+\details Application instance handle.
+
+\var window_t::created
+\brief Creation flag
+\brief Flag indicating if window was created by window library or supplied externally.
+
+\var window_t::cursor_lock
+\brief Cursor lock flag
+\details Flag indicating the cursor is locked to a position.
+
+\var window_t::cursor_pos
+\brief Cursor lock position
+\details Position the cursor should be locked to.
+
+\var window_t::wstyle
+\brief Window style
+\details Window style.
+
+\var window_t::nswindow
+\brief Window
+\details Window (type NSWindow*).
+
+\var window_t::uiwindow
+\brief Window
+\details Window (type UIWindow*).
+
+\var window_t::tag
+\brief Window tag
+\details Tag used to identify window association during startup.
+
+\var window_t::display
+\brief Display
+\details Display where window is located.
+
+\var window_t::screen
+\brief Screen
+\details Screen where window is located.
+
+\var window_t::visual
+\brief Visual information
+\details Visual information for window.
+
+\var window_t::drawable
+\brief Window drawable
+\details Window drawable.
+
+\var window_t::atom
+\brief Window destroy atom
+\details Window destroy atom.
+
+\var window_t::xim
+\brief Window input
+\details Window input.
+
+\var window_t::xic
+\brief Window input
+\details Window input.
+
+\var window_t::focus
+\brief Focus flag
+\details Flag indicating if window has focus or not.
+
+\var window_t::visible
+\brief Visible flag
+\details Flag indicating if window is visible or not.
+	
+\var window_t::size
+\brief Window size
+\details Window size.
+
+\var window_t::native
+\brief Native handle
+\brief Window native handle.
 
 
-// OPAQUE COMPLEX TYPES
-struct _window
-{
-#if FOUNDATION_PLATFORM_WINDOWS
-	unsigned int           adapter;
-	HWND                   hwnd;
-	HINSTANCE              instance;
-	bool                   created;
-	bool                   cursor_lock;
-	uipoint_t              cursor_pos;
-	unsigned int           wstyle;
-#elif FOUNDATION_PLATFORM_MACOSX
-	void*                  nswindow;
-#elif FOUNDATION_PLATFORM_LINUX
-	unsigned int           adapter;
-	bool                   created;
-	Display*               display;
-	unsigned int           screen;
-	XVisualInfo*           visual;
-	Window                 drawable;
-	Atom                   atom;
-	XIM                    xim;
-	XIC                    xic;
-	bool                   focus;
-	bool                   visible;
-#elif FOUNDATION_PLATFORM_IOS
-	void*                  uiwindow;
-	unsigned int           tag;
-#elif FOUNDATION_PLATFORM_ANDROID
-	unsigned int           adapter;
-	uipoint_t              size;
-	void*                  native;
-#endif
-};
+
+\fn int _window_event_initialize( void )
+\brief Initialize window events
+\details Initialize window event system.
+\return Status code, 0 if success, <0 if error
+
+\fn void _window_event_shutdown( void )
+\brief Shutdown window events
+\details Shutdown window event system and free any used resources.
+
+\fn void _window_class_reference( void )
+\brief Symbol reference helper
+\details Helper function to make sure all window system symbols and classes are properly referenced and not removed by linker.
+
+\fn void _window_native_initialize( void )
+\brief Initialize native bindings
+\details Initialize any bindings to native windowing system.
+
+\fn void _window_native_shutdown( void )
+\brief Initialize native bindings
+\details Initialize any bindings to native windowing system.
 
 
-// COMPLEX TYPES
+\var _window_app_started
+\brief Start flag
+\details Flag indicating that application has properly started and window system is available.
+
+\var _window_app_paused
+\brief Pause flag
+\details Flag indicating that application is paused (not visible in background)
 
 
-// UTILITY FUNCTIONS
-WINDOW_EXTERN int          _window_event_initialize( void );
-WINDOW_EXTERN void         _window_event_shutdown( void );
-
-#if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
-WINDOW_EXTERN void         _window_class_reference( void );
-#endif
-
-#if FOUNDATION_PLATFORM_IOS
-WINDOW_EXTERN void         _window_native_initialize( void );
-WINDOW_EXTERN void         _window_native_shutdown( void );
-#endif
-
-
-// GLOBAL DATA
-#if FOUNDATION_PLATFORM_IOS
-WINDOW_EXTERN bool         _window_app_started;
-WINDOW_EXTERN bool         _window_app_paused;
-#endif
+*/
