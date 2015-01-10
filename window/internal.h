@@ -12,10 +12,13 @@
 
 #pragma once
 
-
 #include <foundation/platform.h>
+
 #include <window/types.h>
 
+#if FOUNDATION_PLATFORM_WINDOWS
+#  include <foundation/windows.h>
+#endif
 #if FOUNDATION_PLATFORM_LINUX
 #  include <X11/Xlib.h>
 #  include <X11/Xutil.h>
@@ -31,7 +34,8 @@ struct window_t
 	HINSTANCE              instance;
 	bool                   created;
 	bool                   cursor_lock;
-	uipoint_t              cursor_pos;
+	int                    cursor_pos_x;
+	int                    cursor_pos_y;
 	unsigned int           wstyle;
 #elif FOUNDATION_PLATFORM_MACOSX
 	void*                  nswindow;

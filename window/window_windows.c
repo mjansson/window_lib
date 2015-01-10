@@ -10,13 +10,12 @@
  *
  */
 
-#include <foundation/foundation.h>
-
 #include <window/window.h>
 #include <window/internal.h>
 
 #if FOUNDATION_PLATFORM_WINDOWS
 
+#include <foundation/memory.h>
 #include <foundation/windows.h>
 
 
@@ -57,7 +56,7 @@ void window_release_hdc( void* hwnd, void* hdc )
 
 unsigned int window_screen_width( unsigned int adapter )
 {
-	return 0
+	return 0;
 }
 
 

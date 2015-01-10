@@ -10,7 +10,6 @@
  *
  */
 
-#include <foundation/foundation.h>
 #include <window/window.h>
 #include <window/internal.h>
 
