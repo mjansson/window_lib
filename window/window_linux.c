@@ -10,8 +10,6 @@
  *
  */
 
-#include <foundation/foundation.h>
-
 #include <window/window.h>
 #include <window/internal.h>
 
@@ -34,7 +32,7 @@ void* window_display( window_t* window )
 
 int window_screen( window_t* window )
 {
-	return 0;
+	return -1;
 }
 
 

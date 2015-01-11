@@ -1,0 +1,23 @@
+
+/*!
+
+\file types.h
+\brief Window events
+\details Window events
+
+
+\fn void window_event_process( void )
+\brief Process window events
+\details Process window events. You should call this once every loop iteration in your main loop
+
+\fn event_stream_t* window_event_stream( void )
+\brief Get window event stream
+\details Get window event stream
+\return Window event stream
+
+\fn void window_event_handle_foundation( event_t* event )
+\brief Process foundation events
+\details Send a foundation system event to the window library to handle. You should ideally let the window system listen to all foundation events for full functionality.
+\param event Foundation event
+
+*/

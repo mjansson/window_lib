@@ -1,0 +1,17 @@
+
+/*!
+
+\file build.h
+\brief Build setup
+\details Build setup
+
+
+\def WINDOW_EXTERN
+\brief Declare extern symbol
+\details Declare an extern symbol 
+
+\def WINDOW_API
+\brief API entry point
+\details Declare an API entry point
+
+*/
