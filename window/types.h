@@ -18,6 +18,19 @@
 #include <window/hashstrings.h>
 
 
+typedef enum window_event_id
+{
+	WINDOWEVENT_CREATE = 0,
+	WINDOWEVENT_RESIZE,
+	WINDOWEVENT_CLOSE,
+	WINDOWEVENT_SHOW,
+	WINDOWEVENT_HIDE,
+	WINDOWEVENT_GOTFOCUS,
+	WINDOWEVENT_LOSTFOCUS,
+	WINDOWEVENT_REDRAW
+} window_event_id;
+
+
 static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
 
 typedef struct window_t window_t;

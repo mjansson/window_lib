@@ -37,6 +37,7 @@ struct window_t
 	int                    cursor_pos_x;
 	int                    cursor_pos_y;
 	unsigned int           wstyle;
+	bool                   is_resizing;
 #elif FOUNDATION_PLATFORM_MACOSX
 	void*                  nswindow;
 #elif FOUNDATION_PLATFORM_LINUX
