@@ -124,7 +124,7 @@ window_draw_fn draw_fn;
 }
 
 
-- (id)initWithDrawFn:(window_draw_fn)fn window:(window_t*)window;
+- (id)initWithDrawFn:(window_draw_fn)fn window:(window_t*)window
 {
 	draw_fn = fn;
 	target_window = window;
@@ -152,6 +152,7 @@ void window_add_displaylink( window_t* window, window_draw_fn drawfn )
 void window_show_keyboard( window_t* window )
 {
 }
+
 
 void window_hide_keyboard( window_t* window )
 {
