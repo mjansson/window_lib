@@ -10,10 +10,10 @@
  *
  */
 
-#include <foundation/foundation.h>
-
 #include <window/window.h>
 #include <window/internal.h>
+
+#include <foundation/event.h>
 
 
 static event_stream_t* _window_stream = 0;

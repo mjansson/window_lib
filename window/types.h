@@ -13,6 +13,7 @@
 #pragma once
 
 #include <foundation/platform.h>
+
 #include <window/build.h>
 #include <window/hashstrings.h>
 
