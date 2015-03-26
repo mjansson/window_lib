@@ -80,6 +80,7 @@ void window_deallocate( window_t* window )
 
 unsigned int window_adapter( window_t* window )
 {
+	FOUNDATION_UNUSED( window );
 	return WINDOW_ADAPTER_DEFAULT;
 }
 
@@ -88,10 +89,10 @@ void window_maximize( window_t* window )
 {
     if( !window || !window->nswindow )
         return;
-	
+
 	if( window_is_maximized( window ) )
 		return;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	[nswindow zoom:nil];
 }
@@ -101,7 +102,7 @@ void window_minimize( window_t* window )
 {
     if( !window || !window->nswindow )
         return;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	[nswindow miniaturize:nil];
 }
@@ -111,7 +112,7 @@ void window_restore( window_t* window )
 {
     if( !window || !window->nswindow )
         return;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	if( window_is_minimized( window ) )
 		[nswindow deminiaturize:nil];
@@ -124,13 +125,13 @@ void window_resize( window_t* window, unsigned int width, unsigned int height )
 {
 	if( !window || !window->nswindow )
 		return;
-				
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	if( window_is_maximized( window ) )
 		[nswindow zoom:nil];
-	
+
 	NSRect frame_rect = [nswindow frame];
-	
+
 	NSRect new_rect = frame_rect;
 	new_rect.size.width = width;
 	new_rect.size.height = height;
@@ -140,9 +141,9 @@ void window_resize( window_t* window, unsigned int width, unsigned int height )
 		NSUInteger style_mask = [nswindow styleMask];
 		NSUInteger resize_mask = style_mask | NSResizableWindowMask;
 		[nswindow setStyleMask:resize_mask];
-		
+
 		[nswindow setFrame:new_rect display:TRUE];
-		
+
 		[nswindow setStyleMask:style_mask];
 	}
 }
@@ -152,7 +153,7 @@ void window_move( window_t* window, int x, int y )
 {
 	if( !window || !window->nswindow )
 		return;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	NSPoint pt = { x, y };
 	[nswindow setFrameOrigin:pt];
@@ -181,7 +182,7 @@ bool window_is_maximized( window_t* window )
 {
 	if( !window || !window->nswindow )
 		return false;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	return [nswindow isZoomed];
 }
@@ -191,7 +192,7 @@ bool window_is_minimized( window_t* window )
 {
 	if( !window || !window->nswindow )
 		return false;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	return [nswindow isMiniaturized];
 }
@@ -205,16 +206,23 @@ bool window_has_focus( window_t* window )
 
 void window_show_cursor( window_t* window, bool show, bool lock )
 {
+	FOUNDATION_UNUSED( window );
+	FOUNDATION_UNUSED( show );
+	FOUNDATION_UNUSED( lock );
 }
 
 
 void window_set_cursor_pos( window_t* window, int x, int y )
 {
+	FOUNDATION_UNUSED( window );
+	FOUNDATION_UNUSED( x );
+	FOUNDATION_UNUSED( y );
 }
 
 
 bool window_is_cursor_locked( window_t* window )
 {
+	FOUNDATION_UNUSED( window );
 	return false;
 }
 
@@ -223,7 +231,7 @@ void window_set_title( window_t* window, const char* title )
 {
 	if( !window || !window->nswindow )
 		return;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	@autoreleasepool
 	{
@@ -280,30 +288,30 @@ void window_fit_to_screen( window_t* window )
 {
 	if( !window || !window->nswindow )
 		return;
-	
+
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	NSScreen* screen = [nswindow screen];
 	NSRect frame_rect = [nswindow frame];
-	
+
 	NSUInteger style_mask = [nswindow styleMask];
 	NSUInteger resize_mask = style_mask | NSResizableWindowMask;
 	[nswindow setStyleMask:resize_mask];
-	
+
 	NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
 	if( ( new_rect.size.width < frame_rect.size.width ) || ( new_rect.size.height < frame_rect.size.height ) )
 	{
 		//Maintain aspect
 		float width_factor = (float)new_rect.size.width / (float)frame_rect.size.width;
 		float height_factor = (float)new_rect.size.height / (float)frame_rect.size.height;
-		
+
 		if( width_factor < height_factor )
 			new_rect.size.height = new_rect.size.height * width_factor;
 		else
 			new_rect.size.width = new_rect.size.width * height_factor;
-		
+
 		[nswindow setFrame:new_rect display:TRUE];
 	}
-	
+
 	[nswindow setStyleMask:style_mask];
 }
 

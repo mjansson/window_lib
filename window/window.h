@@ -1,5 +1,5 @@
 /* window.h  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
@@ -22,6 +22,7 @@
 WINDOW_API int                 window_initialize( void );
 WINDOW_API void                window_shutdown( void );
 WINDOW_API bool                window_is_initialized( void );
+WINDOW_API version_t           window_version( void );
 
 
 WINDOW_API void                window_deallocate( window_t* window );

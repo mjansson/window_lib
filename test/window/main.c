@@ -1,11 +1,11 @@
 /* main.c  -  Window test  -  Public Domain  -  2013 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
  *
  * https://github.com/rampantpixels/window_lib
- * 
+ *
  * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
  *
  */
@@ -18,7 +18,8 @@
 
 static application_t test_window_application( void )
 {
-	application_t app = {0};
+	application_t app;
+	memset( &app, 0, sizeof( app ) );
 	app.name = "Window tests";
 	app.short_name = "test_window";
 	app.config_dir = "test_window";
@@ -53,15 +54,15 @@ DECLARE_TEST( window, createdestroy )
 #elif FOUNDATION_PLATFORM_IOS
 	window = window_allocate_from_uiwindow( delegate_uiwindow() );
 #endif
-	
+
 	EXPECT_NE( window, 0 );
 	EXPECT_TRUE( window_is_open( window ) );
-	
+
 	window_deallocate( window );
 	window = 0;
 
 	EXPECT_FALSE( window_is_open( window ) );
-	
+
 	return 0;
 }
 
@@ -76,21 +77,21 @@ DECLARE_TEST( window, sizemove )
 #elif FOUNDATION_PLATFORM_IOS
 	window = window_allocate_from_uiwindow( delegate_uiwindow() );
 #endif
-	
+
 	EXPECT_NE( window, 0 );
 	EXPECT_TRUE( window_is_open( window ) );
 
 	thread_sleep( 1000 );
-	
+
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
 	EXPECT_TRUE( window_is_maximized( window ) );
 #else
 	EXPECT_FALSE( window_is_maximized( window ) );
 #endif
-	
+
 	EXPECT_TRUE( window_is_visible( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
-	
+
 	window_maximize( window );
 	thread_sleep( 1000 );
 	EXPECT_TRUE( window_is_maximized( window ) );
@@ -102,11 +103,11 @@ DECLARE_TEST( window, sizemove )
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 #endif
-	
+
 	window_maximize( window );
 	thread_sleep( 1000 );
 	EXPECT_TRUE( window_is_maximized( window ) );
-		
+
 #if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
 	window_resize( window, 150, 100 );
 	thread_sleep( 1000 );
@@ -114,14 +115,14 @@ DECLARE_TEST( window, sizemove )
 	EXPECT_EQ( window_height( window ), 100 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
-	
+
 	window_move( window, 10, 20 );
 	thread_sleep( 1000 );
 	EXPECT_EQ( window_position_x( window ), 10 );
 	EXPECT_EQ( window_position_y( window ), 20 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
-	
+
 	window_minimize( window );
 	thread_sleep( 1000 );
 	EXPECT_FALSE( window_is_maximized( window ) );
@@ -132,18 +133,18 @@ DECLARE_TEST( window, sizemove )
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_FALSE( window_is_minimized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
-	
+
 	window_minimize( window );
 	thread_sleep( 1000 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_is_minimized( window ) );
 #endif
-		
+
 	window_deallocate( window );
 	window = 0;
-	
+
 	EXPECT_FALSE( window_is_open( window ) );
-	
+
 	return 0;
 }
 

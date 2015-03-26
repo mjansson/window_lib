@@ -17,7 +17,7 @@ writer = generator.writer
 toolchain = generator.toolchain
 
 window_lib = generator.lib( module = 'window', sources = [
-  'event.c', 'window.c', 'window_android.c', 'window_ios.m', 'window_linux.c', 'window_osx.m', 'window_windows.c' ] )
+  'event.c', 'version.c', 'window.c', 'window_android.c', 'window_ios.m', 'window_linux.c', 'window_osx.m', 'window_windows.c' ] )
 
 includepaths = generator.test_includepaths()
 
@@ -47,10 +47,10 @@ if target.is_ios() or target.is_android():
   generator.app( module = '', sources = [ os.path.join( module, 'main.c' ) for module in test_cases ] + test_extrasources, binname = 'test-all', basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'test', 'window', 'foundation' ], resources = test_resources, includepaths = includepaths, extralibs = gllibs, extraframeworks = glframeworks )
 else:
   #Build one binary per test case
-  generator.bin( module = 'all', sources = [ 'main.c' ], binname = 'test-all', basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'window', 'foundation' ], includepaths = includepaths )
+  generator.bin( module = 'all', sources = [ 'main.c' ], binname = 'test-all', basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'window' ], includepaths = includepaths )
   for test in test_cases:
     if target.is_macosx():
       test_resources = [ os.path.join( 'osx', item ) for item in [ 'test-' + test + '.plist', 'Images.xcassets', 'test-' + test + '.xib' ] ]
-      generator.app( module = test, sources = [ 'main.c' ], binname = 'test-' + test, basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'test', 'window', 'foundation' ], resources = test_resources, includepaths = includepaths, extralibs = gllibs, extraframeworks = glframeworks )
+      generator.app( module = test, sources = [ 'main.c' ], binname = 'test-' + test, basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'test', 'window' ], resources = test_resources, includepaths = includepaths, extralibs = gllibs, extraframeworks = glframeworks )
     else:
-      generator.bin( module = test, sources = [ 'main.c' ], binname = 'test-' + test, basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'test', 'window', 'foundation' ], includepaths = includepaths )
+      generator.bin( module = test, sources = [ 'main.c' ], binname = 'test-' + test, basepath = 'test', implicit_deps = [ window_lib ], libs = [ 'test', 'window' ], includepaths = includepaths )
