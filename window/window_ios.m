@@ -1,11 +1,11 @@
 /* window_ios.m  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
  *
  * https://github.com/rampantpixels/window_lib
- * 
+ *
  * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
  *
  */
@@ -55,7 +55,7 @@ void* window_view( window_t* window, unsigned int tag )
 {
 	if( !window || !window->uiwindow )
 		return 0;
-	
+
 	UIWindow* uiwindow = (__bridge UIWindow*)(window->uiwindow);
 	UIView* view = [uiwindow viewWithTag:tag];
 	if( !view )
@@ -328,7 +328,7 @@ void window_fit_to_screen( window_t* window )
 
 + (void)referenceClass
 {
-	log_debugf( HASH_WINDOW, "WindowGLView class referenced" );
+	log_debugf( HASH_WINDOW, "WindowView class referenced" );
 	++_dummy_window_class_reference;
 }
 
@@ -349,21 +349,21 @@ void window_fit_to_screen( window_t* window )
 		UIScreen* main_screen = [UIScreen mainScreen];
 		CGFloat screen_width = main_screen.currentMode.size.width;
 		CGFloat screen_height = main_screen.currentMode.size.height;
-        
+
         if( ( frame.size.width < screen_width ) && ( frame.size.height < screen_height ) )
         {
             int wscale = (int)( 0.5 + ( screen_width / frame.size.width ) );
             int hscale = (int)( 0.5 + ( screen_height / frame.size.height ) );
 			self.contentScaleFactor = ( wscale > hscale ) ? wscale : hscale;
         }
-		
-		log_debugf( HASH_WINDOW, "WindowGLView initWithFrame, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), screen_width, screen_height, self.contentScaleFactor );
+
+		log_debugf( HASH_WINDOW, "WindowView initWithFrame, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), screen_width, screen_height, self.contentScaleFactor );
         CAEAGLLayer* layer = (CAEAGLLayer*)self.layer;
         layer.opaque = TRUE;
         if( self.contentScaleFactor > 1 )
             layer.contentsScale = self.contentScaleFactor;
         layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
-		
+
 		keyboard_view = 0;
 	}
     return self;
@@ -377,7 +377,7 @@ void window_fit_to_screen( window_t* window )
 		UIScreen* main_screen = [UIScreen mainScreen];
 		CGFloat screen_width = main_screen.currentMode.size.width;
 		CGFloat screen_height = main_screen.currentMode.size.height;
-        
+
 		CGRect frame = [main_screen applicationFrame];
         if( ( frame.size.width < screen_width ) && ( frame.size.height < screen_height ) )
         {
@@ -385,14 +385,14 @@ void window_fit_to_screen( window_t* window )
             int hscale = (int)( 0.5 + ( screen_height / frame.size.height ) );
 			self.contentScaleFactor = ( wscale > hscale ) ? wscale : hscale;
         }
-        
-		log_debugf( HASH_WINDOW, "WindowGLView initWithCoder, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), (int)screen_width, (int)screen_height, self.contentScaleFactor );
+
+		log_debugf( HASH_WINDOW, "WindowView initWithCoder, setting up layer (class %s) %dx%d (%.1f)", class_getName( [[self layer] class] ), (int)screen_width, (int)screen_height, self.contentScaleFactor );
         CAEAGLLayer* layer = (CAEAGLLayer*)self.layer;
         layer.opaque = TRUE;
         if( self.contentScaleFactor > 1 )
             layer.contentsScale = self.contentScaleFactor;
         layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
-		
+
 		keyboard_view = 0;
 	}
     return self;
@@ -421,7 +421,7 @@ void window_fit_to_screen( window_t* window )
 
 + (void)referenceClass
 {
-	log_debugf( HASH_WINDOW, "GLViewController class referenced" );
+	log_debugf( HASH_WINDOW, "WindowViewController class referenced" );
 	++_dummy_window_class_reference;
 }
 

@@ -63,11 +63,12 @@ typedef struct window_t window_t;
 + (void)referenceClass;
 @end
 
+IB_DESIGNABLE
 @interface WindowViewController : UIViewController
 {
 	@public
 }
-@property (nonatomic) BOOL hideStatusBar;
+@property (nonatomic) IBInspectable BOOL hideStatusBar;
 + (void)referenceClass;
 @end
 

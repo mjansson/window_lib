@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		451C85F2192B4C5D00BA6F6D /* event.c in Sources */ = {isa = PBXBuildFile; fileRef = 451C85EF192B4C5D00BA6F6D /* event.c */; };
+		457586001AC3F127009E9325 /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = 457585FB1AC3F127009E9325 /* version.c */; };
+		457586011AC3F127009E9325 /* window_android.c in Sources */ = {isa = PBXBuildFile; fileRef = 457585FC1AC3F127009E9325 /* window_android.c */; };
+		457586021AC3F127009E9325 /* window_linux.c in Sources */ = {isa = PBXBuildFile; fileRef = 457585FD1AC3F127009E9325 /* window_linux.c */; };
+		457586031AC3F127009E9325 /* window_osx.m in Sources */ = {isa = PBXBuildFile; fileRef = 457585FE1AC3F127009E9325 /* window_osx.m */; };
+		457586041AC3F127009E9325 /* window_windows.c in Sources */ = {isa = PBXBuildFile; fileRef = 457585FF1AC3F127009E9325 /* window_windows.c */; };
 		459894C519237529000F9BE2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 459894C419237529000F9BE2 /* Foundation.framework */; };
 		459894F1192375C5000F9BE2 /* window_ios.m in Sources */ = {isa = PBXBuildFile; fileRef = 459894EE192375C5000F9BE2 /* window_ios.m */; };
 		459894F2192375C5000F9BE2 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = 459894EF192375C5000F9BE2 /* window.c */; };
@@ -31,6 +36,11 @@
 		451C85F1192B4C5D00BA6F6D /* hashstrings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hashstrings.h; path = ../../../window/hashstrings.h; sourceTree = "<group>"; };
 		451C8675192D10EA00BA6F6D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		451C868B192D10EB00BA6F6D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		457585FB1AC3F127009E9325 /* version.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = version.c; path = ../../../window/version.c; sourceTree = "<group>"; };
+		457585FC1AC3F127009E9325 /* window_android.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = window_android.c; path = ../../../window/window_android.c; sourceTree = "<group>"; };
+		457585FD1AC3F127009E9325 /* window_linux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = window_linux.c; path = ../../../window/window_linux.c; sourceTree = "<group>"; };
+		457585FE1AC3F127009E9325 /* window_osx.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = window_osx.m; path = ../../../window/window_osx.m; sourceTree = "<group>"; };
+		457585FF1AC3F127009E9325 /* window_windows.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = window_windows.c; path = ../../../window/window_windows.c; sourceTree = "<group>"; };
 		459894C119237529000F9BE2 /* libwindow.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libwindow.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		459894C419237529000F9BE2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		459894D519237529000F9BE2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -98,9 +108,14 @@
 				451C85F1192B4C5D00BA6F6D /* hashstrings.h */,
 				459894EC192375C5000F9BE2 /* internal.h */,
 				459894ED192375C5000F9BE2 /* types.h */,
+				457585FB1AC3F127009E9325 /* version.c */,
 				459894EF192375C5000F9BE2 /* window.c */,
 				459894F0192375C5000F9BE2 /* window.h */,
+				457585FC1AC3F127009E9325 /* window_android.c */,
+				457585FD1AC3F127009E9325 /* window_linux.c */,
+				457585FE1AC3F127009E9325 /* window_osx.m */,
 				459894EE192375C5000F9BE2 /* window_ios.m */,
+				457585FF1AC3F127009E9325 /* window_windows.c */,
 			);
 			name = window;
 			sourceTree = "<group>";
@@ -131,7 +146,7 @@
 		459894B919237529000F9BE2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0620;
 				ORGANIZATIONNAME = "Rampant Pixels AB";
 			};
 			buildConfigurationList = 459894BC19237529000F9BE2 /* Build configuration list for PBXProject "window" */;
@@ -156,8 +171,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				457586031AC3F127009E9325 /* window_osx.m in Sources */,
+				457586001AC3F127009E9325 /* version.c in Sources */,
 				451C85F2192B4C5D00BA6F6D /* event.c in Sources */,
+				457586041AC3F127009E9325 /* window_windows.c in Sources */,
+				457586011AC3F127009E9325 /* window_android.c in Sources */,
 				459894F1192375C5000F9BE2 /* window_ios.m in Sources */,
+				457586021AC3F127009E9325 /* window_linux.c in Sources */,
 				459894F2192375C5000F9BE2 /* window.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

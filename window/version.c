@@ -2,7 +2,7 @@
    This file is generated from the git describe command.
    Run the configure script to regeneerate this file */
 
-#include <foundation/foundation.h>
+#include <window/window.h>
 
 version_t window_version( void )
 {

@@ -65,6 +65,8 @@ static void* event_thread( object_t thread, void* arg )
 				default:
 					break;
 			}
+            
+            window_event_handle_foundation( event );
 		}
 
 		thread_sleep( 10 );

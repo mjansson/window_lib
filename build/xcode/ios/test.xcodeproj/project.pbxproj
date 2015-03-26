@@ -12,7 +12,6 @@
 		4513861B1939CD4800BA2092 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4513861A1939CD4800BA2092 /* UIKit.framework */; };
 		451386461939CFAC00BA2092 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 451386451939CFAC00BA2092 /* main.c */; };
 		4513864A1939CFB900BA2092 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 451386471939CFB900BA2092 /* Images.xcassets */; };
-		4513864B1939CFB900BA2092 /* test-all.plist in Resources */ = {isa = PBXBuildFile; fileRef = 451386481939CFB900BA2092 /* test-all.plist */; };
 		4513864C1939CFB900BA2092 /* test-all.xib in Resources */ = {isa = PBXBuildFile; fileRef = 451386491939CFB900BA2092 /* test-all.xib */; };
 		4513864E1939CFCA00BA2092 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4513864D1939CFCA00BA2092 /* main.c */; };
 		45138650193A53DC00BA2092 /* libwindow.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4513864F193A53DC00BA2092 /* libwindow.a */; };
@@ -139,7 +138,7 @@
 		451386091939CD2D00BA2092 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0620;
 			};
 			buildConfigurationList = 4513860C1939CD2D00BA2092 /* Build configuration list for PBXProject "test" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -163,7 +162,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4513864B1939CFB900BA2092 /* test-all.plist in Resources */,
 				4513864A1939CFB900BA2092 /* Images.xcassets in Resources */,
 				4513864C1939CFB900BA2092 /* test-all.xib in Resources */,
 			);
