@@ -1,11 +1,11 @@
 /* window.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
  *
  * https://github.com/rampantpixels/window_lib
- * 
+ *
  * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
  *
  */
@@ -17,20 +17,20 @@
 static bool _window_initialized = false;
 
 
-int window_initialize( void )
+int window_module_initialize( void )
 {
 	if( _window_initialized )
 		return 0;
-	
+
 	if( _window_event_initialize() < 0 )
 		return -1;
-	
+
 	_window_initialized = true;
-	
+
 #if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
 	_window_class_reference();
 #endif
-	
+
 #if FOUNDATION_PLATFORM_IOS
 	_window_native_initialize();
 #endif
@@ -39,19 +39,19 @@ int window_initialize( void )
 }
 
 
-void window_shutdown( void )
+void window_module_shutdown( void )
 {
 #if FOUNDATION_PLATFORM_IOS
 	_window_native_shutdown();
 #endif
-	
+
 	_window_event_shutdown();
-	
+
 	_window_initialized = false;
 }
 
 
-bool window_is_initialized( void )
+bool window_module_is_initialized( void )
 {
 	return _window_initialized;
 }

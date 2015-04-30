@@ -6,19 +6,29 @@
 \details Window handling functions. Wrapper for window library headers and main entry/exit points.
 
 
-\fn int window_initialize( void )
+\fn int window_module_initialize( void )
 \brief Initialize window library
 \details Main entry point. Call this to bootstrap the window library and initialize all functionality.
 \return 0 if initialization successful, <0 if error
 
-\fn void window_shutdown( void )
+\fn void window_module_shutdown( void )
 \brief Shutdown window library
 \details Main exit point. Call this to cleanup the window library and terminate all functionality.
 
-\fn bool window_is_initialized( void )
+\fn bool window_module_is_initialized( void )
 \brief Query if initialized
 \details Query if window library is initialized properly
 \return true if initialized, false if not
+
+\fn version_t window_module_version( void )
+\brief Get library version
+\details Get the window library version
+\return Window library version
+
+\fn void window_finalize( window_t* window )
+\brief Finalize window object
+\details Finalize window object and destroy window if created by the window library.
+\param window Window
 
 \fn void window_deallocate( window_t* window )
 \brief Deallocate and destroy window

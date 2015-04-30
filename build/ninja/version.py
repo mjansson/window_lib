@@ -40,7 +40,7 @@ def generate_version_string(libname):
    This file is generated from the git describe command.
    Run the configure script to regeneerate this file */
 
-#include <""" + libname + "/" + libname + """.h>
+#include <foundation/foundation.h>
 
 version_t """ + libname + """_version( void )
 {

@@ -2,9 +2,9 @@
    This file is generated from the git describe command.
    Run the configure script to regeneerate this file */
 
-#include <window/window.h>
+#include <foundation/foundation.h>
 
-version_t window_version( void )
+version_t window_module_version( void )
 {
 	return version_make( 0, 0, 1, 0, 0x0 );
 }
