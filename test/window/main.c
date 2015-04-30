@@ -79,6 +79,8 @@ DECLARE_TEST( window, sizemove )
 #elif FOUNDATION_PLATFORM_IOS
 	window = window_allocate( delegate_uiwindow() );
 #endif
+	
+	window_event_process();
 
 	EXPECT_NE( window, 0 );
 	EXPECT_TRUE( window_is_open( window ) );
@@ -95,48 +97,56 @@ DECLARE_TEST( window, sizemove )
 	EXPECT_TRUE( window_has_focus( window ) );
 
 	window_maximize( window );
+	window_event_process();
 	thread_sleep( 1000 );
 	EXPECT_TRUE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 
 #if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
 	window_restore( window );
+	window_event_process();
 	thread_sleep( 1000 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 #endif
 
 	window_maximize( window );
+	window_event_process();
 	thread_sleep( 1000 );
 	EXPECT_TRUE( window_is_maximized( window ) );
 
 #if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
 	window_resize( window, 150, 100 );
+	window_event_process();
 	thread_sleep( 1000 );
-	EXPECT_EQ( window_width( window ), 150 );
-	EXPECT_EQ( window_height( window ), 100 );
+	EXPECT_INTEQ( window_width( window ), 150 );
+	EXPECT_INTEQ( window_height( window ), 100 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 
 	window_move( window, 10, 20 );
+	window_event_process();
 	thread_sleep( 1000 );
-	EXPECT_EQ( window_position_x( window ), 10 );
-	EXPECT_EQ( window_position_y( window ), 20 );
+	EXPECT_INTEQ( window_position_x( window ), 10 );
+	EXPECT_INTEQ( window_position_y( window ), 20 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 
 	window_minimize( window );
+	window_event_process();
 	thread_sleep( 1000 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_FALSE( window_has_focus( window ) );
 
 	window_restore( window );
+	window_event_process();
 	thread_sleep( 1000 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_FALSE( window_is_minimized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 
 	window_minimize( window );
+	window_event_process();
 	thread_sleep( 1000 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_is_minimized( window ) );

@@ -15,6 +15,9 @@
 
 #include <foundation/event.h>
 
+#if FOUNDATION_PLATFORM_WINDOWS
+#include <foundation/windows.h>
+#endif
 
 static event_stream_t* _window_stream = 0;
 
@@ -38,8 +41,27 @@ void _window_event_shutdown( void )
 }
 
 
+void window_event_post( window_event_id id, window_t* window )
+{
+	if ( _window_stream )
+		event_post( _window_stream, id, sizeof( window_t* ), 0, &window, 0 );
+}
+
+
 void window_event_process( void )
 {
+#if FOUNDATION_PLATFORM_WINDOWS
+	MSG msg;
+	BOOL got;
+	while( ( got = PeekMessage( &msg, (HWND)0, 0U, 0U, PM_REMOVE | PM_NOYIELD ) ) != 0 )
+	{
+		TranslateMessage( &msg );
+		DispatchMessage( &msg );
+
+		if( msg.message >= WM_MOUSEFIRST )
+			break;
+	}
+#endif
 }
 
 

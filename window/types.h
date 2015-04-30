@@ -18,19 +18,33 @@
 #include <window/hashstrings.h>
 
 
+typedef enum window_event_id
+{
+	WINDOWEVENT_CREATE = 0,
+	WINDOWEVENT_RESIZE,
+	WINDOWEVENT_CLOSE,
+	WINDOWEVENT_SHOW,
+	WINDOWEVENT_HIDE,
+	WINDOWEVENT_GOTFOCUS,
+	WINDOWEVENT_LOSTFOCUS,
+	WINDOWEVENT_REDRAW
+} window_event_id;
+
+
 static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
 
 struct window_t
 {
 #if FOUNDATION_PLATFORM_WINDOWS
-    unsigned int           adapter;
-    HWND                   hwnd;
-    HINSTANCE              instance;
-    bool                   created;
-    bool                   cursor_lock;
-    int                    cursor_pos_x;
-    int                    cursor_pos_y;
-    unsigned int           wstyle;
+	unsigned int           adapter;
+	void*                  hwnd;
+	void*                  instance;
+	bool                   created;
+	bool                   cursor_lock;
+	int                    cursor_pos_x;
+	int                    cursor_pos_y;
+	unsigned int           wstyle;
+	bool                   is_resizing;
 #elif FOUNDATION_PLATFORM_MACOSX
     void*                  nswindow;
 #elif FOUNDATION_PLATFORM_LINUX
