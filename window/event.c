@@ -1,5 +1,5 @@
 /* event.c  -  Window library events  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
@@ -70,7 +70,7 @@ event_stream_t* window_event_stream( void )
 
 void window_event_handle_foundation( event_t* event )
 {
-#if FOUNDATION_PLATFORM_IOS
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
 	if( event->id == FOUNDATIONEVENT_START )
 	{
 		_window_app_started = true;
@@ -80,6 +80,8 @@ void window_event_handle_foundation( event_t* event )
 		_window_app_paused = true;
 	else if( event->id == FOUNDATIONEVENT_RESUME )
 		_window_app_paused = false;
+#else
+	FOUNDATION_UNUSED( event );
 #endif
 }
 
