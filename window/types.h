@@ -1,5 +1,5 @@
 /* types.h  -  Window library types  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
@@ -19,6 +19,43 @@
 
 
 static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
+
+struct window_t
+{
+#if FOUNDATION_PLATFORM_WINDOWS
+    unsigned int           adapter;
+    HWND                   hwnd;
+    HINSTANCE              instance;
+    bool                   created;
+    bool                   cursor_lock;
+    int                    cursor_pos_x;
+    int                    cursor_pos_y;
+    unsigned int           wstyle;
+#elif FOUNDATION_PLATFORM_MACOSX
+    void*                  nswindow;
+#elif FOUNDATION_PLATFORM_LINUX
+    unsigned int           adapter;
+    bool                   created;
+    Display*               display;
+    unsigned int           screen;
+    XVisualInfo*           visual;
+    Window                 drawable;
+    Atom                   atom;
+    XIM                    xim;
+    XIC                    xic;
+    bool                   focus;
+    bool                   visible;
+#elif FOUNDATION_PLATFORM_IOS
+    void*                  uiwindow;
+    unsigned int           tag;
+#elif FOUNDATION_PLATFORM_ANDROID
+    unsigned int           adapter;
+    int                    width;
+    int                    height;
+    void*                  native;
+#endif
+};
+
 
 typedef struct window_t window_t;
 

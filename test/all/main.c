@@ -132,7 +132,7 @@ int main_initialize( void )
 	application.name = "Foundation library test suite";
 	application.short_name = "test_all";
 	application.config_dir = "test_all";
-	application.version = window_version();
+	application.version = window_module_version();
 	application.flags = APPLICATION_UTILITY;
 	application.dump_callback = test_crash_handler;
 
@@ -152,7 +152,7 @@ int main_initialize( void )
 		return -1;
 
 #if BUILD_MONOLITHIC
-	return window_initialize();
+	return window_module_initialize();
 #else
 	return 0;
 #endif
@@ -215,7 +215,7 @@ int main_run( void* main_arg )
 
 	log_set_suppress( HASH_TEST, ERRORLEVEL_DEBUG );
 
-	log_infof( HASH_TEST, "Window library v%s built for %s using %s (%s)", string_from_version_static( window_version() ), FOUNDATION_PLATFORM_DESCRIPTION, FOUNDATION_COMPILER_DESCRIPTION, build_name );
+	log_infof( HASH_TEST, "Window library v%s built for %s using %s (%s)", string_from_version_static( window_module_version() ), FOUNDATION_PLATFORM_DESCRIPTION, FOUNDATION_COMPILER_DESCRIPTION, build_name );
 
 	thread = thread_create( event_thread, "event_thread", THREAD_PRIORITY_NORMAL, 0 );
 	thread_start( thread, 0 );
@@ -393,7 +393,7 @@ void main_shutdown( void )
 #if FOUNDATION_PLATFORM_ANDROID
 	thread_detach_jvm();
 #endif
-
+	window_module_shutdown();
 	foundation_shutdown();
 }
 

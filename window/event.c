@@ -18,6 +18,9 @@
 
 static event_stream_t* _window_stream = 0;
 
+bool _window_app_started = false;
+bool _window_app_paused = true;
+
 
 int _window_event_initialize( void )
 {
@@ -48,7 +51,6 @@ event_stream_t* window_event_stream( void )
 
 void window_event_handle_foundation( event_t* event )
 {
-#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
 	if( event->id == FOUNDATIONEVENT_START )
 	{
 		_window_app_started = true;
@@ -58,8 +60,5 @@ void window_event_handle_foundation( event_t* event )
 		_window_app_paused = true;
 	else if( event->id == FOUNDATIONEVENT_RESUME )
 		_window_app_paused = false;
-#else
-	FOUNDATION_UNUSED( event );
-#endif
 }
 

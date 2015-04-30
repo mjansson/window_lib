@@ -58,23 +58,36 @@ volatile int _dummy_window_class_reference = 0;
 @end
 
 
-window_t* window_allocate_from_nswindow( void* nswindow )
+window_t* window_allocate( void* nswindow )
 {
 	window_t* window = memory_allocate( 0, sizeof( window_t ), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED );
-	window->nswindow = nswindow;
+	window_initialize( window, nswindow );
 	return window;
+}
+
+
+void window_initialize( window_t* window, void* nswindow )
+{
+	window->nswindow = nswindow;
+}
+
+
+void window_finalize( window_t* window )
+{
+	FOUNDATION_UNUSED( window );
+}
+
+
+void window_deallocate( window_t* window )
+{
+	window_finalize( window );
+	memory_deallocate( window );
 }
 
 
 void* window_content_view( window_t* window )
 {
 	return (__bridge void *)(window && window->nswindow ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
-}
-
-
-void window_deallocate( window_t* window )
-{
-	memory_deallocate( window );
 }
 
 

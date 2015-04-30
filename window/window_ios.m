@@ -23,9 +23,6 @@
 #import <UIKit/UIScreenMode.h>
 
 
-bool _window_app_started = false;
-bool _window_app_paused = true;
-
 volatile int _dummy_window_class_reference = 0;
 
 

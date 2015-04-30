@@ -23,6 +23,7 @@ static application_t test_window_application( void )
 	app.name = "Window tests";
 	app.short_name = "test_window";
 	app.config_dir = "test_window";
+	app.version = window_module_version();
 	return app;
 }
 
@@ -35,12 +36,13 @@ static memory_system_t test_window_memory_system( void )
 
 static int test_window_initialize( void )
 {
-	return 0;
+	return window_module_initialize();
 }
 
 
 static void test_window_shutdown( void )
 {
+	window_module_shutdown();
 }
 
 
@@ -50,9 +52,9 @@ DECLARE_TEST( window, createdestroy )
 #if FOUNDATION_PLATFORM_WINDOWS
 	window = window_create( WINDOW_ADAPTER_DEFAULT, "Window test", 800, 600, true );
 #elif FOUNDATION_PLATFORM_MACOSX
-	window = window_allocate_from_nswindow( delegate_nswindow() );
+	window = window_allocate( delegate_nswindow() );
 #elif FOUNDATION_PLATFORM_IOS
-	window = window_allocate_from_uiwindow( delegate_uiwindow() );
+	window = window_allocate( delegate_uiwindow() );
 #endif
 
 	EXPECT_NE( window, 0 );
@@ -73,9 +75,9 @@ DECLARE_TEST( window, sizemove )
 #if FOUNDATION_PLATFORM_WINDOWS
 	window = window_create( WINDOW_ADAPTER_DEFAULT, "Window test", 800, 600, true );
 #elif FOUNDATION_PLATFORM_MACOSX
-	window = window_allocate_from_nswindow( delegate_nswindow() );
+	window = window_allocate( delegate_nswindow() );
 #elif FOUNDATION_PLATFORM_IOS
-	window = window_allocate_from_uiwindow( delegate_uiwindow() );
+	window = window_allocate( delegate_uiwindow() );
 #endif
 
 	EXPECT_NE( window, 0 );

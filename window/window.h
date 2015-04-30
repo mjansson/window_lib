@@ -19,12 +19,13 @@
 #include <window/event.h>
 
 
-WINDOW_API int                 window_initialize( void );
-WINDOW_API void                window_shutdown( void );
-WINDOW_API bool                window_is_initialized( void );
-WINDOW_API version_t           window_version( void );
+WINDOW_API int                 window_module_initialize( void );
+WINDOW_API void                window_module_shutdown( void );
+WINDOW_API bool                window_module_is_initialized( void );
+WINDOW_API version_t           window_module_version( void );
 
 
+WINDOW_API void                window_finalize( window_t* window );
 WINDOW_API void                window_deallocate( window_t* window );
 
 WINDOW_API unsigned int        window_adapter( window_t* window );
@@ -44,9 +45,6 @@ WINDOW_API bool                window_has_focus( window_t* window );
 WINDOW_API void                window_show_cursor( window_t* window, bool show, bool lock );
 WINDOW_API void                window_set_cursor_pos( window_t* window, int x, int y );
 WINDOW_API bool                window_is_cursor_locked( window_t* window );
-//WINDOW_API unsigned int      window_create_cursor( window_t* window, image_t* image, unsigned int xofs, unsigned int yofs, unsigned int width, unsigned int height );
-//WINDOW_API void              window_set_cursor( window_t* window, unsigned int id );
-//WINDOW_API unsigned int      window_get_cursor( window_t* window );
 
 WINDOW_API void                window_set_title( window_t* window, const char* title );
 
@@ -60,7 +58,8 @@ WINDOW_API void                window_fit_to_screen( window_t* window );
 #if FOUNDATION_PLATFORM_WINDOWS
 
 WINDOW_API window_t*           window_create( unsigned int adapter, const char* title, unsigned int width, unsigned int height, bool show );
-WINDOW_API window_t*           window_allocate_from_hwnd( void* hwnd );
+WINDOW_API window_t*           window_allocate( void* hwnd );
+WINDOW_API void                window_initialize( window_t* window, void* hwnd );
 WINDOW_API void*               window_hwnd( window_t* window );
 WINDOW_API void*               window_hinstance( window_t* window );
 WINDOW_API void*               window_hdc( window_t* window );
@@ -70,7 +69,8 @@ WINDOW_API unsigned int        window_screen_height( unsigned int adapter );
 
 #elif FOUNDATION_PLATFORM_MACOSX
 
-WINDOW_API window_t*           window_allocate_from_nswindow( void* nswindow );
+WINDOW_API window_t*           window_allocate( void* nswindow );
+WINDOW_API void                window_initialize( window_t* window, void* nswindow );
 WINDOW_API void*               window_content_view( window_t* window ); //NSView*
 
 #elif FOUNDATION_PLATFORM_LINUX
@@ -83,7 +83,8 @@ WINDOW_API void*               window_visual( window_t* window );
 
 #elif FOUNDATION_PLATFORM_IOS
 
-WINDOW_API window_t*           window_allocate_from_uiwindow( void* uiwindow );
+WINDOW_API window_t*           window_allocate( void* uiwindow );
+WINDOW_API void                window_initialize( window_t* window, void* uiwindow );
 WINDOW_API void*               window_view( window_t* window, unsigned int tag ); //UIView*
 WINDOW_API void*               window_layer( window_t* window, void* view ); //CAEAGLLayer*
 
@@ -97,7 +98,8 @@ WINDOW_API void                window_hide_keyboard( window_t* window );
 
 #elif FOUNDATION_PLATFORM_ANDROID
 
-WINDOW_API window_t*           window_allocate_from_native( void* window );
+WINDOW_API window_t*           window_allocate( void* native );
+WINDOW_API void                window_initialize( window_t* window, void* native );
 WINDOW_API void*               window_native( window_t* window );
 WINDOW_API void*               window_display( window_t* window );
 

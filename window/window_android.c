@@ -1,11 +1,11 @@
 /* window_android.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
- * 
+ *
  * This library provides a cross-platform window library in C11 providing basic support data types and
  * functions to create and manage windows in a platform-independent fashion. The latest source code is
  * always available at
  *
  * https://github.com/rampantpixels/window_lib
- * 
+ *
  * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
  *
  */
@@ -15,12 +15,27 @@
 
 #if FOUNDATION_PLATFORM_ANDROID
 
+#include <foundation/foundation.h>
 #include <foundation/android.h>
 
 
-window_t* window_allocate_from_native( void* window )
+window_t* window_allocate( void* native )
 {
-	return 0;
+	window_t* window = memory_allocate( 0, sizeof( window_t ), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED );
+	window_initialize( window, native );
+	return window;
+}
+
+
+void window_initialize( window_t* window, void* native )
+{
+
+}
+
+
+void window_finalize( window_t* window )
+{
+
 }
 
 
@@ -48,6 +63,7 @@ void window_hide_keyboard( window_t* window )
 
 void window_deallocate( window_t* window )
 {
+	window_finalize( window );
 	memory_deallocate( window );
 }
 
