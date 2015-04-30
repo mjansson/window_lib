@@ -119,16 +119,16 @@ DECLARE_TEST( window, sizemove )
 	window_resize( window, 150, 100 );
 	window_event_process();
 	thread_sleep( 1000 );
-	EXPECT_EQ( window_width( window ), 150 );
-	EXPECT_EQ( window_height( window ), 100 );
+	EXPECT_INTEQ( window_width( window ), 150 );
+	EXPECT_INTEQ( window_height( window ), 100 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 
 	window_move( window, 10, 20 );
 	window_event_process();
 	thread_sleep( 1000 );
-	EXPECT_EQ( window_position_x( window ), 10 );
-	EXPECT_EQ( window_position_y( window ), 20 );
+	EXPECT_INTEQ( window_position_x( window ), 10 );
+	EXPECT_INTEQ( window_position_y( window ), 20 );
 	EXPECT_FALSE( window_is_maximized( window ) );
 	EXPECT_TRUE( window_has_focus( window ) );
 

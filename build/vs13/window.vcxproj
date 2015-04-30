@@ -44,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\window\event.c" />
+    <ClCompile Include="..\..\window\version.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\window\window.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Deploy|Win32'">Create</PrecompiledHeader>

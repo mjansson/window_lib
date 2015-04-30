@@ -37,8 +37,8 @@ struct window_t
 {
 #if FOUNDATION_PLATFORM_WINDOWS
 	unsigned int           adapter;
-	HWND                   hwnd;
-	HINSTANCE              instance;
+	void*                  hwnd;
+	void*                  instance;
 	bool                   created;
 	bool                   cursor_lock;
 	int                    cursor_pos_x;

@@ -480,7 +480,7 @@ bool window_is_minimized( window_t* window )
 		memset( &plc, 0, sizeof( WINDOWPLACEMENT ) );
 		plc.length = sizeof( WINDOWPLACEMENT );
 		GetWindowPlacement( (HWND)window->hwnd, &plc );
-		return ( plc.showCmd == SW_MINIMIZE ) || ( plc.showCmd == SW_HIDE );
+		return ( plc.showCmd == SW_MINIMIZE ) || ( plc.showCmd == SW_SHOWMINIMIZED ) || ( plc.showCmd == SW_HIDE );
 	}
 	return false;
 }
@@ -578,7 +578,7 @@ int window_position_x( window_t* window )
 	if( window && window->hwnd )
 	{
 		RECT rect;
-		GetClientRect( (HWND)window->hwnd, &rect );
+		GetWindowRect( (HWND)window->hwnd, &rect );
 		return rect.left;
 	}
 
@@ -591,7 +591,7 @@ int window_position_y( window_t* window )
 	if( window && window->hwnd )
 	{
 		RECT rect;
-		GetClientRect( (HWND)window->hwnd, &rect );
+		GetWindowRect( (HWND)window->hwnd, &rect );
 		return rect.top;
 	}
 
