@@ -13,16 +13,14 @@
 #include <window/window.h>
 #include <window/internal.h>
 
-
 static bool _window_initialized = false;
 
-
-int window_module_initialize( void )
-{
-	if( _window_initialized )
+int
+window_module_initialize(const window_config_t config) {
+	if (_window_initialized)
 		return 0;
 
-	if( _window_event_initialize() < 0 )
+	if (_window_event_initialize() < 0)
 		return -1;
 
 	_window_initialized = true;
@@ -38,20 +36,18 @@ int window_module_initialize( void )
 	return 0;
 }
 
-
-void window_module_shutdown( void )
-{
+void
+window_module_finalize(void) {
 #if FOUNDATION_PLATFORM_IOS
-	_window_native_shutdown();
+	_window_native_finalize();
 #endif
 
-	_window_event_shutdown();
+	_window_event_finalize();
 
 	_window_initialized = false;
 }
 
-
-bool window_module_is_initialized( void )
-{
+bool
+window_module_is_initialized(void) {
 	return _window_initialized;
 }

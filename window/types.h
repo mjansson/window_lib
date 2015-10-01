@@ -17,9 +17,7 @@
 #include <window/build.h>
 #include <window/hashstrings.h>
 
-
-typedef enum window_event_id
-{
+typedef enum window_event_id {
 	WINDOWEVENT_CREATE = 0,
 	WINDOWEVENT_RESIZE,
 	WINDOWEVENT_CLOSE,
@@ -30,49 +28,50 @@ typedef enum window_event_id
 	WINDOWEVENT_REDRAW
 } window_event_id;
 
+#define WINDOW_ADAPTER_DEFAULT -1
 
-static const unsigned int WINDOW_ADAPTER_DEFAULT    = -1;
-
-struct window_t
-{
-#if FOUNDATION_PLATFORM_WINDOWS
-	unsigned int           adapter;
-	void*                  hwnd;
-	void*                  instance;
-	bool                   created;
-	bool                   cursor_lock;
-	int                    cursor_pos_x;
-	int                    cursor_pos_y;
-	unsigned int           wstyle;
-	bool                   is_resizing;
-#elif FOUNDATION_PLATFORM_MACOSX
-    void*                  nswindow;
-#elif FOUNDATION_PLATFORM_LINUX
-    unsigned int           adapter;
-    bool                   created;
-    Display*               display;
-    unsigned int           screen;
-    XVisualInfo*           visual;
-    Window                 drawable;
-    Atom                   atom;
-    XIM                    xim;
-    XIC                    xic;
-    bool                   focus;
-    bool                   visible;
-#elif FOUNDATION_PLATFORM_IOS
-    void*                  uiwindow;
-    unsigned int           tag;
-#elif FOUNDATION_PLATFORM_ANDROID
-    unsigned int           adapter;
-    int                    width;
-    int                    height;
-    void*                  native;
-#endif
-};
-
-
+typedef struct window_config_t window_config_t;
 typedef struct window_t window_t;
 
+struct window_config_t {
+	int unused;
+};
+
+struct window_t {
+#if FOUNDATION_PLATFORM_WINDOWS
+	unsigned int adapter;
+	void*        hwnd;
+	void*        instance;
+	bool         created;
+	bool         cursor_lock;
+	int          cursor_pos_x;
+	int          cursor_pos_y;
+	unsigned int wstyle;
+	bool         is_resizing;
+#elif FOUNDATION_PLATFORM_MACOSX
+	void*        nswindow;
+#elif FOUNDATION_PLATFORM_LINUX
+	unsigned int adapter;
+	bool         created;
+	Display*     display;
+	unsigned int screen;
+	XVisualInfo* visual;
+	Window       drawable;
+	Atom         atom;
+	XIM          xim;
+	XIC          xic;
+	bool         focus;
+	bool         visible;
+#elif FOUNDATION_PLATFORM_IOS
+	void*        uiwindow;
+	unsigned int tag;
+#elif FOUNDATION_PLATFORM_ANDROID
+	unsigned int adapter;
+	int          width;
+	int          height;
+	void*        native;
+#endif
+};
 
 #if FOUNDATION_PLATFORM_MACOSX
 #  ifdef __OBJC__
@@ -80,16 +79,14 @@ typedef struct window_t window_t;
 #include <foundation/apple.h>
 #import <AppKit/NSView.h>
 
-@interface WindowView : NSView
-{
-	@public
+@interface WindowView : NSView {
+@public
 }
 + (void)referenceClass;
 @end
 
-@interface WindowViewController : NSViewController
-{
-	@public
+@interface WindowViewController : NSViewController {
+@public
 }
 + (void)referenceClass;
 @end
@@ -102,9 +99,8 @@ typedef struct window_t window_t;
 
 #include <foundation/apple.h>
 
-@interface WindowView : UIView
-{
-	@public
+@interface WindowView : UIView {
+@public
 	id       display_link;
 	CGPoint  begin_touch;
 	CGPoint  last_touch;
@@ -115,17 +111,15 @@ typedef struct window_t window_t;
 @end
 
 IB_DESIGNABLE
-@interface WindowViewController : UIViewController
-{
-	@public
+@interface WindowViewController : UIViewController {
+@public
 }
-@property (nonatomic) IBInspectable BOOL hideStatusBar;
+@property(nonatomic) IBInspectable BOOL hideStatusBar;
 + (void)referenceClass;
 @end
 
 #  endif
 #endif
 
-
-typedef void (* window_draw_fn)( window_t* window );
+typedef void (* window_draw_fn)(window_t* window);
 

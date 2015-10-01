@@ -25,18 +25,28 @@
 #  include <X11/extensions/xf86vmode.h>
 #endif
 
+WINDOW_EXTERN int
+_window_event_initialize(void);
 
-WINDOW_EXTERN int          _window_event_initialize( void );
-WINDOW_EXTERN void         _window_event_shutdown( void );
+WINDOW_EXTERN void
+_window_event_finalize(void);
 
 #if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
-WINDOW_EXTERN void         _window_class_reference( void );
+
+WINDOW_EXTERN void
+_window_class_reference(void);
+
 #endif
 
 #if FOUNDATION_PLATFORM_IOS
-WINDOW_EXTERN void         _window_native_initialize( void );
-WINDOW_EXTERN void         _window_native_shutdown( void );
+
+WINDOW_EXTERN void
+_window_native_initialize(void);
+
+WINDOW_EXTERN void
+_window_native_finalize(void);
+
 #endif
 
-WINDOW_EXTERN bool         _window_app_started;
-WINDOW_EXTERN bool         _window_app_paused;
+WINDOW_EXTERN bool _window_app_started;
+WINDOW_EXTERN bool _window_app_paused;

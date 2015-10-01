@@ -65,9 +65,12 @@ class Toolchain(object):
     else:
       self.exe_suffix = ''
 
+    self.python = 'python'
+
     #Set default values
     self.build_monolithic = False
     self.build_coverage = False
+    self.support_lua = False
 
     self.android_ndkpath = ''
     self.android_sdkpath = ''
@@ -98,6 +101,11 @@ class Toolchain(object):
     self.tizen_toolchainversion_gcc = '4.8'
     self.tizen_toolchainversion_clang = '3.4'
 
+    self.msvc_toolchain = ''
+    self.msvc_sdkpath = ''
+    msvc_sdkversion = ''
+    msvc_sdkversionpath = ''
+
     #Parse variables
     if variables:
       if isinstance( variables, dict ):
@@ -109,6 +117,8 @@ class Toolchain(object):
           self.build_monolithic = self.get_boolean_flag( val )
         elif key == 'coverage':
           self.build_coverage = self.get_boolean_flag( val )
+        elif key == 'support_lua':
+          self.support_lua = self.get_boolean_flag( val )
         elif key == 'bundleidentifier':
           self.ios_bundleidentifier = val
           self.macosx_bundleidentifier = val
@@ -169,6 +179,10 @@ class Toolchain(object):
           self.tizen_toolchainversion_gcc = val
         elif key == 'tizen_clangversion':
           self.tizen_toolchainversion_clang = val
+        elif key == 'msvc_toolchain':
+          self.msvc_toolchain = val
+        elif key == 'msvc_sdkpath':
+          self.msvc_sdkpath = val
 
     #Source in local build prefs
     self.read_prefs( 'build.json' )
@@ -231,11 +245,13 @@ class Toolchain(object):
       self.linkflags = []
       self.extralibs += [ 'kernel32', 'user32', 'shell32', 'advapi32' ]
       self.objext = '.obj'
-      self.cccmd = '$cc /showIncludes $includepaths $moreincludepaths $cflags $carchflags $cconfigflags /c $in /Fo$out /Fd$pdbpath /FS /nologo'
+      self.cccmd = '$toolchain$cc /showIncludes $includepaths $moreincludepaths $cflags $carchflags $cconfigflags /c $in /Fo$out /Fd$pdbpath /FS /nologo'
       self.ccdepfile = None
       self.ccdeps = 'msvc'
-      self.arcmd = '$ar $arflags $ararchflags $arconfigflags /NOLOGO /OUT:$out $in'
-      self.linkcmd = '$link $libpaths $linkflags $linkarchflags $linkconfigflags /DEBUG /NOLOGO /SUBSYSTEM:CONSOLE /DYNAMICBASE /NXCOMPAT /MANIFEST /MANIFESTUAC:\"level=\'asInvoker\' uiAccess=\'false\'\" /TLBID:1 /PDB:$pdbpath /OUT:$out $in $libs $archlibs'
+      self.arcmd = '$toolchain$ar $arflags $ararchflags $arconfigflags /NOLOGO /OUT:$out $in'
+      self.linkcmd = '$toolchain$link $libpaths $linkflags $linkarchflags $linkconfigflags /DEBUG /NOLOGO /SUBSYSTEM:CONSOLE /DYNAMICBASE /NXCOMPAT /MANIFEST /MANIFESTUAC:\"level=\'asInvoker\' uiAccess=\'false\'\" /TLBID:1 /PDB:$pdbpath /OUT:$out $in $libs $archlibs'
+
+      self.build_msvc_toolchain()
 
     elif self.toolchain.startswith('gcc') or self.toolchain.startswith('gnu'):
       self.toolchain = 'gcc' + self.exe_suffix
@@ -243,13 +259,16 @@ class Toolchain(object):
       self.ar = 'ar' + self.exe_suffix
       self.link = 'gcc' + self.exe_suffix
       self.cflags = [ '-D' + self.project.upper() + '_COMPILE=1',
-                      '-W', '-Wall', '-Werror',
+                      '-Wextra', '-Wall', '-Werror',
                       '-funit-at-a-time', '-fstrict-aliasing',
                       '-fno-math-errno','-ffinite-math-only', '-funsafe-math-optimizations','-fno-trapping-math', '-ffast-math' ]
       self.mflags = []
       self.arflags = []
       self.linkflags = []
       self.objext = '.o'
+
+      if not target.is_android() and not target.is_raspberrypi():
+        self.cflags += [ '-Wpedantic' ]
 
       self.cccmd = '$cc -MMD -MT $out -MF $out.d $includepaths $moreincludepaths $cflags $carchflags $cconfigflags -c $in -o $out'
       self.ccdeps = 'gcc'
@@ -302,7 +321,8 @@ class Toolchain(object):
       self.ar = 'llvm-ar'
       self.link = 'clang'
       self.cflags = [ '-std=c11', '-D' + self.project.upper() + '_COMPILE=1',
-                      '-W', '-Wall', '-Werror',
+                      '-W', '-Werror', '-pedantic', '-Wall', '-Weverything',
+                      '-Wno-padded', '-Wno-documentation-unknown-command',
                       '-funit-at-a-time', '-fstrict-aliasing',
                       '-fno-math-errno','-ffinite-math-only', '-funsafe-math-optimizations','-fno-trapping-math', '-ffast-math' ]
       self.mflags = []
@@ -333,15 +353,15 @@ class Toolchain(object):
         if target.is_macosx():
           sdk = 'macosx'
           deploytarget = 'MACOSX_DEPLOYMENT_TARGET=' + self.macosx_deploymenttarget
-          self.cflags += [ '-fasm-blocks', '-mmacosx-version-min=' + self.macosx_deploymenttarget, '-isysroot', '$sdkdir' ]
+          self.cflags += [ '-fasm-blocks', '-mmacosx-version-min=' + self.macosx_deploymenttarget, '-isysroot', '$sdkpath' ]
           self.arflags += [ '-static', '-no_warning_for_no_symbols' ]
-          self.linkflags += [ '-isysroot', '$sdkdir' ]
+          self.linkflags += [ '-isysroot', '$sdkpath' ]
         elif target.is_ios():
           sdk = 'iphoneos'
           deploytarget = 'IPHONEOS_DEPLOYMENT_TARGET=' + self.ios_deploymenttarget
-          self.cflags += [ '-fasm-blocks', '-miphoneos-version-min=' + self.ios_deploymenttarget, '-isysroot', '$sdkdir' ]
+          self.cflags += [ '-fasm-blocks', '-miphoneos-version-min=' + self.ios_deploymenttarget, '-isysroot', '$sdkpath' ]
           self.arflags += [ '-static', '-no_warning_for_no_symbols' ]
-          self.linkflags += [ '-isysroot', '$sdkdir' ]
+          self.linkflags += [ '-isysroot', '$sdkpath' ]
 
         platformpath = subprocess.check_output( [ 'xcrun', '--sdk', sdk, '--show-sdk-platform-path' ] ).strip()
         localpath = platformpath + "/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"
@@ -404,29 +424,18 @@ class Toolchain(object):
         self.sysroot = ''
         self.liblinkname = ''
 
-        #-O0 -g3 -Wall -c -fmessage-length=0 -target i386-tizen-linux-gnueabi
-        #-gcc-toolchain /Users/mjansson/projects/tizen-sdk/tools/smart-build-interface/../i386-linux-gnueabi-gcc-4.6/
-        #-ccc-gcc-name i386-linux-gnueabi-g++ -march=i386
-        #--sysroot="/Users/mjansson/projects/tizen-sdk/tools/smart-build-interface/../../platforms/mobile-2.3/rootstraps/mobile-2.3-emulator.core"
-        #-I"/Users/mjansson/projects/tizen-sdk/library"
-        #-I"/Users/mjansson/projects/tizen-sdk/tools/smart-build-interface/../../platforms/mobile-2.3/rootstraps/mobile-2.3-emulator.core/usr/include/evas-1"
-        #-I"/Users/mjansson/projects/tizen-sdk/tools/smart-build-interface/../../platforms/mobile-2.3/rootstraps/mobile-2.3-emulator.core/usr/include/fontconfig"
-
-        self.cccmd = '$toolchain$cc -MMD -MT $out -MF $out.d $includepaths $moreincludepaths $cflags $carchflags $cconfigflags -c $in -o $out'
-        self.arcmd = self.rmcmd + ' $out && $toolchain$ar crsD $ararchflags $arflags $out $in'
-        self.linkcmd = '$toolchain$cc -shared -Wl,-soname,$liblinkname --sysroot=$sysroot $libpaths $linkflags $linkarchflags $linkconfigflags -o $out $in $libs $archlibs'
-
-        self.cflags += [ '-fpic', '-ffunction-sections', '-funwind-tables', '-fstack-protector', '-fomit-frame-pointer',
-                         '-no-canonical-prefixes', '-Wa,--noexecstack' ]
-
-        self.linkflags += [ '-no-canonical-prefixes', '-Wl,--no-undefined', '-Wl,-z,noexecstack', '-Wl,-z,relro', '-Wl,-z,now' ]
+        self.cccmd = '$toolchain$cc -MMD -MT $out -MF $out.d $includepaths $moreincludepaths $cflags $carchflags $cconfigflags --sysroot=$sysroot -D__TIZEN__=1 -D_GNU_SOURCE=1 -c $in -o $out'
+        self.arcmd = self.rmcmd + ' $out && $ar crsD $ararchflags $arflags $out $in'
+        self.linkcmd = '$toolchain$cc --sysroot=$sysroot $libpaths $linkflags $linkarchflags $linkconfigflags -Xlinker --as-needed -pie -o $out $in $libs $archlibs'
 
         self.includepaths += [ os.path.join( '$sdk', 'library' ) ]
+
+        self.extralibs += [ 'capi-appfw-application', 'dlog', 'pthread', 'dl', 'rt_pic' ]
 
       elif target.is_pnacl():
         self.pnacl_sdkpath = os.path.expanduser( os.getenv( 'PNACL_SDKPATH', os.getenv( 'NACL_SDK_ROOT', self.pnacl_sdkpath ) ) )
 
-        pnacl_osname = subprocess.check_output( [ 'python', os.path.join( self.pnacl_sdkpath, 'tools', 'getos.py' ) ] ).strip()
+        pnacl_osname = subprocess.check_output( [ self.python, os.path.join( self.pnacl_sdkpath, 'tools', 'getos.py' ) ] ).strip()
         pnacl_toolchainpath = os.path.join( self.pnacl_sdkpath, 'toolchain', pnacl_osname + '_pnacl' )
 
         shsuffix = ''
@@ -441,7 +450,7 @@ class Toolchain(object):
         self.arcmd = self.rmcmd + ' $out && $ar crs $ararchflags $arflags $out $in'
         self.linkcmd = '$cc $libpaths $linkflags $linkarchflags $linkconfigflags -o $out $in $libs $archlibs'
         self.finalizecmd = '$finalize -o $out $in'
-        self.nmfcmd = 'python $nmf -o $out $in'
+        self.nmfcmd = self.python + ' $nmf -o $out $in'
 
         self.includepaths += [ os.path.join( self.pnacl_sdkpath, 'include' ) ]
 
@@ -477,14 +486,14 @@ class Toolchain(object):
 
       if target.is_windows():
         self.cflags = [
-          '/D', '"' + self.project.upper() + '_COMPILE=1"', '/Zi', '/W3', '/WX', '/Oi', '/Oy-', '/MT', '/GS-', '/Gy-', '/Qpar-', '/fp:fast=2', '/fp:except-', '/Zc:forScope', '/Zc:wchar_t', '/GR-', '/openmp-',
+          '/D', '"' + self.project.upper() + '_COMPILE=1"', '/Zi', '/W3', '/WX', '/Oi', '/MT', '/GS-', '/Gy-', '/Qpar-', '/fp:fast=2', '/fp:except-', '/Zc:forScope', '/Zc:wchar_t', '/GR-', '/openmp-',
           '/Qrestrict', '/Qansi-alias', '/QxSSE3', '/Quse-intel-optimized-headers', '/Qstd=c99'
         ]
         self.extralibs += [ 'kernel32', 'user32', 'shell32', 'advapi32' ]
-        self.cccmd = '$cc /showIncludes $includepaths $moreincludepaths $cflags $carchflags $cconfigflags /c $in /Fo$out /Fd$pdbpath /FS /nologo'
+        self.cccmd = '$cc /showIncludes $includepaths $moreincludepaths $cflags $carchflags $cconfigflags /c $in /Fo$out /pdbfile:$pdbpath /nologo'
         self.ccdepfile = None
         self.ccdeps = 'msvc'
-        self.arcmd = '$ar $arflags $ararchflags $arconfigflags /NOLOGO /OUT:$out $in'
+        self.arcmd = '$ar crs $arflags $ararchflags $arconfigflags $out $in'
         self.linkcmd = '$link $libpaths $linkflags $linkarchflags $linkconfigflags /DEBUG /NOLOGO /SUBSYSTEM:CONSOLE /DYNAMICBASE /NXCOMPAT /MANIFEST /MANIFESTUAC:\"level=\'asInvoker\' uiAccess=\'false\'\" /TLBID:1 /PDB:$pdbpath /OUT:$out $in $libs $archlibs'
         self.objext = '.obj'
       else:
@@ -515,6 +524,83 @@ class Toolchain(object):
     self.buildpath = os.path.join( 'build', 'ninja', target.platform )
     self.libpath = os.path.join( 'lib', target.platform )
     self.binpath = os.path.join( 'bin', target.platform )
+
+  def read_prefs( self, filename ):
+    if not os.path.isfile( filename ):
+      return
+    file = open( filename, 'r' )
+    prefs = json.load( file )
+    file.close()
+    if 'android' in prefs:
+      androidprefs = prefs['android']
+      if 'ndkpath' in androidprefs:
+        self.android_ndkpath = androidprefs['ndkpath']
+      if 'sdkpath' in androidprefs:
+        self.android_sdkpath = androidprefs['sdkpath']
+      if 'keystore' in androidprefs:
+        self.android_keystore = androidprefs['keystore']
+      if 'keyalias' in androidprefs:
+        self.android_keyalias = androidprefs['keyalias']
+      if 'keystorepass' in androidprefs:
+        self.android_keystorepass = androidprefs['keystorepass']
+      if 'keypass' in androidprefs:
+        self.android_keypass = androidprefs['keypass']
+      if 'platformversion' in androidprefs:
+        self.android_platformversion = androidprefs['platformversion']
+      if 'gccversion' in androidprefs:
+        self.android_gccversion = androidprefs['gccversion']
+      if 'clangversion' in androidprefs:
+        self.android_clangversion = androidprefs['clangversion']
+      if 'tsa' in androidprefs:
+        self.android_tsa = androidprefs['tsa']
+      if 'tsacert' in androidprefs:
+        self.android_tsacert = androidprefs['tsacert']
+    if 'ios' in prefs:
+      iosprefs = prefs['ios']
+      if 'deploymenttarget' in iosprefs:
+        self.ios_deploymenttarget = iosprefs['deploymenttarget']
+      if 'organisation' in iosprefs:
+        self.ios_organisation = iosprefs['organisation']
+      if 'bundleidentifier' in iosprefs:
+        self.ios_bundleidentifier = iosprefs['bundleidentifier']
+      if 'provisioning' in iosprefs:
+        self.ios_provisioning = iosprefs['provisioning']
+    if 'macosx' in prefs:
+      macosxprefs = prefs['macosx']
+      if 'deploymenttarget' in macosxprefs:
+        self.macosx_deploymenttarget = macosxprefs['deploymenttarget']
+      if 'organisation' in macosxprefs:
+        self.macosx_organisation = macosxprefs['organisation']
+      if 'bundleidentifier' in macosxprefs:
+        self.macosx_bundleidentifier = macosxprefs['bundleidentifier']
+      if 'provisioning' in macosxprefs:
+        self.macosx_provisioning = macosxprefs['provisioning']
+    if 'pnacl' in prefs:
+      pnaclprefs = prefs['pnacl']
+      if 'sdkpath' in pnaclprefs:
+        self.pnacl_sdkpath = pnaclprefs['sdkpath']
+    if 'tizen' in prefs:
+      tizenprefs = prefs['tizen']
+      if 'sdkpath' in tizenprefs:
+        self.tizen_sdkpath = tizenprefs['sdkpath']
+      if 'gccversion' in tizenprefs:
+        self.tizen_gccversion = tizenprefs['gccversion']
+      if 'clangversion' in tizenprefs:
+        self.tizen_clangversion = tizenprefs['clangversion']
+    if 'msvc' in prefs:
+      msvcprefs = prefs['msvc']
+      if 'sdkpath' in msvcprefs:
+        self.msvc_sdkpath = msvcprefs['sdkpath']
+      if 'toolchain' in msvcprefs:
+        self.msvc_toolchain = msvcprefs['toolchain']
+    if 'monolithic' in prefs:
+      self.build_monolithic = self.get_boolean_flag( prefs['monolithic'] )
+    if 'coverage' in prefs:
+      self.build_coverage = self.get_boolean_flag( prefs['coverage'] )
+    if 'support_lua' in prefs:
+      self.support_lua = self.get_boolean_flag( prefs['support_lua'] )
+    if 'python' in prefs:
+      self.python = prefs['python']
 
   def build_android_toolchain( self ):
     self.android_platformversion = os.getenv( 'ANDROID_PLATFORMVERSION', self.android_platformversion )
@@ -623,73 +709,74 @@ class Toolchain(object):
     self.tizen_archpath['mips'] = 'mips'
     self.tizen_archpath['mips64'] = 'mips64'
 
-  def read_prefs( self, filename ):
-    if not os.path.isfile( filename ):
-      return
-    file = open( filename, 'r' )
-    prefs = json.load( file )
-    file.close()
-    if 'android' in prefs:
-      androidprefs = prefs['android']
-      if 'ndkpath' in androidprefs:
-        self.android_ndkpath = androidprefs['ndkpath']
-      if 'sdkpath' in androidprefs:
-        self.android_sdkpath = androidprefs['sdkpath']
-      if 'keystore' in androidprefs:
-        self.android_keystore = androidprefs['keystore']
-      if 'keyalias' in androidprefs:
-        self.android_keyalias = androidprefs['keyalias']
-      if 'keystorepass' in androidprefs:
-        self.android_keystorepass = androidprefs['keystorepass']
-      if 'keypass' in androidprefs:
-        self.android_keypass = androidprefs['keypass']
-      if 'platformversion' in androidprefs:
-        self.android_platformversion = androidprefs['platformversion']
-      if 'gccversion' in androidprefs:
-        self.android_gccversion = androidprefs['gccversion']
-      if 'clangversion' in androidprefs:
-        self.android_clangversion = androidprefs['clangversion']
-      if 'tsa' in androidprefs:
-        self.android_tsa = androidprefs['tsa']
-      if 'tsacert' in androidprefs:
-        self.android_tsacert = androidprefs['tsacert']
-    if 'ios' in prefs:
-      iosprefs = prefs['ios']
-      if 'deploymenttarget' in iosprefs:
-        self.ios_deploymenttarget = iosprefs['deploymenttarget']
-      if 'organisation' in iosprefs:
-        self.ios_organisation = iosprefs['organisation']
-      if 'bundleidentifier' in iosprefs:
-        self.ios_bundleidentifier = iosprefs['bundleidentifier']
-      if 'provisioning' in iosprefs:
-        self.ios_provisioning = iosprefs['provisioning']
-    if 'macosx' in prefs:
-      macosxprefs = prefs['macosx']
-      if 'deploymenttarget' in macosxprefs:
-        self.macosx_deploymenttarget = macosxprefs['deploymenttarget']
-      if 'organisation' in macosxprefs:
-        self.macosx_organisation = macosxprefs['organisation']
-      if 'bundleidentifier' in macosxprefs:
-        self.macosx_bundleidentifier = macosxprefs['bundleidentifier']
-      if 'provisioning' in macosxprefs:
-        self.macosx_provisioning = macosxprefs['provisioning']
-    if 'pnacl' in prefs:
-      pnaclprefs = prefs['pnacl']
-      if 'sdkpath' in pnaclprefs:
-        self.pnacl_sdkpath = pnaclprefs['sdkpath']
-    if 'tizen' in prefs:
-      tizenprefs = prefs['tizen']
-      if 'sdkpath' in tizenprefs:
-        self.tizen_sdkpath = tizenprefs['sdkpath']
-      if 'gccversion' in tizenprefs:
-        self.tizen_gccversion = tizenprefs['gccversion']
-      if 'clangversion' in tizenprefs:
-        self.tizen_clangversion = tizenprefs['clangversion']
-    if 'monolithic' in prefs:
-      self.build_monolithic = self.get_boolean_flag( prefs['monolithic'] )
-    if 'coverage' in prefs:
-      self.build_coverage = self.get_boolean_flag( prefs['coverage'] )
-
+  def build_msvc_toolchain( self ):
+    if self.msvc_toolchain == '':
+      versions = [ '14.0', '13.0', '12.0', '11.0', '10.0' ]
+      keys = [
+        'HKLM\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7',
+        'HKCU\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7',
+        'HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\SxS\\VC7',
+        'HKCU\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\SxS\\VC7'
+      ]
+      msvc_toolchain = ''
+      for version in versions:
+        for key in keys:
+          try:
+            query = subprocess.check_output( [ 'reg', 'query', key, '/v', version ], stderr=subprocess.STDOUT ).strip().splitlines()
+            if len(query) == 2:
+              msvc_toolchain = query[1].split('REG_SZ')[-1].strip()
+          except:
+            continue
+          if not msvc_toolchain == '':
+            self.includepaths += [ os.path.join(msvc_toolchain, 'include' ) ]
+            self.msvc_toolchain = msvc_toolchain
+            break
+        if not msvc_toolchain == '':
+          break
+    if self.msvc_sdkpath == '':
+      versions = [ 'v10.0', 'v8.1' ]
+      keys = [
+        'HKLM\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows',
+        'HKCU\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows',
+        'HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft SDKs\\Windows',
+        'HKCU\\SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft SDKs\\Windows'
+      ]
+      include_path = 'include'
+      for version in versions:
+        for key in keys:
+          msvc_sdkpath = ''
+          try:
+            query = subprocess.check_output( [ 'reg', 'query', key + '\\' + version, '/v', 'InstallationFolder' ], stderr=subprocess.STDOUT ).strip().splitlines()
+            if len(query) == 2:
+              msvc_sdkpath = query[1].split('REG_SZ')[-1].strip()
+              if not msvc_sdkpath == '' and version == 'v10.0':
+                base_path = msvc_sdkpath
+                msvc_sdkpath = ''
+                query = subprocess.check_output( [ 'reg', 'query', key + '\\' + version, '/v', 'ProductVersion' ], stderr=subprocess.STDOUT ).strip().splitlines()
+                if len(query) == 2:
+                  version_path = query[1].split('REG_SZ')[-1].strip()
+                  if not version_path == '':
+                    msvc_sdkpath = base_path
+                    self.msvc_sdkversionpath = version_path + '.0'
+                    include_path = os.path.join( include_path, self.msvc_sdkversionpath )
+          except subprocess.CalledProcessError as e:
+            continue
+          if not msvc_sdkpath == '':
+            self.includepaths += [
+              os.path.join( msvc_sdkpath, include_path, 'shared' ),
+              os.path.join( msvc_sdkpath, include_path, 'um' ),
+              os.path.join( msvc_sdkpath, include_path, 'winrt' )
+            ]
+            if version == 'v10.0':
+              self.includepaths += [
+                os.path.join( msvc_sdkpath, include_path, 'ucrt' )
+              ]
+            self.msvc_sdkpath = msvc_sdkpath
+            self.msvc_sdkversion = version
+            break
+        if not msvc_sdkpath == '':
+          break
+    
   def get_boolean_flag( self, val ):
     return ( val == True or val == "True" or val == "true" or val == "1" or val == 1 )
 
@@ -708,10 +795,26 @@ class Toolchain(object):
         finalpaths += [ os.path.join( '..', deplib + '_lib', 'lib', self.target.platform, config ) ]
       else:
         finalpaths += [ os.path.join( '..', deplib + '_lib', 'lib', self.target.platform, config, arch ) ]
+    finalpaths += [ self.libpath ]
     if self.target.is_android():
       if arch == 'x86-64' or arch == 'mips64' or arch == 'arm64':
         finalpaths += [ os.path.join( self.make_android_sysroot_path( arch ), 'usr', 'lib64' ) ]
       finalpaths += [ os.path.join( self.make_android_sysroot_path( arch ), 'usr', 'lib' ) ]
+    if self.target.is_windows() and self.msvc_sdkpath != '':
+      if arch == 'x86':
+        finalpaths += [ os.path.join( self.msvc_toolchain, 'lib' ) ]
+        if self.msvc_sdkversion == 'v8.1':
+          finalpaths += [ os.path.join( self.msvc_sdkpath, 'lib', 'winv6.3', 'um', 'x86' ) ]
+        if self.msvc_sdkversion == 'v10.0':
+          finalpaths += [ os.path.join( self.msvc_sdkpath, 'lib', self.msvc_sdkversionpath, 'um', 'x86' ) ]
+          finalpaths += [ os.path.join( self.msvc_sdkpath, 'lib', self.msvc_sdkversionpath, 'ucrt', 'x86' ) ]
+      else:
+        finalpaths += [ os.path.join( self.msvc_toolchain, 'lib', 'amd64' ) ]
+        if self.msvc_sdkversion == 'v8.1':
+          finalpaths += [ os.path.join( self.msvc_sdkpath, 'lib', 'winv6.3', 'um', 'x64' ) ]
+        if self.msvc_sdkversion == 'v10.0':
+          finalpaths += [ os.path.join( self.msvc_sdkpath, 'lib', self.msvc_sdkversionpath, 'um', 'x64' ) ]
+          finalpaths += [ os.path.join( self.msvc_sdkpath, 'lib', self.msvc_sdkversionpath, 'ucrt', 'x64' ) ]
     return finalpaths
 
   def make_cconfigflags( self, config ):
@@ -796,11 +899,18 @@ class Toolchain(object):
         flags += ' -march=armv7-a -mhard-float -mfpu=vfpv3-d16 -mfpu=neon -D_NDK_MATH_NO_SOFTFP=1 -marm'
       elif arch == 'arm64':
         pass
+    elif self.target.is_tizen():
+      if arch == 'x86':
+        flags += ' -target i386-tizen-linux-gnueabi -ccc-gcc-name i386-linux-gnueabi-g++ -march=i386'
+        flags += ' -gcc-toolchain ' + os.path.join( self.tizen_sdkpath, 'tools', 'i386-linux-gnueabi-gcc-' + self.tizen_toolchainversion_gcc + '/' )
     elif self.target.is_windows() and self.toolchain == 'msvc':
       if arch == 'x86':
         flags += ' /arch:SSE2'
       elif arch == 'x86-64':
         pass
+    elif self.target.is_windows() and self.toolchain == 'intel':
+      if arch == 'x86':
+        flags += '/Oy-'
     elif self.toolchain == 'gcc' or self.toolchain == 'clang':
       if arch == 'x86':
         flags += ' -m32'
@@ -829,6 +939,7 @@ class Toolchain(object):
   def make_arconfigflags( self, arch, config ):
     flags = ''
     if self.toolchain == 'msvc':
+      flags += ' /ignore:4221' #Ignore empty object file warning
       if config != 'debug':
         flags += ' /LTCG'
     return flags.strip()
@@ -840,15 +951,19 @@ class Toolchain(object):
         flags += ' -arch x86'
       elif arch == 'x86-64':
         flags += ' -arch x86_64'
+        if self.support_lua:
+          flags += ' -pagezero_size 10000 -image_base 100000000'
       elif arch == 'arm7':
         flags += ' -arch armv7'
       elif arch == 'arm64':
         flags += ' -arch arm64'
+        if self.support_lua:
+          flags += ' -pagezero_size 10000 -image_base 100000000'
     elif self.target.is_raspberrypi():
       pass
     elif self.target.is_android():
       if arch == 'arm7':
-        flags += ' -Wl,--no-warn-mismatch -Wl,--fix-cortex-a8'
+        flags += ' -lm_hard -Wl,--no-warn-mismatch -Wl,--fix-cortex-a8'
       if self.toolchain == 'clang':
         if arch == 'x86':
           flags += ' -target i686-none-linux-android'
@@ -865,6 +980,10 @@ class Toolchain(object):
         elif arch == 'mips64':
           flags += ' -target mips64el-none-linux-android'
         flags += ' -gcc-toolchain ' + self.make_android_gcc_path( arch )
+    elif self.target.is_tizen():
+      if arch == 'x86':
+        flags += ' -target i386-tizen-linux-gnueabi -ccc-gcc-name i386-linux-gnueabi-g++ -march=i386'
+        flags += ' -gcc-toolchain ' + os.path.join( self.tizen_sdkpath, 'tools', 'i386-linux-gnueabi-gcc-' + self.tizen_toolchainversion_gcc + '/' )
     elif self.toolchain == 'gcc' or self.toolchain == 'clang':
       if arch == 'x86':
         flags += ' -m32'
@@ -1012,11 +1131,11 @@ class Toolchain(object):
     writer.variable( 'config', '' )
     if self.host.is_macosx() and (self.target.is_macosx() or self.target.is_ios()):
       if self.target.is_macosx():
-        sdkdir = subprocess.check_output( [ 'xcrun', '--sdk', 'macosx', '--show-sdk-path' ] ).strip()
+        sdkpath = subprocess.check_output( [ 'xcrun', '--sdk', 'macosx', '--show-sdk-path' ] ).strip()
       elif self.target.is_ios():
-        sdkdir = subprocess.check_output( [ 'xcrun', '--sdk', 'iphoneos', '--show-sdk-path' ] ).strip()
-      if sdkdir:
-        writer.variable( 'sdkdir', sdkdir )
+        sdkpath = subprocess.check_output( [ 'xcrun', '--sdk', 'iphoneos', '--show-sdk-path' ] ).strip()
+      if sdkpath:
+        writer.variable( 'sdkpath', sdkpath )
     if self.target.is_windows():
       writer.variable( 'pdbpath', '' )
     if self.target.is_android():
@@ -1047,6 +1166,8 @@ class Toolchain(object):
       writer.variable( 'toolchain', '' )
       writer.variable( 'toolchaintarget', '' )
       writer.variable( 'sysroot', '' )
+    if self.is_msvc():
+      writer.variable( 'toolchain', self.msvc_toolchain )
     if self.target.is_pnacl():
       writer.variable( 'finalize', self.finalize )
       writer.variable( 'nmf', self.nmf )
@@ -1130,13 +1251,6 @@ class Toolchain(object):
   def make_android_sysroot_path( self, arch ):
     return os.path.join( self.android_ndkpath, 'platforms', 'android-' + self.android_platformversion, 'arch-' + self.android_archname[arch] )
 
-  def make_bundleidentifier( self, binname ):
-    if self.target.is_macosx():
-      return self.macosx_bundleidentifier.replace( '$(binname)', binname )
-    elif self.target.is_ios():
-      return self.ios_bundleidentifier.replace( '$(binname)', binname )
-    return ''
-
   def make_tizen_toolchain_path( self, arch ):
     if self.toolchain == 'clang':
       return os.path.join( self.make_tizen_clang_path( arch ), 'bin', '' )
@@ -1149,7 +1263,15 @@ class Toolchain(object):
     return os.path.join( self.tizen_sdkpath, 'tools', self.tizen_toolchainprefix[arch] + '-gcc-' + self.tizen_gccversion )
 
   def make_tizen_sysroot_path( self, arch ):
-    return os.path.join( self.tizen_sdkpath, 'tools', 'mobile-' + self.tizen_platformversion, 'rootstraps', 'mobile-' + self.tizen_platformversion + '-emulator.core' )
+    return os.path.join( self.tizen_sdkpath, 'platforms', 'mobile-' + self.tizen_platformversion, 'rootstraps', 'mobile-' + self.tizen_platformversion + '-emulator.core' )
+
+  def make_tizen_ar_path( self, arch ):
+    return os.path.join( self.tizen_sdkpath, 'tools', self.tizen_toolchainname[arch], 'bin', self.tizen_toolchainprefix[arch] + '-ar' )
+
+  def make_msvc_toolchain_path( self, arch ):
+    if arch == 'x86-64':
+      return os.path.join( self.msvc_toolchain, 'bin', 'amd64\\' )
+    return os.path.join( self.msvc_toolchain, 'bin\\' )
 
   def make_bundleidentifier( self, binname ):
     if self.target.is_macosx():
@@ -1343,44 +1465,53 @@ class Toolchain(object):
       basepath = ''
     if configs is None:
       configs = list( self.configs )
+    decoratedmodule = module + self.make_pathhash( module )
     moreincludepaths = self.build_includepaths( includepaths )
     do_universal = True if self.target.is_macosx() or self.target.is_ios() else False
     for config in configs:
       archlibs = []
       built[config] = []
-      localcconfigflags = self.make_cconfigflags( config )
       for arch in self.archs:
         objs = []
         buildpath = os.path.join( self.buildpath, config, arch )
-        libpath = os.path.join( self.libpath, config, arch )
-        localcarchflags = self.make_carchflags( arch )
-        localararchflags = self.make_ararchflags( arch )
-        localvariables = [ ( 'carchflags', localcarchflags ), ( 'cconfigflags', localcconfigflags ) ]
-        localarconfigflags = self.make_arconfigflags( arch, config )
-        localarvariables = [ ( 'ararchflags', localararchflags ), ( 'arconfigflags', localarconfigflags ) ]
+        if self.target.is_macosx() or self.target.is_ios() or self.target.is_pnacl():
+          libpath = os.path.join( self.libpath, config )
+        else:
+          libpath = os.path.join( self.libpath, config, arch )
+        localvariables = [ ( 'carchflags', self.make_carchflags( arch ) ),
+                           ( 'cconfigflags', self.make_cconfigflags( config ) ) ]
+        localarvariables = [ ( 'ararchflags', self.make_ararchflags( arch ) ),
+                             ( 'arconfigflags', self.make_arconfigflags( arch, config ) ) ]
         extraincludepaths = []
         if self.target.is_windows():
-          pdbpath = os.path.join( buildpath, basepath, module, 'ninja.pdb' )
-          localvariables += [ ( 'pdbpath', pdbpath ) ]
+          localvariables += [ ( 'pdbpath', os.path.join( buildpath, basepath, decoratedmodule, 'ninja.pdb' ) ) ]
+          if self.is_msvc():
+            localvariables += [ ( 'toolchain', self.make_msvc_toolchain_path( arch ) ) ]
+            localarvariables += [ ( 'toolchain', self.make_msvc_toolchain_path( arch ) ) ]
         if self.target.is_android():
           sysroot = self.make_android_sysroot_path( arch )
-          localvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ), ( 'sysroot', sysroot ) ]
-          localarvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ), ( 'sysroot', sysroot ) ]
+          localvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ),
+                              ( 'sysroot', sysroot ) ]
+          localarvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ),
+                                ( 'sysroot', sysroot ) ]
           extraincludepaths += [ os.path.join( sysroot, 'usr', 'include' ) ]
         if self.target.is_tizen():
           sysroot = self.make_tizen_sysroot_path( arch )
-          localvariables += [ ( 'toolchain', self.make_tizen_toolchain_path( arch ) ), ( 'sysroot', sysroot ) ]
-          localarvariables += [ ( 'toolchain', self.make_tizen_toolchain_path( arch ) ), ( 'sysroot', sysroot ) ]
-          extraincludepaths += [ os.path.join( sysroot, 'usr', 'include' ) ]
+          localvariables += [ ( 'toolchain', self.make_tizen_toolchain_path( arch ) ),
+                              ( 'sysroot', sysroot ) ]
+          localarvariables += [ ( 'toolchain', self.make_tizen_toolchain_path( arch ) ),
+                                ( 'sysroot', sysroot ),
+                                ( 'ar', self.make_tizen_ar_path( arch ) ) ]
+          extraincludepaths += [ os.path.join( sysroot, 'usr', 'include' ), os.path.join( sysroot, 'usr', 'include', 'appfw' ) ]
         if moreincludepaths != [] or extraincludepaths != []:
           localvariables += [ ( 'moreincludepaths', self.make_includepaths( moreincludepaths + extraincludepaths ) ) ]
         for name in sources:
           if os.path.isabs( name ):
             infile = name
-            outfile = os.path.join( buildpath, basepath, module, os.path.splitext( os.path.basename( name ) )[0] + self.make_pathhash( infile ) + self.objext )
+            outfile = os.path.join( buildpath, basepath, decoratedmodule, os.path.splitext( os.path.basename( name ) )[0] + self.make_pathhash( infile ) + self.objext )
           else:
             infile = os.path.join( basepath, module, name )
-            outfile = os.path.join( buildpath, basepath, module, os.path.splitext( name )[0] + self.make_pathhash( infile ) + self.objext )
+            outfile = os.path.join( buildpath, basepath, decoratedmodule, os.path.splitext( name )[0] + self.make_pathhash( infile ) + self.objext )
           if name.endswith( '.c' ):
             objs += writer.build( outfile, 'cc', infile, variables = localvariables )
           elif name.endswith( '.m' ) and ( self.target.is_macosx() or self.target.is_ios() ):
@@ -1419,33 +1550,47 @@ class Toolchain(object):
       for arch in self.archs:
         objs = []
         buildpath = os.path.join( self.buildpath, config, arch )
-        if self.target.is_pnacl():
+        if self.target.is_macosx() or self.target.is_ios() or self.target.is_pnacl():
+          libpath = os.path.join( self.libpath, config )
           binpath = os.path.join( self.binpath, config )
         else:
-          binpath = os.path.join( self.binpath, config, arch )
-        if self.target.is_macosx() or self.target.is_ios():
-          libpath = os.path.join( self.libpath, config ) #Use universal libraries
-        else:
           libpath = os.path.join( self.libpath, config, arch )
+          binpath = os.path.join( self.binpath, config, arch )
         localcarchflags = self.make_carchflags( arch )
         locallinkarchflags = self.make_linkarchflags( arch )
         locallinkconfigflags = self.make_linkconfigflags( arch, config )
         locallibpaths = self.make_libpaths( self.build_libpaths( self.libpaths + [ libpath ], arch, config ) )
         localarchlibs = self.make_linkarchlibs( arch )
-        localvariables = [ ( 'carchflags', localcarchflags ), ( 'cconfigflags', localcconfigflags ) ]
-        locallinkvariables = [ ( 'libs', self.make_libs( libs + self.dependlibs + extralibs + self.extralibs ) + self.make_frameworks( extraframeworks ) ), ( 'archlibs', self.make_libs( localarchlibs ) ),
-                               ( 'linkconfigflags', locallinkconfigflags ), ( 'linkarchflags', locallinkarchflags ), ( 'libpaths', locallibpaths ) ]
+        localvariables = [ ( 'carchflags', localcarchflags ),
+                           ( 'cconfigflags', localcconfigflags ) ]
+        locallinkvariables = [ ( 'libs', self.make_libs( libs + self.dependlibs + extralibs + self.extralibs ) + self.make_frameworks( extraframeworks ) ),
+                               ( 'archlibs', self.make_libs( localarchlibs ) ),
+                               ( 'linkconfigflags', locallinkconfigflags ),
+                               ( 'linkarchflags', locallinkarchflags ),
+                               ( 'libpaths', locallibpaths ) ]
         extraincludepaths = []
         if self.target.is_windows():
-          pdbpath = os.path.join( buildpath, basepath, module, 'ninja.pdb' )
-          localvariables += [ ( 'pdbpath', pdbpath ) ]
-          linkpdbpath = os.path.join( binpath, self.binprefix + binname + '.pdb' )
-          locallinkvariables += [ ( 'pdbpath', linkpdbpath ) ]
+          localvariables += [ ( 'pdbpath', os.path.join( buildpath, basepath, module, 'ninja.pdb' ) ) ]
+          locallinkvariables += [ ( 'pdbpath', os.path.join( binpath, self.binprefix + binname + '.pdb' ) ) ]
+          if self.is_msvc():
+            localvariables += [ ( 'toolchain', self.make_msvc_toolchain_path( arch ) ) ]
+            locallinkvariables += [ ( 'toolchain', self.make_msvc_toolchain_path( arch ) ) ]
         if self.target.is_android():
           sysroot = self.make_android_sysroot_path( arch )
-          localvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ), ( 'sysroot', sysroot ) ]
-          locallinkvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ), ( 'sysroot', sysroot ), ( 'liblinkname', self.binprefix + binname + self.binext ) ]
+          localvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ),
+                              ( 'sysroot', sysroot ) ]
+          locallinkvariables += [ ( 'toolchain', self.make_android_toolchain_path( arch ) ),
+                                  ( 'sysroot', sysroot ),
+                                  ( 'liblinkname', self.binprefix + binname + self.binext ) ]
           extraincludepaths += [ os.path.join( sysroot, 'usr', 'include' ) ]
+        if self.target.is_tizen():
+          sysroot = self.make_tizen_sysroot_path( arch )
+          localvariables += [ ( 'toolchain', self.make_tizen_toolchain_path( arch ) ),
+                              ( 'sysroot', sysroot ) ]
+          locallinkvariables += [ ( 'toolchain', self.make_tizen_toolchain_path( arch ) ),
+                                  ( 'sysroot', sysroot ),
+                                  ( 'liblinkname', self.binprefix + binname + self.binext ) ]
+          extraincludepaths += [ os.path.join( sysroot, 'usr', 'include' ), os.path.join( sysroot, 'usr', 'include', 'appfw' ) ]
         if moreincludepaths != [] or extraincludepaths != []:
           localvariables += [ ( 'moreincludepaths', self.make_includepaths( moreincludepaths + extraincludepaths ) ) ]
         for name in sources:

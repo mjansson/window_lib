@@ -22,33 +22,31 @@
 #import <UIKit/UIScreen.h>
 #import <UIKit/UIScreenMode.h>
 
-
 volatile int _dummy_window_class_reference = 0;
-
 
 @interface WindowKeyboardView : UIView <UIKeyInput>
 @end
 
-
-void _window_native_initialize( void )
+void 
+_window_native_initialize( void )
 {
 }
 
-
-void _window_native_shutdown( void )
+void 
+_window_native_finalize( void )
 {
 }
 
-
-window_t* window_allocate_from_uiwindow( void* uiwindow )
+window_t* 
+window_allocate_from_uiwindow( void* uiwindow )
 {
 	window_t* window = memory_allocate( 0, sizeof( window_t ), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED );
 	window->uiwindow = uiwindow;
 	return window;
 }
 
-
-void* window_view( window_t* window, unsigned int tag )
+void* 
+window_view( window_t* window, unsigned int tag )
 {
 	if( !window || !window->uiwindow )
 		return 0;
@@ -61,7 +59,6 @@ void* window_view( window_t* window, unsigned int tag )
 		view = [[uiwindow subviews] objectAtIndex:0];
 	return (__bridge void*)(view);
 }
-
 
 void* window_layer( window_t* window, void* view )
 {
