@@ -23,6 +23,8 @@
 #include <foundation/atomic.h>
 #include <foundation/windows.h>
 
+#include <stdio.h>
+
 static LRESULT WINAPI
 _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	if (msg == WM_CREATE) {
@@ -32,139 +34,131 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 	//debug_logf( "WND message 0x%x for window 0x%p", msg, hwnd );
 
+	LRESULT result;
+	RECT rect;
+	int width, height;
+
 	window_t* window = (window_t*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	//_input_service_process_native( hwnd, msg, wparam, lparam );
 
-	if (window) switch (msg) {
-		case WM_NCHITTEST:
-				LRESULT result = DefWindowProc(hwnd, msg, wparam, lparam);
-				if ((result == HTBORDER) || (result == HTLEFT) || (result == HTRIGHT) || (result == HTSIZE) ||
-				        (result == HTBOTTOM) || (result == HTBOTTOMLEFT) || (result == HTBOTTOMRIGHT) ||
-				        (result == HTTOP) || (result == HTTOPLEFT) || (result == HTTOPRIGHT))
-					result = HTCLIENT;
-				return result;
+	if (!window)
+		goto default_process;
 
-		case WM_ENTERSIZEMOVE: {
-				window->is_resizing = true;
-				break;
-			}
+	switch (msg) {
+	case WM_NCHITTEST:
+		result = DefWindowProc(hwnd, msg, wparam, lparam);
+		if ((result == HTBORDER) || (result == HTLEFT) || (result == HTRIGHT) || (result == HTSIZE) ||
+		        (result == HTBOTTOM) || (result == HTBOTTOMLEFT) || (result == HTBOTTOMRIGHT) ||
+		        (result == HTTOP) || (result == HTTOPLEFT) || (result == HTTOPRIGHT))
+			result = HTCLIENT;
+		return result;
 
-		case WM_EXITSIZEMOVE: {
-				RECT rect;
-				int width, height;
+	case WM_ENTERSIZEMOVE:
+		window->is_resizing = true;
+		break;
 
-				window->is_resizing = false;
-				if (!window_is_visible(window))
-					window_event_post(WINDOWEVENT_SHOW, window);
-				GetClientRect(hwnd, &rect);
-				width  = rect.right  - rect.left;
-				height = rect.bottom - rect.top;
-				if ((width != 0) || (height != 0)) {
-					int size_x = window_width(window);
-					int size_y = window_height(window);
-					if ((width != size_x) || (height != size_y)) {
-						window_event_post(WINDOWEVENT_RESIZE, window);
-						window_event_post(WINDOWEVENT_REDRAW, window);
-					}
-				}
-				break;
-			}
-
-		case WM_SETFOCUS: {
-				log_infof(HASH_WINDOW, STRING_CONST("WM_SETFOCUS: %s"),
-				          window_has_focus(window) ? "window already has focus" : "gain focus");
-				//if( !window_has_focus( window ) )
-				{
-					window_event_post(WINDOWEVENT_GOTFOCUS, window);
-					window_event_post(WINDOWEVENT_REDRAW, window);
-				}
-				break;
-			}
-
-		case WM_KILLFOCUS: {
-				log_infof(HASH_WINDOW, STRING_CONST("WM_KILLFOCUS: %s"),
-				          window_has_focus(window) ? "window already unfocused" : "lost focus");
-				//if( window_has_focus( window ) )
-				{
-					window_event_post(WINDOWEVENT_LOSTFOCUS, window);
-				}
-				break;
-			}
-
-		case WM_SETCURSOR: {
-				/*if( window_cursor() )
-				{
-					window_set_cursor( window_cursor() );
-					return TRUE;
-				}*/
-				break;
-			}
-
-		case WM_SIZE: {
-				int width, height;
-
-				if (wparam == SIZE_MINIMIZED) {
-					window_event_post(WINDOWEVENT_HIDE, window);
-					break;
-				}
-
-				if (!window_is_visible(window)) {
-					window_event_post(WINDOWEVENT_SHOW, window);
-					window_event_post(WINDOWEVENT_REDRAW, window);
-				}
-
-				width  = LOWORD(lparam);
-				height = HIWORD(lparam);
-				if ((!window->is_resizing || (wparam == SIZE_MAXIMIZED)) && ((width != 0) || (height != 0))) {
-					int size_x = window_width(window);
-					int size_y = window_height(window);
-					if ((wparam == SIZE_MAXIMIZED) || (width != size_x) || (height != size_y)) {
-						//resize.setParameter( "width",  core::EventParameter( ( width  > 0 ) ? width  : 1 ) );
-						//resize.setParameter( "height", core::EventParameter( ( height > 0 ) ? height : 1 ) );
-						window_event_post(WINDOWEVENT_RESIZE, window);
-						window_event_post(WINDOWEVENT_REDRAW, window);
-					}
-				}
-
-				break;
-			}
-
-		case WM_ACTIVATEAPP: {
-				if (!window_has_focus(window) && (wparam == TRUE)) {
-					window_event_post(WINDOWEVENT_GOTFOCUS, window);
-					window_event_post(WINDOWEVENT_REDRAW, window);
-				}
-				else if (window_has_focus(window) && (wparam == FALSE)) {
-					window_event_post(WINDOWEVENT_LOSTFOCUS, window);
-				}
-				break;
-			}
-
-		case WM_PAINT: {
+	case WM_EXITSIZEMOVE:
+		window->is_resizing = false;
+		if (!window_is_visible(window))
+			window_event_post(WINDOWEVENT_SHOW, window);
+		GetClientRect(hwnd, &rect);
+		width  = rect.right  - rect.left;
+		height = rect.bottom - rect.top;
+		if ((width != 0) || (height != 0)) {
+			int size_x = window_width(window);
+			int size_y = window_height(window);
+			if ((width != size_x) || (height != size_y)) {
+				window_event_post(WINDOWEVENT_RESIZE, window);
 				window_event_post(WINDOWEVENT_REDRAW, window);
-				break;
 			}
+		}
+		break;
 
-		case WM_CLOSE: {
-				window_event_post(WINDOWEVENT_CLOSE, window);
-				return TRUE;
-			}
+	case WM_SETFOCUS:
+		log_infof(HASH_WINDOW, STRING_CONST("WM_SETFOCUS: %s"),
+		          window_has_focus(window) ? "window already has focus" : "gain focus");
+		//if( !window_has_focus( window ) )
+		{
+			window_event_post(WINDOWEVENT_GOTFOCUS, window);
+			window_event_post(WINDOWEVENT_REDRAW, window);
+		}
+		break;
 
-		case WM_DESTROY: {
-				//window_event_post( WINDOWEVENT_CLOSE, window );
-				break;
-			}
+	case WM_KILLFOCUS:
+		log_infof(HASH_WINDOW, STRING_CONST("WM_KILLFOCUS: %s"),
+		          window_has_focus(window) ? "window already unfocused" : "lost focus");
+		//if( window_has_focus( window ) )
+		{
+			window_event_post(WINDOWEVENT_LOSTFOCUS, window);
+		}
+		break;
 
-		case WM_UNICHAR: {
-				if (wparam == 0xFFFF)  //UNICODE_NOCHAR
-					return TRUE;
-				return FALSE;
-			}
+	case WM_SETCURSOR:
+		/*if (window_cursor(window))
+		{
+			window_set_cursor(window, window_cursor(window));
+			return TRUE;
+		}*/
+		break;
 
-		default:
+	case WM_SIZE:
+		if (wparam == SIZE_MINIMIZED) {
+			window_event_post(WINDOWEVENT_HIDE, window);
 			break;
 		}
+
+		if (!window_is_visible(window)) {
+			window_event_post(WINDOWEVENT_SHOW, window);
+			window_event_post(WINDOWEVENT_REDRAW, window);
+		}
+
+		width  = LOWORD(lparam);
+		height = HIWORD(lparam);
+		if ((!window->is_resizing || (wparam == SIZE_MAXIMIZED)) && ((width != 0) || (height != 0))) {
+			int size_x = window_width(window);
+			int size_y = window_height(window);
+			if ((wparam == SIZE_MAXIMIZED) || (width != size_x) || (height != size_y)) {
+				//resize.setParameter( "width",  core::EventParameter( ( width  > 0 ) ? width  : 1 ) );
+				//resize.setParameter( "height", core::EventParameter( ( height > 0 ) ? height : 1 ) );
+				window_event_post(WINDOWEVENT_RESIZE, window);
+				window_event_post(WINDOWEVENT_REDRAW, window);
+			}
+		}
+		break;
+
+	case WM_ACTIVATEAPP:
+		if (!window_has_focus(window) && (wparam == TRUE)) {
+			window_event_post(WINDOWEVENT_GOTFOCUS, window);
+			window_event_post(WINDOWEVENT_REDRAW, window);
+		}
+		else if (window_has_focus(window) && (wparam == FALSE)) {
+			window_event_post(WINDOWEVENT_LOSTFOCUS, window);
+		}
+		break;
+
+	case WM_PAINT:
+		window_event_post(WINDOWEVENT_REDRAW, window);
+		break;
+
+	case WM_CLOSE:
+		window_event_post(WINDOWEVENT_CLOSE, window);
+		return TRUE;
+
+	case WM_DESTROY:
+		//window_event_post( WINDOWEVENT_CLOSE, window );
+		break;
+
+	case WM_UNICHAR:
+		if (wparam == 0xFFFF)  //UNICODE_NOCHAR
+			return TRUE;
+		return FALSE;
+
+	default:
+		break;
+	}
+
+default_process:
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -185,7 +179,7 @@ window_create(unsigned int adapter, const char* title, unsigned int width, unsig
 
 	do {
 		static atomic32_t counter = {0};
-		wsprintf(wndclassname, L"__neo_wnd_%lld%d", time_current(), atomic_incr32(&counter));
+		_snwprintf_s(wndclassname, sizeof(wndclassname), _TRUNCATE, L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d", time_current(), atomic_incr32(&counter));
 		wc.lpfnWndProc    = (WNDPROC)_window_proc;
 		wc.cbClsExtra     = 0;
 		wc.cbWndExtra     = 0;
@@ -196,10 +190,8 @@ window_create(unsigned int adapter, const char* title, unsigned int width, unsig
 		wc.hbrBackground  = CreateSolidBrush(RGB(0, 0, 0));
 		wc.lpszMenuName   = 0;
 		wc.lpszClassName  = wndclassname;
-
 		if (!wc.hIcon)
 			wc.hIcon      = LoadIcon(0, IDI_WINLOGO);
-
 	}
 	while (!RegisterClassW(&wc));
 
