@@ -164,8 +164,8 @@ default_process:
 }
 
 window_t*
-window_create(unsigned int adapter, const char* title, unsigned int width, unsigned int height,
-              bool show) {
+window_create(unsigned int adapter, const char* title, size_t length, unsigned int width,
+              unsigned int height, bool show) {
 	wchar_t wndclassname[64];
 	window_t* window;
 	WNDCLASSW wc;
@@ -268,7 +268,7 @@ window_create(unsigned int adapter, const char* title, unsigned int width, unsig
 	if (!title || !strlen(title))
 		title = "Untitled";
 
-	wchar_t* wtitle = wstring_allocate_from_string(title, 0);
+	wchar_t* wtitle = wstring_allocate_from_string(title, length);
 	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname, wtitle,
 	               window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0, 0, (HINSTANCE)window->instance,
 	               window);

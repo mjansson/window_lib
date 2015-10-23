@@ -99,8 +99,8 @@ window_fit_to_screen(window_t* window);
 #if FOUNDATION_PLATFORM_WINDOWS
 
 WINDOW_API window_t*
-window_create(unsigned int adapter, const char* title, unsigned int width, unsigned int height,
-              bool show);
+window_create(unsigned int adapter, const char* title, size_t length, unsigned int width,
+              unsigned int height, bool show);
 
 WINDOW_API window_t*
 window_allocate(void* hwnd);

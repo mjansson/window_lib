@@ -53,7 +53,7 @@ test_window_finalize(void) {
 DECLARE_TEST(window, createdestroy) {
 	window_t* window = 0;
 #if FOUNDATION_PLATFORM_WINDOWS
-	window = window_create(WINDOW_ADAPTER_DEFAULT, "Window test", 800, 600, true);
+	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
 #elif FOUNDATION_PLATFORM_MACOSX
 	window = window_allocate(delegate_nswindow());
 #elif FOUNDATION_PLATFORM_IOS
@@ -74,7 +74,7 @@ DECLARE_TEST(window, createdestroy) {
 DECLARE_TEST(window, sizemove) {
 	window_t* window = 0;
 #if FOUNDATION_PLATFORM_WINDOWS
-	window = window_create(WINDOW_ADAPTER_DEFAULT, "Window test", 800, 600, true);
+	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
 #elif FOUNDATION_PLATFORM_MACOSX
 	window = window_allocate(delegate_nswindow());
 #elif FOUNDATION_PLATFORM_IOS
