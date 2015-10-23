@@ -220,28 +220,28 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		rect.left    = 0;
 		rect.top     = 0;
 
-		unsigned int pad_x = rect.right - width;
-		unsigned int pad_y = rect.bottom - height;
+		int pad_x = rect.right - width;
+		int pad_y = rect.bottom - height;
 
 		//Constrain to screen and maintain aspect
-		unsigned int screen_width = window_screen_width(adapter);
-		unsigned int screen_height = window_screen_height(adapter);
+		int screen_width = window_screen_width(adapter);
+		int screen_height = window_screen_height(adapter);
 
-		if ((screen_width < (unsigned int)rect.right) || (screen_height < (unsigned int)rect.bottom)) {
-			unsigned int new_width = screen_width - pad_x;
-			unsigned int new_height = screen_height - pad_y;
+		if ((screen_width < rect.right) || (screen_height < rect.bottom)) {
+			int new_width = screen_width - pad_x;
+			int new_height = screen_height - pad_y;
 
 			real width_factor = (real)new_width / (real)width;
 			real height_factor = (real)new_height / (real)height;
 
 			if ((width_factor < height_factor) && (width_factor < 1)) {
 				width = new_width;
-				height = (unsigned int)((real)height * width_factor);
+				height = (int)((real)height * width_factor);
 				rect.right  = width + pad_x;
 				rect.bottom = height + pad_y;
 			}
 			else if (height_factor < 1) {
-				width = (unsigned int)((real)width * height_factor);
+				width = (int)((real)width * height_factor);
 				height = new_height;
 				rect.right  = width + pad_x;
 				rect.bottom = height + pad_y;
@@ -265,14 +265,11 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		rect.top  = CW_USEDEFAULT;
 	}
 
-	if (!title || !strlen(title))
-		title = "Untitled";
-
-	wchar_t* wtitle = wstring_allocate_from_string(title, length);
-	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname, wtitle,
+	string_t titlestr = string_clone(title, length);
+	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname, (LPCWSTR)titlestr.str,
 	               window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0, 0, (HINSTANCE)window->instance,
 	               window);
-	wstring_deallocate(wtitle);
+	string_deallocate(titlestr.str);
 	if (!window->hwnd) {
 		int err = system_error();
 		string_const_t errmsg = system_error_message(err);
@@ -325,14 +322,14 @@ window_release_hdc(void* hwnd, void* hdc) {
 		ReleaseDC((HWND)hwnd, (HDC)hdc);
 }
 
-unsigned int
+int
 window_screen_width(unsigned int adapter) {
 	//if( !adapter )
 	return GetSystemMetrics(SM_CXSCREEN);
 	//else not implemented, use GetDeviceCaps?
 }
 
-unsigned int
+int
 window_screen_height(unsigned int adapter) {
 	//if( !adapter )
 	return GetSystemMetrics(SM_CYSCREEN);

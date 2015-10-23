@@ -120,10 +120,10 @@ window_hdc(window_t* window);
 WINDOW_API void
 window_release_hdc(void* hwnd, void* hdc);
 
-WINDOW_API unsigned int
+WINDOW_API int
 window_screen_width(unsigned int adapter);
 
-WINDOW_API unsigned int
+WINDOW_API int
 window_screen_height(unsigned int adapter);
 
 #elif FOUNDATION_PLATFORM_MACOSX
