@@ -52,6 +52,11 @@ test_window_finalize(void) {
 
 DECLARE_TEST(window, createdestroy) {
 	window_t* window = 0;
+	event_stream_t* stream;
+	event_block_t* block;
+	event_t* event;
+	int got_create, got_destroy, got_show, got_hide, got_focus, got_unfocus, got_redraw, got_resize;
+	int got_other;
 #if FOUNDATION_PLATFORM_WINDOWS
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
 #elif FOUNDATION_PLATFORM_MACOSX
@@ -63,8 +68,68 @@ DECLARE_TEST(window, createdestroy) {
 	EXPECT_NE(window, 0);
 	EXPECT_TRUE(window_is_open(window));
 
+	window_event_process();
+	stream = window_event_stream();
+	block = event_stream_process(stream);
+	event = 0;
+	got_create = got_show = got_focus = got_redraw = got_resize = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_CREATE:
+			got_create++;
+			break;
+		case WINDOWEVENT_GOTFOCUS:
+			got_focus++;
+			break;
+		case WINDOWEVENT_SHOW:
+			got_show++;
+			break;
+		case WINDOWEVENT_REDRAW:
+			got_redraw++;
+			break;
+		case WINDOWEVENT_RESIZE:
+			got_resize++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	EXPECT_INTEQ(got_create, 1);
+	EXPECT_INTEQ(got_show, 1);
+	EXPECT_INTEQ(got_focus, 1);
+	EXPECT_INTEQ(got_redraw, 1);
+	EXPECT_INTEQ(got_other, 0);
+
 	window_deallocate(window);
 	window = 0;
+
+	window_event_process();
+	block = event_stream_process(stream);
+	event = 0;
+	got_destroy = got_hide = got_unfocus = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_DESTROY:
+			got_destroy++;
+			break;
+		case WINDOWEVENT_HIDE:
+			got_hide++;
+			break;
+		case WINDOWEVENT_LOSTFOCUS:
+			got_unfocus++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	EXPECT_INTEQ(got_destroy, 1);
+	EXPECT_INTEQ(got_unfocus, 1);
+	EXPECT_INTEQ(got_hide, 1);
+	EXPECT_INTEQ(got_other, 0);
 
 	EXPECT_FALSE(window_is_open(window));
 
@@ -73,6 +138,14 @@ DECLARE_TEST(window, createdestroy) {
 
 DECLARE_TEST(window, sizemove) {
 	window_t* window = 0;
+	event_stream_t* stream;
+	event_block_t* block;
+	event_t* event;
+#if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
+	int got_resize, got_redraw, got_focus, got_unfocus;
+	int got_other;
+#endif
+
 #if FOUNDATION_PLATFORM_WINDOWS
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
 #elif FOUNDATION_PLATFORM_MACOSX
@@ -82,6 +155,8 @@ DECLARE_TEST(window, sizemove) {
 #endif
 
 	window_event_process();
+	stream = window_event_stream();
+	block = event_stream_process(stream);
 
 	EXPECT_NE(window, 0);
 	EXPECT_TRUE(window_is_open(window));
@@ -99,6 +174,30 @@ DECLARE_TEST(window, sizemove) {
 
 	window_maximize(window);
 	window_event_process();
+
+#if !(FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID)
+	block = event_stream_process(stream);
+	event = 0;
+	got_resize = got_redraw = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_RESIZE:
+			got_resize++;
+			break;
+		case WINDOWEVENT_REDRAW:
+			got_redraw++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	EXPECT_INTEQ(got_resize, 1);
+	EXPECT_INTEQ(got_redraw, 1);
+	EXPECT_INTEQ(got_other, 0);
+#endif
+
 	thread_sleep(1000);
 	EXPECT_TRUE(window_is_maximized(window));
 	EXPECT_TRUE(window_has_focus(window));
@@ -106,6 +205,27 @@ DECLARE_TEST(window, sizemove) {
 #if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
 	window_restore(window);
 	window_event_process();
+	block = event_stream_process(stream);
+	event = 0;
+	got_resize = got_redraw = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_RESIZE:
+			got_resize++;
+			break;
+		case WINDOWEVENT_REDRAW:
+			got_redraw++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	EXPECT_INTEQ(got_resize, 1);
+	EXPECT_INTEQ(got_redraw, 1);
+	EXPECT_INTEQ(got_other, 0);
+
 	thread_sleep(1000);
 	EXPECT_FALSE(window_is_maximized(window));
 	EXPECT_TRUE(window_has_focus(window));
@@ -113,12 +233,37 @@ DECLARE_TEST(window, sizemove) {
 
 	window_maximize(window);
 	window_event_process();
+	block = event_stream_process(stream);
 	thread_sleep(1000);
 	EXPECT_TRUE(window_is_maximized(window));
 
 #if !FOUNDATION_PLATFORM_IOS && !FOUNDATION_PLATFORM_ANDROID
 	window_resize(window, 150, 100);
 	window_event_process();
+	block = event_stream_process(stream);
+	event = 0;
+	got_resize = got_redraw = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_RESIZE:
+			got_resize++;
+			break;
+		case WINDOWEVENT_REDRAW:
+			got_redraw++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	//Can get two resize && redraw for restore and resize
+	EXPECT_INTGE(got_resize, 1);
+	EXPECT_INTLE(got_resize, 2);
+	EXPECT_INTGE(got_redraw, 1);
+	EXPECT_INTLE(got_redraw, 2);
+	EXPECT_INTEQ(got_other, 0);
+
 	thread_sleep(1000);
 	EXPECT_INTEQ(window_width(window), 150);
 	EXPECT_INTEQ(window_height(window), 100);
@@ -127,6 +272,7 @@ DECLARE_TEST(window, sizemove) {
 
 	window_move(window, 10, 20);
 	window_event_process();
+	block = event_stream_process(stream);
 	thread_sleep(1000);
 	EXPECT_INTEQ(window_position_x(window), 10);
 	EXPECT_INTEQ(window_position_y(window), 20);
@@ -135,12 +281,62 @@ DECLARE_TEST(window, sizemove) {
 
 	window_minimize(window);
 	window_event_process();
+	block = event_stream_process(stream);
+	event = 0;
+	got_resize = got_redraw = got_unfocus = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_RESIZE:
+			got_resize++;
+			break;
+		case WINDOWEVENT_REDRAW:
+			got_redraw++;
+			break;
+		case WINDOWEVENT_LOSTFOCUS:
+			got_unfocus++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	EXPECT_INTEQ(got_resize, 1);
+	EXPECT_INTEQ(got_redraw, 1);
+	EXPECT_INTEQ(got_unfocus, 1);
+	EXPECT_INTEQ(got_other, 0);
+
 	thread_sleep(1000);
 	EXPECT_FALSE(window_is_maximized(window));
 	EXPECT_FALSE(window_has_focus(window));
 
 	window_restore(window);
 	window_event_process();
+	block = event_stream_process(stream);
+	event = 0;
+	got_resize = got_redraw = got_focus = 0;
+	got_other = 0;
+	while ((event = event_next(block, event))) {
+		switch (event->id) {
+		case WINDOWEVENT_RESIZE:
+			got_resize++;
+			break;
+		case WINDOWEVENT_REDRAW:
+			got_redraw++;
+			break;
+		case WINDOWEVENT_GOTFOCUS:
+			got_focus++;
+			break;
+		default:
+			got_other++;
+			break;
+		}
+	}
+	EXPECT_INTEQ(got_resize, 1);
+	EXPECT_INTEQ(got_redraw, 1);
+	EXPECT_INTEQ(got_focus, 1);
+	EXPECT_INTEQ(got_other, 0);
+
 	thread_sleep(1000);
 	EXPECT_FALSE(window_is_maximized(window));
 	EXPECT_FALSE(window_is_minimized(window));

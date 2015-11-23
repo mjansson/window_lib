@@ -14,17 +14,20 @@
 #include <window/window.h>
 #include <test/test.h>
 
-static volatile bool _test_should_start = false;
-static volatile bool _test_have_focus = false;
-static volatile bool _test_should_terminate = false;
+static volatile bool _test_should_start;
+static volatile bool _test_have_focus;
+static volatile bool _test_should_terminate;
 
 static void*
-event_thread(object_t thread, void* arg) {
+event_loop(void* arg) {
 	event_block_t* block;
 	event_t* event = 0;
 	FOUNDATION_UNUSED(arg);
 
-	while (!thread_should_terminate(thread)) {
+	event_stream_set_beacon(system_event_stream(), &thread_self()->beacon);
+
+	while (!_test_should_terminate) {
+		thread_wait();
 		block = event_stream_process(system_event_stream());
 		event = 0;
 
@@ -58,11 +61,8 @@ event_thread(object_t thread, void* arg) {
 			default:
 				break;
 			}
-
 			window_event_handle_foundation(event);
 		}
-
-		thread_sleep(10);
 	}
 
 	log_debug(HASH_TEST, STRING_CONST("Application event thread exiting"));
@@ -130,11 +130,10 @@ test_should_terminate(void) {
 int
 main_initialize(void) {
 	foundation_config_t config;
-	window_config_t window_config;
 	application_t application;
+	int ret;
 
 	memset(&config, 0, sizeof(config));
-	memset(&window_config, 0, sizeof(window_config));
 
 	memset(&application, 0, sizeof(application));
 	application.name = string_const(STRING_CONST("Window library test suite"));
@@ -156,14 +155,16 @@ main_initialize(void) {
 
 #endif
 
-	if (foundation_initialize(memory_system_malloc(), application, config) < 0)
-		return -1;
+	ret = foundation_initialize(memory_system_malloc(), application, config);
 
 #if BUILD_MONOLITHIC
-	return window_module_initialize(window_config);
-#else
-	return 0;
+	if (ret == 0) {
+		window_config_t window_config;
+		memset(&window_config, 0, sizeof(window_config));
+		ret = window_module_initialize(window_config);
+	}
 #endif
+	return ret;
 }
 
 #if FOUNDATION_PLATFORM_ANDROID
@@ -218,7 +219,7 @@ main_run(void* main_arg) {
 #endif
 	char* pathbuf;
 	int process_result = 0;
-	object_t thread = 0;
+	thread_t event_thread;
 	FOUNDATION_UNUSED(main_arg);
 	FOUNDATION_UNUSED(build_name);
 
@@ -228,12 +229,13 @@ main_run(void* main_arg) {
 	          string_from_version_static(window_module_version()).str, FOUNDATION_PLATFORM_DESCRIPTION,
 	          FOUNDATION_COMPILER_DESCRIPTION, build_name.str);
 
-	thread = thread_create(event_thread, STRING_CONST("event_thread"), THREAD_PRIORITY_NORMAL, 0);
-	thread_start(thread, 0);
+	thread_initialize(&event_thread, event_loop, 0, STRING_CONST("event_thread"),
+	                  THREAD_PRIORITY_NORMAL, 0);
+	thread_start(&event_thread);
 
 	pathbuf = memory_allocate(HASH_STRING, BUILD_MAX_PATHLEN, 0, MEMORY_PERSISTENT);
 
-	while (!thread_is_running(thread))
+	while (!thread_is_running(&event_thread))
 		thread_sleep(10);
 
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID || FOUNDATION_PLATFORM_PNACL
@@ -385,16 +387,15 @@ exit:
 
 #endif
 
-	thread_terminate(thread);
-	thread_destroy(thread);
-	while (thread_is_running(thread))
-		thread_sleep(10);
-	while (thread_is_thread(thread))
-		thread_sleep(10);
+	_test_should_terminate = true;
+
+	thread_signal(&event_thread);
+	thread_finalize(&event_thread);
 
 	memory_deallocate(pathbuf);
 
-	log_infof(HASH_TEST, STRING_CONST("Tests exiting: %d"), process_result);
+	log_infof(HASH_TEST, STRING_CONST("Tests exiting: %s (%d)"),
+	          process_result ? "FAILED" : "PASSED", process_result);
 
 	return process_result;
 }
