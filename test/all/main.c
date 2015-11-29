@@ -130,11 +130,10 @@ test_should_terminate(void) {
 int
 main_initialize(void) {
 	foundation_config_t config;
-	window_config_t window_config;
 	application_t application;
+	int ret;
 
 	memset(&config, 0, sizeof(config));
-	memset(&window_config, 0, sizeof(window_config));
 
 	memset(&application, 0, sizeof(application));
 	application.name = string_const(STRING_CONST("Window library test suite"));
@@ -156,14 +155,16 @@ main_initialize(void) {
 
 #endif
 
-	if (foundation_initialize(memory_system_malloc(), application, config) < 0)
-		return -1;
+	ret = foundation_initialize(memory_system_malloc(), application, config);
 
 #if BUILD_MONOLITHIC
-	return window_module_initialize(window_config);
-#else
-	return 0;
+	if (ret == 0) {
+		window_config_t window_config;
+		memset(&window_config, 0, sizeof(window_config));
+		ret = window_module_initialize(window_config);
+	}
 #endif
+	return ret;
 }
 
 #if FOUNDATION_PLATFORM_ANDROID

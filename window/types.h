@@ -18,13 +18,23 @@
 #include <window/hashstrings.h>
 
 typedef enum window_event_id {
-	WINDOWEVENT_CREATE = 0,
+	/*! Window was created */
+	WINDOWEVENT_CREATE = 1,
+	/*! Window was resized */
 	WINDOWEVENT_RESIZE,
+	/*! Window close requested */
 	WINDOWEVENT_CLOSE,
+	/*! Window was destroyed */
+	WINDOWEVENT_DESTROY,
+	/*! Window was shown */
 	WINDOWEVENT_SHOW,
+	/*! Window was hidden */
 	WINDOWEVENT_HIDE,
+	/*! Window got focus */
 	WINDOWEVENT_GOTFOCUS,
+	/*! Window lost focus */
 	WINDOWEVENT_LOSTFOCUS,
+	/*! Window needs to be redrawn */
 	WINDOWEVENT_REDRAW
 } window_event_id;
 

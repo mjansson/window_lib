@@ -15,30 +15,24 @@
 
 #if FOUNDATION_PLATFORM_WINDOWS
 
-#include <foundation/memory.h>
-#include <foundation/time.h>
-#include <foundation/system.h>
-#include <foundation/thread.h>
-#include <foundation/log.h>
-#include <foundation/atomic.h>
-#include <foundation/windows.h>
+#include <foundation/foundation.h>
 
 #include <stdio.h>
 
 static LRESULT WINAPI
 _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+	window_t* window;
+	LRESULT result;
+
 	if (msg == WM_CREATE) {
-		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)((CREATESTRUCT*)lparam)->lpCreateParams);
+		window = (window_t*)((CREATESTRUCT*)lparam)->lpCreateParams;
+		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
+		window_event_post(WINDOWEVENT_CREATE, window);
 		return 0;
 	}
 
-	//debug_logf( "WND message 0x%x for window 0x%p", msg, hwnd );
-
-	LRESULT result;
-	RECT rect;
-	int width, height;
-
-	window_t* window = (window_t*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+	//log_debugf(HASH_WINDOW, STRING_CONST("WND message 0x%x for window 0x%" PRIfixPTR), msg, hwnd);
+	window = (window_t*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	//_input_service_process_native( hwnd, msg, wparam, lparam );
 
@@ -60,83 +54,37 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 	case WM_EXITSIZEMOVE:
 		window->is_resizing = false;
-		if (!window_is_visible(window))
-			window_event_post(WINDOWEVENT_SHOW, window);
-		GetClientRect(hwnd, &rect);
-		width  = rect.right  - rect.left;
-		height = rect.bottom - rect.top;
-		if ((width != 0) || (height != 0)) {
-			int size_x = window_width(window);
-			int size_y = window_height(window);
-			if ((width != size_x) || (height != size_y)) {
-				window_event_post(WINDOWEVENT_RESIZE, window);
-				window_event_post(WINDOWEVENT_REDRAW, window);
-			}
-		}
+		break;
+
+	case WM_SIZE:
+		window_event_post(WINDOWEVENT_RESIZE, window);
 		break;
 
 	case WM_SETFOCUS:
-		log_infof(HASH_WINDOW, STRING_CONST("WM_SETFOCUS: %s"),
-		          window_has_focus(window) ? "window already has focus" : "gain focus");
-		//if( !window_has_focus( window ) )
-		{
-			window_event_post(WINDOWEVENT_GOTFOCUS, window);
-			window_event_post(WINDOWEVENT_REDRAW, window);
-		}
+		window_event_post(WINDOWEVENT_GOTFOCUS, window);
 		break;
 
 	case WM_KILLFOCUS:
-		log_infof(HASH_WINDOW, STRING_CONST("WM_KILLFOCUS: %s"),
-		          window_has_focus(window) ? "window already unfocused" : "lost focus");
-		//if( window_has_focus( window ) )
-		{
-			window_event_post(WINDOWEVENT_LOSTFOCUS, window);
-		}
+		window_event_post(WINDOWEVENT_LOSTFOCUS, window);
 		break;
 
 	case WM_SETCURSOR:
-		/*if (window_cursor(window))
-		{
+		/*if (window_cursor(window)) {
 			window_set_cursor(window, window_cursor(window));
 			return TRUE;
 		}*/
 		break;
 
-	case WM_SIZE:
-		if (wparam == SIZE_MINIMIZED) {
-			window_event_post(WINDOWEVENT_HIDE, window);
-			break;
-		}
-
-		if (!window_is_visible(window)) {
-			window_event_post(WINDOWEVENT_SHOW, window);
-			window_event_post(WINDOWEVENT_REDRAW, window);
-		}
-
-		width  = LOWORD(lparam);
-		height = HIWORD(lparam);
-		if ((!window->is_resizing || (wparam == SIZE_MAXIMIZED)) && ((width != 0) || (height != 0))) {
-			int size_x = window_width(window);
-			int size_y = window_height(window);
-			if ((wparam == SIZE_MAXIMIZED) || (width != size_x) || (height != size_y)) {
-				//resize.setParameter( "width",  core::EventParameter( ( width  > 0 ) ? width  : 1 ) );
-				//resize.setParameter( "height", core::EventParameter( ( height > 0 ) ? height : 1 ) );
-				window_event_post(WINDOWEVENT_RESIZE, window);
-				window_event_post(WINDOWEVENT_REDRAW, window);
-			}
+	case WM_WINDOWPOSCHANGED: {
+			WINDOWPOS* wpos = (WINDOWPOS*)lparam;
+			if (wpos->flags & SWP_HIDEWINDOW)
+				window_event_post(WINDOWEVENT_HIDE, window);
+			else if(wpos->flags & SWP_SHOWWINDOW)
+				window_event_post(WINDOWEVENT_SHOW, window);
 		}
 		break;
 
-	case WM_ACTIVATEAPP:
-		if (!window_has_focus(window) && (wparam == TRUE)) {
-			window_event_post(WINDOWEVENT_GOTFOCUS, window);
-			window_event_post(WINDOWEVENT_REDRAW, window);
-		}
-		else if (window_has_focus(window) && (wparam == FALSE)) {
-			window_event_post(WINDOWEVENT_LOSTFOCUS, window);
-		}
-		break;
-
+	case WM_NCPAINT:
 	case WM_PAINT:
 		window_event_post(WINDOWEVENT_REDRAW, window);
 		break;
@@ -146,7 +94,7 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 		return TRUE;
 
 	case WM_DESTROY:
-		//window_event_post( WINDOWEVENT_CLOSE, window );
+		window_event_post(WINDOWEVENT_DESTROY, window);
 		break;
 
 	case WM_UNICHAR:
@@ -179,7 +127,9 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 
 	do {
 		static atomic32_t counter = {0};
-		_snwprintf_s(wndclassname, sizeof(wndclassname), _TRUNCATE, L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d", time_current(), atomic_incr32(&counter));
+		_snwprintf_s(wndclassname, sizeof(wndclassname), _TRUNCATE,
+		             L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d", time_current(),
+		             atomic_incr32(&counter));
 		wc.lpfnWndProc    = (WNDPROC)_window_proc;
 		wc.cbClsExtra     = 0;
 		wc.cbWndExtra     = 0;
@@ -266,7 +216,8 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 	}
 
 	string_t titlestr = string_clone(title, length);
-	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname, (LPCWSTR)titlestr.str,
+	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname,
+	               (LPCWSTR)titlestr.str,
 	               window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0, 0, (HINSTANCE)window->instance,
 	               window);
 	string_deallocate(titlestr.str);
@@ -338,7 +289,7 @@ window_screen_height(unsigned int adapter) {
 
 void
 window_deallocate(window_t* window) {
-	if (window && window->created) {
+	if (window->created) {
 		void* hwnd = window->hwnd;
 		window->hwnd = 0;
 		if (hwnd)
@@ -350,49 +301,42 @@ window_deallocate(window_t* window) {
 
 unsigned int
 window_adapter(window_t* window) {
-	return window ? window->adapter : WINDOW_ADAPTER_DEFAULT;
+	return window->adapter;
 }
 
 void
 window_maximize(window_t* window) {
-	if (window && window->hwnd)
-		ShowWindow((HWND)window->hwnd, SW_MAXIMIZE);
+	ShowWindow((HWND)window->hwnd, SW_MAXIMIZE);
 }
 
 void
 window_minimize(window_t* window) {
-	if (window && window->hwnd)
-		ShowWindow((HWND)window->hwnd, SW_MINIMIZE);
+	ShowWindow((HWND)window->hwnd, SW_MINIMIZE);
 }
 
 void
 window_restore(window_t* window) {
-	if (window && window->hwnd)
-		ShowWindow((HWND)window->hwnd, SW_RESTORE);
+	ShowWindow((HWND)window->hwnd, SW_RESTORE);
 }
 
 void
 window_resize(window_t* window, unsigned int width, unsigned int height) {
-	if (window && window->hwnd) {
-		RECT rect = {0};
-		if (window_is_maximized(window))
-			window_restore(window);
-		rect.right = width;
-		rect.bottom = height;
-		AdjustWindowRect(&rect, window->wstyle, FALSE);
-		SetWindowPos((HWND)window->hwnd, 0, 0, 0, rect.right - rect.left, rect.bottom - rect.top,
-		             SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
-	}
+	RECT rect = {0};
+	if (window_is_maximized(window))
+		window_restore(window);
+	rect.right = width;
+	rect.bottom = height;
+	AdjustWindowRect(&rect, window->wstyle, FALSE);
+	SetWindowPos((HWND)window->hwnd, 0, 0, 0, rect.right - rect.left, rect.bottom - rect.top,
+	             SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
 }
 
 void
 window_move(window_t* window, int x, int y) {
-	if (window && window->hwnd) {
-		if (window_is_maximized(window))
-			window_restore(window);
-		SetWindowPos((HWND)window->hwnd, 0, x, y, 0, 0,
-		             SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER);
-	}
+	if (window_is_maximized(window))
+		window_restore(window);
+	SetWindowPos((HWND)window->hwnd, 0, x, y, 0, 0,
+	             SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER);
 }
 
 bool
@@ -402,44 +346,35 @@ window_is_open(window_t* window) {
 
 bool
 window_is_visible(window_t* window) {
-	return (window && window->hwnd && IsWindowVisible((HWND)window->hwnd));
+	return (window->hwnd && IsWindowVisible((HWND)window->hwnd));
 }
 
 bool
 window_is_maximized(window_t* window) {
-	if (window && window->hwnd) {
-		WINDOWPLACEMENT plc;
-		memset(&plc, 0, sizeof(WINDOWPLACEMENT));
-		plc.length = sizeof(WINDOWPLACEMENT);
-		GetWindowPlacement((HWND)window->hwnd, &plc);
-		return (plc.showCmd == SW_SHOWMAXIMIZED);
-	}
-	return false;
+	WINDOWPLACEMENT plc;
+	memset(&plc, 0, sizeof(WINDOWPLACEMENT));
+	plc.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement((HWND)window->hwnd, &plc);
+	return (plc.showCmd == SW_SHOWMAXIMIZED);
 }
 
 bool
 window_is_minimized(window_t* window) {
-	if (window && window->hwnd) {
-		WINDOWPLACEMENT plc;
-		memset(&plc, 0, sizeof(WINDOWPLACEMENT));
-		plc.length = sizeof(WINDOWPLACEMENT);
-		GetWindowPlacement((HWND)window->hwnd, &plc);
-		return (plc.showCmd == SW_MINIMIZE) || (plc.showCmd == SW_SHOWMINIMIZED) ||
-		       (plc.showCmd == SW_HIDE);
-	}
-	return false;
+	WINDOWPLACEMENT plc;
+	memset(&plc, 0, sizeof(WINDOWPLACEMENT));
+	plc.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement((HWND)window->hwnd, &plc);
+	return (plc.showCmd == SW_MINIMIZE) || (plc.showCmd == SW_SHOWMINIMIZED) ||
+	       (plc.showCmd == SW_HIDE);
 }
 
 bool
 window_has_focus(window_t* window) {
-	return (window && window->hwnd && (GetForegroundWindow() == window->hwnd));
+	return (GetForegroundWindow() == window->hwnd);
 }
 
 void
 window_show_cursor(window_t* window, bool show, bool lock) {
-	if (!window || !window->hwnd)
-		return;
-
 	ShowCursor(show ? TRUE : FALSE);
 
 	/*if( show && window_cursor( window ) )
@@ -460,9 +395,6 @@ window_show_cursor(window_t* window, bool show, bool lock) {
 
 void
 window_set_cursor_pos(window_t* window, int x, int y) {
-	if (!window || !window->hwnd)
-		return;
-
 	POINT pt;
 	pt.x = x;
 	pt.y = y;
@@ -472,60 +404,42 @@ window_set_cursor_pos(window_t* window, int x, int y) {
 
 bool
 window_is_cursor_locked(window_t* window) {
-	return (window && window->hwnd && window->cursor_lock);
+	return window->cursor_lock;
 }
 
 void
 window_set_title(window_t* window, const char* title) {
-	if (window && window->hwnd) {
-		wchar_t* wstr = wstring_allocate_from_string(title, 0);
-		SetWindowTextW(window->hwnd, wstr);
-		wstring_deallocate(wstr);
-	}
+	wchar_t* wstr = wstring_allocate_from_string(title, 0);
+	SetWindowTextW(window->hwnd, wstr);
+	wstring_deallocate(wstr);
 }
 
 int
 window_width(window_t* window) {
-	if (window && window->hwnd) {
-		RECT rect;
-		GetClientRect((HWND)window->hwnd, &rect);
-		return rect.right - rect.left;
-	}
-
-	return 0;
+	RECT rect;
+	GetClientRect((HWND)window->hwnd, &rect);
+	return rect.right - rect.left;
 }
 
 int
 window_height(window_t* window) {
-	if (window && window->hwnd) {
-		RECT rect;
-		GetClientRect((HWND)window->hwnd, &rect);
-		return rect.bottom - rect.top;
-	}
-
-	return 0;
+	RECT rect;
+	GetClientRect((HWND)window->hwnd, &rect);
+	return rect.bottom - rect.top;
 }
 
 int
 window_position_x(window_t* window) {
-	if (window && window->hwnd) {
-		RECT rect;
-		GetWindowRect((HWND)window->hwnd, &rect);
-		return rect.left;
-	}
-
-	return 0;
+	RECT rect;
+	GetWindowRect((HWND)window->hwnd, &rect);
+	return rect.left;
 }
 
 int
 window_position_y(window_t* window) {
-	if (window && window->hwnd) {
-		RECT rect;
-		GetWindowRect((HWND)window->hwnd, &rect);
-		return rect.top;
-	}
-
-	return 0;
+	RECT rect;
+	GetWindowRect((HWND)window->hwnd, &rect);
+	return rect.top;
 }
 
 void
