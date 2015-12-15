@@ -13,10 +13,25 @@
 #include <window/window.h>
 #include <window/internal.h>
 
+#include <foundation/foundation.h>
+
 static bool _window_initialized = false;
+
+#if FOUNDATION_PLATFORM_LINUX
+
+static int
+_x11_error_handler(Display* display, XErrorEvent* event) {
+	char errmsg[512];
+	XGetErrorText(display, event->error_code, errmsg, sizeof(errmsg));
+	log_warnf(HASH_WINDOW, WARNING_SYSTEM_CALL_FAIL, STRING_CONST("X error event occurred: %s"), errmsg);
+	return 0;
+}
+
+#endif
 
 int
 window_module_initialize(const window_config_t config) {
+	FOUNDATION_UNUSED(config);
 	if (_window_initialized)
 		return 0;
 
@@ -31,6 +46,10 @@ window_module_initialize(const window_config_t config) {
 
 #if FOUNDATION_PLATFORM_IOS
 	_window_native_initialize();
+#endif
+
+#if FOUNDATION_PLATFORM_LINUX
+	XSetErrorHandler(_x11_error_handler);
 #endif
 
 	return 0;

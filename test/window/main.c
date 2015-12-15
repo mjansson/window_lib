@@ -59,6 +59,8 @@ DECLARE_TEST(window, createdestroy) {
 	int got_other;
 #if FOUNDATION_PLATFORM_WINDOWS
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
+#elif FOUNDATION_PLATFORM_LINUX
+	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
 #elif FOUNDATION_PLATFORM_MACOSX
 	window = window_allocate(delegate_nswindow());
 #elif FOUNDATION_PLATFORM_IOS

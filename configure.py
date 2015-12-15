@@ -29,6 +29,8 @@ elif target.is_ios():
   glframeworks = [ 'QuartzCore', 'OpenGLES' ]
 if target.is_windows():
   gllibs = [ 'gdi32' ]
+if target.is_linux():
+  gllibs = [ 'GL', 'X11' ]
 
 test_cases = [
   'window'

@@ -17,6 +17,10 @@
 #include <window/build.h>
 #include <window/hashstrings.h>
 
+#if FOUNDATION_PLATFORM_LINUX
+#include <X11/Xutil.h>
+#endif
+
 typedef enum window_event_id {
 	/*! Window was created */
 	WINDOWEVENT_CREATE = 1,

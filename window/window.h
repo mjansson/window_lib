@@ -140,8 +140,8 @@ window_content_view(window_t* window);   //NSView*
 #elif FOUNDATION_PLATFORM_LINUX
 
 WINDOW_API window_t*
-window_create(unsigned int adapter, const char* title, unsigned int width, unsigned int height,
-              bool show);
+window_create(unsigned int adapter, const char* title, size_t length, unsigned int width,
+              unsigned int height, bool show);
 
 WINDOW_API void*
 window_display(window_t* window);
