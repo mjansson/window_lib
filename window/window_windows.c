@@ -57,7 +57,9 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 		break;
 
 	case WM_SIZE:
-		window_event_post(WINDOWEVENT_RESIZE, window);
+		if (!window->last_resize != window_event_token)
+			window_event_post(WINDOWEVENT_RESIZE, window);
+		window->last_resize = window_event_token;
 		break;
 
 	case WM_SETFOCUS:
@@ -86,7 +88,9 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 	case WM_NCPAINT:
 	case WM_PAINT:
-		window_event_post(WINDOWEVENT_REDRAW, window);
+		if (window->last_paint != window_event_token)
+			window_event_post(WINDOWEVENT_REDRAW, window);
+		window->last_paint = window_event_token;
 		break;
 
 	case WM_CLOSE:
@@ -121,9 +125,11 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 
 	window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
 	                         MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
-	window->instance     = GetModuleHandle(0);
-	window->created      = true;
-	window->adapter      = adapter;
+	window->instance = GetModuleHandle(0);
+	window->created = true;
+	window->adapter = adapter;
+	window->last_paint = -1;
+	window->last_resize = -1;
 
 	do {
 		static atomic32_t counter = {0};
@@ -243,11 +249,13 @@ window_t*
 window_allocate_from_hwnd(void* hwnd) {
 	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
 	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
-	window->instance     = GetModuleHandle(0);
-	window->created      = false;
-	window->adapter      = WINDOW_ADAPTER_DEFAULT; //TODO: Get the corresponding adapter for the window
-	window->wstyle       = 0; //TODO: Get wstyle from the window
-	window->hwnd         = hwnd;
+	window->instance = GetModuleHandle(0);
+	window->created = false;
+	window->adapter = WINDOW_ADAPTER_DEFAULT; //TODO: Get the corresponding adapter for the window
+	window->wstyle = 0; //TODO: Get wstyle from the window
+	window->hwnd = hwnd;
+	window->last_paint = -1;
+	window->last_resize = -1;
 
 	return window;
 }

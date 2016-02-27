@@ -61,6 +61,8 @@ struct window_t {
 	int          cursor_pos_x;
 	int          cursor_pos_y;
 	unsigned int wstyle;
+	tick_t       last_paint;
+	tick_t       last_resize;
 	bool         is_resizing;
 #elif FOUNDATION_PLATFORM_MACOSX
 	void*        nswindow;

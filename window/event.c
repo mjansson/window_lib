@@ -17,6 +17,7 @@
 
 #if FOUNDATION_PLATFORM_WINDOWS
 #include <foundation/windows.h>
+tick_t window_event_token;
 #endif
 
 static event_stream_t* _window_stream = 0;
@@ -56,6 +57,7 @@ window_event_process(void) {
 		if (msg.message >= WM_MOUSEFIRST)
 			break;
 	}
+	window_event_token++;
 #endif
 }
 

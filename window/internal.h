@@ -31,6 +31,12 @@ _window_event_initialize(void);
 WINDOW_EXTERN void
 _window_event_finalize(void);
 
+#if FOUNDATION_PLATFORM_WINDOWS
+
+WINDOW_EXTERN tick_t window_event_token;
+
+#endif
+
 #if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
 
 WINDOW_EXTERN void
