@@ -21,8 +21,9 @@ test_window_application(void) {
 	memset(&app, 0, sizeof(app));
 	app.name = string_const(STRING_CONST("Window tests"));
 	app.short_name = string_const(STRING_CONST("test_window"));
-	app.config_dir = string_const(STRING_CONST("test_window"));
+	app.company = string_const(STRING_CONST("Rampant Pixels"));
 	app.version = window_module_version();
+	app.exception_handler = test_exception_handler;
 	return app;
 }
 
