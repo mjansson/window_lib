@@ -67,7 +67,7 @@ window_event_stream(void) {
 }
 
 void
-window_event_handle_foundation(event_t* event) {
+window_event_handle(event_t* event) {
 	if (event->id == FOUNDATIONEVENT_START) {
 		_window_app_started = true;
 		_window_app_paused = false;

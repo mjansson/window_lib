@@ -61,7 +61,7 @@ event_loop(void* arg) {
 				break;
 			}
 
-			window_event_handle_foundation(event);
+			window_event_handle(event);
 		}
 		thread_wait();
 	}

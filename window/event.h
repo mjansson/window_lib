@@ -26,6 +26,9 @@ window_event_process(void);
 WINDOW_API event_stream_t*
 window_event_stream(void);
 
+/*! Handle foundation events. Do not pass in events from any other
+event namespace to this function.
+\param event Foundation event */
 WINDOW_API void
-window_event_handle_foundation(event_t* event);
+window_event_handle(event_t* event);
 
