@@ -183,6 +183,7 @@
 				TargetAttributes = {
 					451385BE1939C1A000BA2092 = {
 						DevelopmentTeam = TDSNBN44YV;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -376,8 +377,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = TDSNBN44YV;
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -399,8 +400,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = TDSNBN44YV;
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -485,8 +486,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = TDSNBN44YV;
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -571,8 +572,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = TDSNBN44YV;
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

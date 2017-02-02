@@ -66,6 +66,7 @@ struct window_t {
 	bool         is_resizing;
 #elif FOUNDATION_PLATFORM_MACOSX
 	void*        nswindow;
+	void*        delegate;
 #elif FOUNDATION_PLATFORM_LINUX
 	unsigned int adapter;
 	bool         created;
