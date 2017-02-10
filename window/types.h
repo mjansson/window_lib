@@ -42,7 +42,7 @@ typedef enum window_event_id {
 	WINDOWEVENT_REDRAW
 } window_event_id;
 
-#define WINDOW_ADAPTER_DEFAULT -1
+#define WINDOW_ADAPTER_DEFAULT ((unsigned int)-1)
 
 typedef struct window_config_t window_config_t;
 typedef struct window_t window_t;
