@@ -14,6 +14,9 @@ local.properties
 .ninja*
 build.ninja
 
+# Generated version
+version.c
+
 # External tool builders
 .externalToolBuilders/
 
@@ -36,8 +39,9 @@ build/xcode/foundation/build
 #Doxygen generated
 doc/html
 
-#Local config
-SConfig
+#Coverity scan
+cov-int/
+cov-int.*
 
 #################
 ## Visual Studio
@@ -77,6 +81,11 @@ SConfig
 *.dotCover
 *.lastbuildstate
 *.unsuccessfulbuild
+*.opendb
+*.vc
+*.VC.db
+*.db-shm
+*.db-wal
 
 ## TODO: If you have NuGet Package Restore enabled, uncomment this
 #packages/
@@ -199,6 +208,9 @@ build/scons/deploy*
 #Backups
 *~
 
+#Object files
+*.o
+
 #XCode
 xcuserdata
 *.xccheckout
@@ -212,4 +224,7 @@ xcuserdata
 #Do not store local build prefs
 build.json
 codesign.json
-
+coveralls.json
+coverallsreport.json
+codecov.json
+codecovreport.json

@@ -221,12 +221,11 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		rect.top  = CW_USEDEFAULT;
 	}
 
-	string_t titlestr = string_clone(title, length);
-	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname,
-	               (LPCWSTR)titlestr.str,
-	               window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0, 0, (HINSTANCE)window->instance,
-	               window);
-	string_deallocate(titlestr.str);
+	wchar_t* titlestr = wstring_allocate_from_string(title, length);
+	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname, titlestr,
+	               window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0, 0,
+	               (HINSTANCE)window->instance, window);
+	wstring_deallocate(titlestr);
 	if (!window->hwnd) {
 		int err = system_error();
 		string_const_t errmsg = system_error_message(err);
