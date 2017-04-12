@@ -20,7 +20,7 @@
 #include <GL/glx.h>
 
 static XVisualInfo*
-_get_xvisual(Display* display, unsigned int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
+_get_xvisual(Display* display, int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
 #if FOUNDATION_PLATFORM_LINUX_RASPBERRYPI
 	return 0;
 #else
@@ -38,7 +38,7 @@ _get_xvisual(Display* display, unsigned int screen, unsigned int color, unsigned
 	config[10] = GLX_STENCIL_SIZE; config[11] = sbits;
 	config[12] = None;
 
-	return glXChooseVisual(display, (int)screen, config);
+	return glXChooseVisual(display, screen, config);
 #endif
 }
 
@@ -53,26 +53,23 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		goto fail;
 	}
 
-	unsigned int screen = adapter;
-	if (!screen)
-		screen = (unsigned int)DefaultScreen(display);
-
+	int screen = (adapter != WINDOW_ADAPTER_DEFAULT) ? (int)adapter : DefaultScreen(display);
 	XVisualInfo* visual = _get_xvisual(display, screen, 24, 16, 0);
 	if (!visual) {
-		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to get X visual"));
+		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to get X visual for screen %d"), screen);
 		goto fail;
 	}
 
-	Colormap colormap = XCreateColormap(display, XRootWindow(display, (int)screen), visual->visual, AllocNone);
+	Colormap colormap = XCreateColormap(display, XRootWindow(display, screen), visual->visual, AllocNone);
 
-	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %u with dimensions %ux%u"), screen, width, height);
+	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %d with dimensions %ux%u"), screen, width, height);
 
 	XSetWindowAttributes attrib;
 	attrib.colormap         = colormap;
 	attrib.background_pixel = 0;
 	attrib.border_pixel     = 0;
 	attrib.event_mask       = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask | Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask | Button5MotionMask | ButtonMotionMask | KeyPressMask | KeyReleaseMask | KeymapStateMask | VisibilityChangeMask | FocusChangeMask;
-	Window drawable = XCreateWindow(display, XRootWindow(display, (int)screen), 0, 0, width, height, 0, visual->depth, InputOutput, visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
+	Window drawable = XCreateWindow(display, XRootWindow(display, screen), 0, 0, width, height, 0, visual->depth, InputOutput, visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
 
 	XSizeHints sizehints;
 	sizehints.x      = 0;
@@ -114,11 +111,12 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	window->display  = display;
 	window->visual   = visual;
-	window->screen   = screen;
+	window->screen   = (unsigned int)screen;
 	window->drawable = drawable;
 	window->atom     = atom_delete;
 	window->xim      = xim;
 	window->xic      = xic;
+	window->created  = true;
 
 	return window;
 
@@ -129,30 +127,35 @@ fail:
 
 void*
 window_display(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return 0;
+	return window->display;
 }
 
 int
 window_screen(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return -1;
+	return (int)window->screen;
 }
 
-int
+unsigned long
 window_drawable(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return 0;
+	return window->drawable;
 }
 
 void*
 window_visual(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return 0;
+	return window->visual;
+}
+
+void
+window_finalize(window_t* window) {
+	if (window->created && window->drawable) {
+		XDestroyWindow(window->display, window->drawable);
+		window->drawable = 0;
+	}
 }
 
 void
 window_deallocate(window_t* window) {
+	window_finalize(window);
 	memory_deallocate(window);
 }
 
@@ -193,8 +196,7 @@ window_move(window_t* window, int x, int y) {
 
 bool
 window_is_open(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return true;
+	return window && (window->drawable != 0);
 }
 
 bool

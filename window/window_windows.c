@@ -295,14 +295,18 @@ window_screen_height(unsigned int adapter) {
 }
 
 void
-window_deallocate(window_t* window) {
+window_finalize(window_t* window) {
 	if (window->created) {
 		void* hwnd = window->hwnd;
 		window->hwnd = 0;
 		if (hwnd)
 			DestroyWindow((HWND)hwnd);
 	}
+}
 
+void
+window_deallocate(window_t* window) {
+	window_finalize(window);
 	memory_deallocate(window);
 }
 

@@ -149,7 +149,7 @@ window_display(window_t* window);
 WINDOW_API int
 window_screen(window_t* window);
 
-WINDOW_API int
+WINDOW_API unsigned long
 window_drawable(window_t* window);
 
 WINDOW_API void*
