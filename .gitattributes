@@ -1,6 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
+# Never mangle resource blob files
+*.blob -text
+
 # Custom for Visual Studio
 *.cs     diff=csharp
 *.sln    merge=union
@@ -20,3 +23,7 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# Ignore build scripts in language stats
+build/* linguist-vendored
+configure.py linguist-vendored=true
