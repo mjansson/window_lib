@@ -19,7 +19,7 @@
 
 #include <GL/glx.h>
 
-XVisualInfo*
+static XVisualInfo*
 _get_xvisual(Display* display, unsigned int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
 #if FOUNDATION_PLATFORM_LINUX_RASPBERRYPI
 	return 0;
@@ -38,7 +38,7 @@ _get_xvisual(Display* display, unsigned int screen, unsigned int color, unsigned
 	config[10] = GLX_STENCIL_SIZE; config[11] = sbits;
 	config[12] = None;
 
-	return glXChooseVisual(display, screen, config);
+	return glXChooseVisual(display, (int)screen, config);
 #endif
 }
 
@@ -55,7 +55,7 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 
 	unsigned int screen = adapter;
 	if (!screen)
-		screen = DefaultScreen(display);
+		screen = (unsigned int)DefaultScreen(display);
 
 	XVisualInfo* visual = _get_xvisual(display, screen, 24, 16, 0);
 	if (!visual) {
@@ -63,22 +63,22 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		goto fail;
 	}
 
-	Colormap colormap = XCreateColormap(display, XRootWindow(display, screen), visual->visual, AllocNone);
+	Colormap colormap = XCreateColormap(display, XRootWindow(display, (int)screen), visual->visual, AllocNone);
 
-	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %d with dimensions %dx%d"), screen, width, height);
+	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %u with dimensions %ux%u"), screen, width, height);
 
 	XSetWindowAttributes attrib;
 	attrib.colormap         = colormap;
 	attrib.background_pixel = 0;
 	attrib.border_pixel     = 0;
 	attrib.event_mask       = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask | Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask | Button5MotionMask | ButtonMotionMask | KeyPressMask | KeyReleaseMask | KeymapStateMask | VisibilityChangeMask | FocusChangeMask;
-	Window drawable = XCreateWindow(display, XRootWindow(display, screen), 0, 0, width, height, 0, visual->depth, InputOutput, visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
+	Window drawable = XCreateWindow(display, XRootWindow(display, (int)screen), 0, 0, width, height, 0, visual->depth, InputOutput, visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
 
 	XSizeHints sizehints;
 	sizehints.x      = 0;
 	sizehints.y      = 0;
-	sizehints.width  = width;
-	sizehints.height = height;
+	sizehints.width  = (int)width;
+	sizehints.height = (int)height;
 	sizehints.flags  = USSize | USPosition;
 	XSetNormalHints(display, drawable, &sizehints);
 	XSetStandardProperties(display, drawable, title, title, None, 0, 0, &sizehints);
