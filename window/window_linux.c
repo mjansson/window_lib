@@ -82,6 +82,7 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 
 	if (show) {
 		XMapWindow(display, drawable);
+		XRaiseWindow(display, drawable);
 		XFlush(display);
 	}
 
@@ -149,6 +150,8 @@ void
 window_finalize(window_t* window) {
 	if (window->created && window->drawable) {
 		XDestroyWindow(window->display, window->drawable);
+		XFlush(window->display);
+		XSync(window->display, False);
 		window->drawable = 0;
 	}
 }
