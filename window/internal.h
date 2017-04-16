@@ -37,7 +37,7 @@ WINDOW_EXTERN tick_t window_event_token;
 
 #endif
 
-#if FOUNDATION_PLATFORM_MACOSX || FOUNDATION_PLATFORM_IOS
+#if FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
 
 WINDOW_EXTERN void
 _window_class_reference(void);

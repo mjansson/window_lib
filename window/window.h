@@ -126,7 +126,7 @@ window_screen_width(unsigned int adapter);
 WINDOW_API int
 window_screen_height(unsigned int adapter);
 
-#elif FOUNDATION_PLATFORM_MACOSX
+#elif FOUNDATION_PLATFORM_MACOS
 
 WINDOW_API window_t*
 window_allocate(void* nswindow);

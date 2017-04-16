@@ -12,7 +12,7 @@
 
 #include <window/window.h>
 
-#if FOUNDATION_PLATFORM_MACOSX
+#if FOUNDATION_PLATFORM_MACOS
 
 #include <window/internal.h>
 #include <foundation/apple.h>

@@ -23,7 +23,7 @@ includepaths = generator.test_includepaths()
 
 gllibs = []
 glframeworks = []
-if target.is_macosx():
+if target.is_macos():
   glframeworks = ['OpenGL']
 elif target.is_ios():
   glframeworks = ['QuartzCore', 'OpenGLES']
@@ -56,7 +56,7 @@ if toolchain.is_monolithic() or target.is_ios() or target.is_android() or target
     test_resources = [os.path.join('all', 'tizen', item) for item in [
       'tizen-manifest.xml', os.path.join( 'res', 'tizenapp.png')
     ]]
-  if target.is_macosx() or target.is_ios() or target.is_android() or target.is_tizen():
+  if target.is_macos() or target.is_ios() or target.is_android() or target.is_tizen():
     generator.app(module = '', sources = [os.path.join(module, 'main.c') for module in test_cases] + test_extrasources, binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['test', 'window', 'foundation'] + gllibs, frameworks = glframeworks, resources = test_resources, includepaths = includepaths)
   else:
     generator.bin(module = '', sources = [os.path.join(module, 'main.c') for module in test_cases] + test_extrasources, binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['test', 'window', 'foundation'] + gllibs, frameworks = glframeworks, resources = test_resources, includepaths = includepaths)
@@ -64,7 +64,7 @@ else:
   #Build one binary per test case
   generator.bin(module = 'all', sources = ['main.c'], binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['window', 'foundation'], includepaths = includepaths)
   for test in test_cases:
-    if target.is_macosx():
+    if target.is_macos():
       test_resources = [os.path.join('osx', item) for item in ['test-' + test + '.plist', 'Images.xcassets', 'test-' + test + '.xib']]
       generator.app(module = test, sources = ['main.c'], binname = 'test-' + test, basepath = 'test', implicit_deps = [window_lib], libs = ['test', 'window', 'foundation'] + gllibs, frameworks = glframeworks, resources = test_resources, includepaths = includepaths)
     else:

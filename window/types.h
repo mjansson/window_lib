@@ -64,7 +64,7 @@ struct window_t {
 	tick_t       last_paint;
 	tick_t       last_resize;
 	bool         is_resizing;
-#elif FOUNDATION_PLATFORM_MACOSX
+#elif FOUNDATION_PLATFORM_MACOS
 	void*        nswindow;
 	void*        delegate;
 #elif FOUNDATION_PLATFORM_LINUX
@@ -90,7 +90,7 @@ struct window_t {
 #endif
 };
 
-#if FOUNDATION_PLATFORM_MACOSX
+#if FOUNDATION_PLATFORM_MACOS
 #  ifdef __OBJC__
 
 #include <foundation/apple.h>

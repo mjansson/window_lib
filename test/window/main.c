@@ -63,10 +63,8 @@ DECLARE_TEST(window, createdestroy) {
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
-#elif FOUNDATION_PLATFORM_MACOSX
-	window = window_allocate(delegate_nswindow());
-#elif FOUNDATION_PLATFORM_IOS
-	window = window_allocate(delegate_uiwindow());
+#elif FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
+	window = window_allocate(delegate_window());
 #endif
 
 	EXPECT_NE(window, 0);
@@ -130,13 +128,13 @@ DECLARE_TEST(window, createdestroy) {
 			break;
 		}
 	}
-#if FOUNDATION_PLATFORM_MACOSX
+#if FOUNDATION_PLATFORM_MACOS
 	EXPECT_INTEQ(got_destroy, 0); //Does not destroy actual NS window
 #else
 	EXPECT_INTEQ(got_destroy, 1);
 #endif
 	EXPECT_INTLE(got_unfocus, 1); //Potential event
-#if FOUNDATION_PLATFORM_MACOSX
+#if FOUNDATION_PLATFORM_MACOS
 	EXPECT_INTEQ(got_hide, 0); //Does not hide actual NS window
 #else
 	EXPECT_INTEQ(got_hide, 1);
@@ -162,10 +160,8 @@ DECLARE_TEST(window, sizemove) {
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
-#elif FOUNDATION_PLATFORM_MACOSX
-	window = window_allocate(delegate_nswindow());
-#elif FOUNDATION_PLATFORM_IOS
-	window = window_allocate(delegate_uiwindow());
+#elif FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
+	window = window_allocate(delegate_window());
 #endif
 
 	window_event_process();
