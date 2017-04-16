@@ -11,10 +11,10 @@
  */
 
 #include <window/window.h>
-#include <window/internal.h>
 
 #if FOUNDATION_PLATFORM_MACOSX
 
+#include <window/internal.h>
 #include <foundation/apple.h>
 
 static volatile int _dummy_window_class_reference = 0;

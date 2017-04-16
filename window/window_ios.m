@@ -11,10 +11,10 @@
  */
 
 #include <window/window.h>
-#include <window/internal.h>
 
 #if FOUNDATION_PLATFORM_IOS
 
+#include <window/internal.h>
 #include <foundation/apple.h>
 #include <objc/runtime.h>
 
