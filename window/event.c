@@ -58,6 +58,9 @@ window_event_process(void) {
 			break;
 	}
 	window_event_token++;
+#elif FOUNDATION_PLATFORM_LINUX
+	/*while (XPending(dis))
+		XNextEvent(dis, &ev);*/
 #endif
 }
 

@@ -152,8 +152,18 @@ window_finalize(window_t* window) {
 		XDestroyWindow(window->display, window->drawable);
 		XFlush(window->display);
 		XSync(window->display, False);
-		window->drawable = 0;
 	}
+	window->drawable = 0;
+
+	if (window->created && window->visual) {
+		XFree(window->visual);
+		XSync(window->display, True);
+	}
+	window->visual = 0;
+
+	if (window->display)
+		XCloseDisplay(window->display);
+	window->display = 0;
 }
 
 void
