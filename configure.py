@@ -19,6 +19,10 @@ toolchain = generator.toolchain
 window_lib = generator.lib(module = 'window', sources = [
   'event.c', 'version.c', 'window.c', 'window_android.c', 'window_ios.m', 'window_linux.c', 'window_osx.m', 'window_windows.c'])
 
+#No test cases if we're a submodule
+if generator.is_subninja():
+  sys.exit()
+
 includepaths = generator.test_includepaths()
 
 gllibs = []
