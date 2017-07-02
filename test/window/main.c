@@ -59,7 +59,7 @@ DECLARE_TEST(window, createdestroy) {
 	int got_create, got_destroy, got_show, got_hide, got_focus, got_unfocus, got_redraw, got_resize;
 	int got_other;
 
-	thread_sleep(1000);
+	thread_sleep(100);
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
@@ -70,6 +70,7 @@ DECLARE_TEST(window, createdestroy) {
 	EXPECT_NE(window, 0);
 	EXPECT_TRUE(window_is_open(window));
 
+	thread_sleep(100);
 	window_event_process();
 	stream = window_event_stream();
 	block = event_stream_process(stream);
@@ -133,12 +134,8 @@ DECLARE_TEST(window, createdestroy) {
 #else
 	EXPECT_INTEQ(got_destroy, 1);
 #endif
+	EXPECT_INTLE(got_hide, 1); //Potential event
 	EXPECT_INTLE(got_unfocus, 1); //Potential event
-#if FOUNDATION_PLATFORM_MACOS
-	EXPECT_INTEQ(got_hide, 0); //Does not hide actual NS window
-#else
-	EXPECT_INTEQ(got_hide, 1);
-#endif
 	EXPECT_INTEQ(got_other, 0);
 
 	EXPECT_FALSE(window_is_open(window));
@@ -156,7 +153,7 @@ DECLARE_TEST(window, sizemove) {
 	int got_other;
 #endif
 	
-	thread_sleep(1000);
+	thread_sleep(100);
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
 	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
@@ -164,6 +161,7 @@ DECLARE_TEST(window, sizemove) {
 	window = window_allocate(delegate_window());
 #endif
 
+	thread_sleep(100);
 	window_event_process();
 	stream = window_event_stream();
 	block = event_stream_process(stream);
@@ -198,6 +196,7 @@ DECLARE_TEST(window, sizemove) {
 			got_redraw++;
 			break;
 		default:
+			log_warnf(HASH_TEST, WARNING_INVALID_VALUE, STRING_CONST("Got invalid window event: %d"), event->id);
 			got_other++;
 			break;
 		}

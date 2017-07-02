@@ -13,31 +13,68 @@
 #include <window/window.h>
 #include <window/internal.h>
 
+#include <foundation/array.h>
 #include <foundation/event.h>
+#include <foundation/semaphore.h>
 
 #if FOUNDATION_PLATFORM_WINDOWS
 #include <foundation/windows.h>
-tick_t window_event_token;
 #endif
+
+tick_t window_event_token;
 
 static event_stream_t* _window_stream = 0;
 
 bool _window_app_started = false;
 bool _window_app_paused = true;
 
+#if FOUNDATION_PLATFORM_LINUX
+static semaphore_t _windows_lock;
+static window_t** _windows;
+#endif
+
 int
 _window_event_initialize(void) {
-	if (!_window_stream)
-		_window_stream = event_stream_allocate(1024);
+	_window_stream = event_stream_allocate(1024);
+	window_event_token = 1;
+#if FOUNDATION_PLATFORM_LINUX
+	semaphore_initialize(&_windows_lock, 1);
+	_windows = 0;
+#endif
 	return 0;
 }
 
 void
 _window_event_finalize(void) {
-	if (_window_stream)
-		event_stream_deallocate(_window_stream);
-	_window_stream = 0;
+#if FOUNDATION_PLATFORM_LINUX
+	array_deallocate(_windows);
+	semaphore_finalize(&_windows_lock);
+#endif
+	event_stream_deallocate(_window_stream);
 }
+
+#if FOUNDATION_PLATFORM_LINUX
+
+void
+_window_event_add(window_t* window) {
+	semaphore_wait(&_windows_lock);
+	array_push(_windows, window);
+	semaphore_post(&_windows_lock);
+}
+
+void
+_window_event_remove(window_t* window) {
+	semaphore_wait(&_windows_lock);
+	for (size_t iwin = 0, wsize = array_size(_windows); iwin < wsize; ++iwin) {
+		if (_windows[iwin] == window) {
+			array_erase(_windows, iwin);
+			break;
+		}
+	}
+	semaphore_post(&_windows_lock);
+}
+
+#endif
 
 void
 window_event_post(window_event_id id, window_t* window) {
@@ -57,11 +94,71 @@ window_event_process(void) {
 		if (msg.message >= WM_MOUSEFIRST)
 			break;
 	}
-	window_event_token++;
 #elif FOUNDATION_PLATFORM_LINUX
-	/*while (XPending(dis))
-		XNextEvent(dis, &ev);*/
+	if (!semaphore_try_wait(&_windows_lock, 0))
+		return;
+	for (size_t iwin = 0, wsize = array_size(_windows); iwin < wsize; ++iwin) {
+		window_t* window = _windows[iwin];
+		while (XPending(window->display)) {
+			XEvent event;
+			XNextEvent(window->display, &event);
+			if (True == XFilterEvent(&event, window->drawable))
+				continue;
+
+			switch (event.type) {
+			case ClientMessage:
+				if (event.xclient.data.l[0] == (long)window->atom_delete)
+					window_event_post(WINDOWEVENT_CLOSE, window);
+				break;
+
+			case ConfigureNotify:
+				if (window->last_resize != window_event_token) {
+					window_event_post(WINDOWEVENT_RESIZE, window);
+					window->last_resize = window_event_token;
+				}
+				if (window->last_paint != window_event_token) {
+					window_event_post(WINDOWEVENT_REDRAW, window);
+					window->last_paint = window_event_token;
+				}
+				break;
+
+			case VisibilityNotify: {
+					XVisibilityEvent* visibility = (XVisibilityEvent*)&event;
+					if (visibility->state == VisibilityFullyObscured) {
+						if (window->visible)
+							window_event_post(WINDOWEVENT_HIDE, window);
+						window->visible = false;
+					}
+					else {
+						if (!window->visible) {
+							window_event_post(WINDOWEVENT_SHOW, window);
+							if (window->last_paint != window_event_token) {
+								window_event_post(WINDOWEVENT_REDRAW, window);
+								window->last_paint = window_event_token;
+							}
+						}
+						window->visible = true;
+					}
+					break;
+				}
+
+			case FocusIn:
+				if (!window->focus)
+					window_event_post(WINDOWEVENT_GOTFOCUS, window);
+				window->focus = true;
+				break;
+
+			case FocusOut:
+				if (window->focus)
+					window_event_post(WINDOWEVENT_LOSTFOCUS, window);
+				window->focus = false;
+				break;
+			}
+		}
+	}
+	semaphore_post(&_windows_lock);
 #endif
+	window_event_token++;
 }
 
 event_stream_t*

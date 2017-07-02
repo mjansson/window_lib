@@ -19,6 +19,10 @@
 
 #include <GL/glx.h>
 
+#define _NET_WM_STATE_REMOVE 0
+#define _NET_WM_STATE_ADD 1
+//#define _NET_WM_STATE_TOGGLE 2
+
 static XVisualInfo*
 _get_xvisual(Display* display, int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
 #if FOUNDATION_PLATFORM_LINUX_RASPBERRYPI
@@ -114,10 +118,14 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 	window->visual   = visual;
 	window->screen   = (unsigned int)screen;
 	window->drawable = drawable;
-	window->atom     = atom_delete;
 	window->xim      = xim;
 	window->xic      = xic;
 	window->created  = true;
+	window->atom_delete = atom_delete;
+
+	_window_event_add(window);
+
+	window_event_post(WINDOWEVENT_CREATE, window);
 
 	return window;
 
@@ -148,10 +156,14 @@ window_visual(window_t* window) {
 
 void
 window_finalize(window_t* window) {
+	if (window->created)
+		_window_event_remove(window);
+
 	if (window->created && window->drawable) {
 		XDestroyWindow(window->display, window->drawable);
 		XFlush(window->display);
 		XSync(window->display, False);
+		window_event_post(WINDOWEVENT_DESTROY, window);
 	}
 	window->drawable = 0;
 
@@ -180,7 +192,22 @@ window_adapter(window_t* window) {
 
 void
 window_maximize(window_t* window) {
-	FOUNDATION_UNUSED(window);
+	XEvent event = {0};
+	Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
+	Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	Atom atom_vertical = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+
+	event.type = ClientMessage;
+	event.xclient.window = window->drawable;
+	event.xclient.message_type = atom_wmstate;
+	event.xclient.format = 32;
+	event.xclient.data.l[0] = _NET_WM_STATE_ADD;
+	event.xclient.data.l[1] = (long)atom_horizontal;
+	event.xclient.data.l[2] = (long)atom_vertical;
+
+	XSendEvent(window->display, DefaultRootWindow(window->display), False, SubstructureNotifyMask, &event);
+	XFlush(window->display);
+	XSync(window->display, False);
 }
 
 void
@@ -190,7 +217,24 @@ window_minimize(window_t* window) {
 
 void
 window_restore(window_t* window) {
-	FOUNDATION_UNUSED(window);
+	if (window_is_maximized(window)) {
+		XEvent event = {0};
+		Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
+		Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		Atom atom_vertical = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+
+		event.type = ClientMessage;
+		event.xclient.window = window->drawable;
+		event.xclient.message_type = atom_wmstate;
+		event.xclient.format = 32;
+		event.xclient.data.l[0] = _NET_WM_STATE_REMOVE;
+		event.xclient.data.l[1] = (long)atom_horizontal;
+		event.xclient.data.l[2] = (long)atom_vertical;
+
+		XSendEvent(window->display, DefaultRootWindow(window->display), False, SubstructureNotifyMask, &event);
+		XFlush(window->display);
+		XSync(window->display, False);
+	}
 }
 
 void
@@ -220,8 +264,25 @@ window_is_visible(window_t* window) {
 
 bool
 window_is_maximized(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return false;
+	Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
+	Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+
+	Atom actual_type;
+    int actual_format;
+    unsigned long i, num_items, bytes_after;
+    Atom* atoms = 0;
+    bool is_maximized = false;
+
+    XGetWindowProperty(window->display, window->drawable, atom_wmstate, 0, 32, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+    for (i = 0; i < num_items; ++i) {
+        if (atoms[i] == atom_horizontal) {
+            is_maximized = true;
+            break;
+        }
+    }
+    
+    XFree(atoms);
+    return is_maximized;
 }
 
 bool

@@ -34,7 +34,8 @@ elif target.is_ios():
 if target.is_windows():
   gllibs = ['gdi32']
 if target.is_linux():
-  gllibs = ['GL', 'X11']
+  gllibs = ['GL', 'Xext', 'X11']
+  print("GLlibs: " + str(gllibs))
 
 test_cases = [
   'window'
@@ -66,7 +67,7 @@ if toolchain.is_monolithic() or target.is_ios() or target.is_android() or target
     generator.bin(module = '', sources = [os.path.join(module, 'main.c') for module in test_cases] + test_extrasources, binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['test', 'window', 'foundation'] + gllibs, frameworks = glframeworks, resources = test_resources, includepaths = includepaths)
 else:
   #Build one binary per test case
-  generator.bin(module = 'all', sources = ['main.c'], binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['window', 'foundation'], includepaths = includepaths)
+  generator.bin(module = 'all', sources = ['main.c'], binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['window', 'foundation'] + gllibs, includepaths = includepaths)
   for test in test_cases:
     if target.is_macos():
       test_resources = [os.path.join('osx', item) for item in ['test-' + test + '.plist', 'Images.xcassets', 'test-' + test + '.xib']]

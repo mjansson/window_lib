@@ -61,8 +61,6 @@ struct window_t {
 	int          cursor_pos_x;
 	int          cursor_pos_y;
 	unsigned int wstyle;
-	tick_t       last_paint;
-	tick_t       last_resize;
 	bool         is_resizing;
 #elif FOUNDATION_PLATFORM_MACOS
 	void*        nswindow;
@@ -74,7 +72,7 @@ struct window_t {
 	unsigned int screen;
 	XVisualInfo* visual;
 	Window       drawable;
-	Atom         atom;
+	Atom         atom_delete;
 	XIM          xim;
 	XIC          xic;
 	bool         focus;
@@ -88,6 +86,8 @@ struct window_t {
 	int          height;
 	void*        native;
 #endif
+	tick_t       last_paint;
+	tick_t       last_resize;
 };
 
 #if FOUNDATION_PLATFORM_MACOS

@@ -22,6 +22,7 @@
 #if FOUNDATION_PLATFORM_LINUX
 #  include <X11/Xlib.h>
 #  include <X11/Xutil.h>
+#  include <X11/Xatom.h>
 #  include <X11/extensions/xf86vmode.h>
 #endif
 
@@ -31,11 +32,7 @@ _window_event_initialize(void);
 WINDOW_EXTERN void
 _window_event_finalize(void);
 
-#if FOUNDATION_PLATFORM_WINDOWS
-
 WINDOW_EXTERN tick_t window_event_token;
-
-#endif
 
 #if FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
 
@@ -51,6 +48,16 @@ _window_native_initialize(void);
 
 WINDOW_EXTERN void
 _window_native_finalize(void);
+
+#endif
+
+#if FOUNDATION_PLATFORM_LINUX
+
+WINDOW_EXTERN void
+_window_event_add(window_t* window);
+
+WINDOW_EXTERN void
+_window_event_remove(window_t* window);
 
 #endif
 
