@@ -152,7 +152,8 @@ DECLARE_TEST(window, sizemove) {
 	int got_resize, got_redraw, got_focus, got_unfocus;
 	int got_other;
 #endif
-	
+	int base_x, base_y;
+
 	thread_sleep(100);
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
@@ -169,7 +170,7 @@ DECLARE_TEST(window, sizemove) {
 
 	EXPECT_NE(window, 0);
 	EXPECT_TRUE(window_is_open(window));
-	
+
 	EXPECT_TRUE(window_is_visible(window));
 	EXPECT_TRUE(window_has_focus(window));
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
@@ -196,7 +197,8 @@ DECLARE_TEST(window, sizemove) {
 			got_redraw++;
 			break;
 		default:
-			log_warnf(HASH_TEST, WARNING_INVALID_VALUE, STRING_CONST("Got invalid window event: %d"), event->id);
+			log_warnf(HASH_TEST, WARNING_INVALID_VALUE, STRING_CONST("Got invalid window event: %d"),
+			          event->id);
 			got_other++;
 			break;
 		}
@@ -280,20 +282,26 @@ DECLARE_TEST(window, sizemove) {
 	EXPECT_FALSE(window_is_maximized(window));
 	EXPECT_TRUE(window_has_focus(window));
 
-	window_move(window, 10, 20);
+	window_move(window, 200, 300);
+	thread_sleep(1000);
+
+	base_x = window_position_x(window);
+	base_y = window_position_y(window);
+	window_move(window, 300, 500);
 	thread_sleep(1000);
 
 	window_event_process();
 	block = event_stream_process(stream);
 
-	EXPECT_INTEQ(window_position_x(window), 10);
-	EXPECT_INTEQ(window_position_y(window), 20);
+
+	EXPECT_INTEQ(window_position_x(window), base_x + 100);
+	EXPECT_INTEQ(window_position_y(window), base_y + 200);
 	EXPECT_FALSE(window_is_maximized(window));
 	EXPECT_TRUE(window_has_focus(window));
-	
+
 	window_minimize(window);
 	thread_sleep(1000);
-	
+
 	window_event_process();
 	block = event_stream_process(stream);
 	event = 0;
@@ -325,7 +333,7 @@ DECLARE_TEST(window, sizemove) {
 
 	window_restore(window);
 	thread_sleep(1000);
-	
+
 	window_event_process();
 	block = event_stream_process(stream);
 	event = 0;

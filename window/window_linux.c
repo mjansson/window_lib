@@ -24,7 +24,8 @@
 //#define _NET_WM_STATE_TOGGLE 2
 
 static XVisualInfo*
-_get_xvisual(Display* display, int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
+_get_xvisual(Display* display, int screen, unsigned int color, unsigned int depth,
+             unsigned int stencil) {
 #if FOUNDATION_PLATFORM_LINUX_RASPBERRYPI
 	return 0;
 #else
@@ -47,8 +48,8 @@ _get_xvisual(Display* display, int screen, unsigned int color, unsigned int dept
 }
 
 window_t*
-window_create(unsigned int adapter, const char* title, size_t length, unsigned int width, unsigned int height,
-              bool show) {
+window_create(unsigned int adapter, const char* title, size_t length,
+              int width, int height, bool show) {
 	FOUNDATION_UNUSED(length);
 
 	Display* display = XOpenDisplay(0);
@@ -60,29 +61,38 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 	int screen = (adapter != WINDOW_ADAPTER_DEFAULT) ? (int)adapter : DefaultScreen(display);
 	XVisualInfo* visual = _get_xvisual(display, screen, 24, 16, 0);
 	if (!visual) {
-		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to get X visual for screen %d"), screen);
+		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL,
+		           STRING_CONST("Unable to get X visual for screen %d"), screen);
 		goto fail;
 	}
 
-	Colormap colormap = XCreateColormap(display, XRootWindow(display, screen), visual->visual, AllocNone);
+	Colormap colormap = XCreateColormap(display, XRootWindow(display, screen), visual->visual,
+	                                    AllocNone);
 
-	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %d with dimensions %ux%u"), screen, width, height);
+	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %d with dimensions %ux%u"), screen,
+	           width, height);
 
 	XSetWindowAttributes attrib;
 	attrib.colormap         = colormap;
 	attrib.background_pixel = 0;
 	attrib.border_pixel     = 0;
-	attrib.event_mask       = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask | Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask | Button5MotionMask | ButtonMotionMask | KeyPressMask | KeyReleaseMask | KeymapStateMask | VisibilityChangeMask | FocusChangeMask;
-	Window drawable = XCreateWindow(display, XRootWindow(display, screen), 0, 0, width, height, 0, visual->depth, InputOutput, visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
+	attrib.event_mask       = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask |
+	                          EnterWindowMask | LeaveWindowMask | PointerMotionMask | Button1MotionMask | Button2MotionMask |
+	                          Button3MotionMask | Button4MotionMask | Button5MotionMask | ButtonMotionMask | KeyPressMask |
+	                          KeyReleaseMask | KeymapStateMask | VisibilityChangeMask | FocusChangeMask;
+	Window drawable = XCreateWindow(display, XRootWindow(display, screen), 0, 0,
+	                                (unsigned int)width, (unsigned int)height, 0, visual->depth, InputOutput,
+	                                visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
 
-	XSizeHints sizehints;
-	sizehints.x      = 0;
-	sizehints.y      = 0;
-	sizehints.width  = (int)width;
-	sizehints.height = (int)height;
-	sizehints.flags  = USSize | USPosition;
-	XSetNormalHints(display, drawable, &sizehints);
-	XSetStandardProperties(display, drawable, title, title, None, 0, 0, &sizehints);
+	XSizeHints* sizehints = XAllocSizeHints();
+	if (sizehints) {
+		sizehints->base_width  = width;
+		sizehints->base_height = height;
+		sizehints->flags = PBaseSize;
+	}
+	XSetStandardProperties(display, drawable, title, title, None, 0, 0, sizehints);
+	if (sizehints)
+		XFree(sizehints);
 
 	if (show) {
 		XMapWindow(display, drawable);
@@ -91,16 +101,16 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 	}
 
 	Atom atom_delete = XInternAtom(display, "WM_DELETE_WINDOW", False);
-
 	XSetWMProtocols(display, drawable, &atom_delete, 1);
 	XFlush(display);
 	XSync(display, False);
 
 	XIC xic = 0;
 	XIM xim = XOpenIM(display, 0, 0, 0);
-	if(xim) {
-		xic = XCreateIC(xim, XNInputStyle, XIMPreeditNone | XIMStatusNone, XNClientWindow, drawable, nullptr);
-		if(xic) {
+	if (xim) {
+		xic = XCreateIC(xim, XNInputStyle, XIMPreeditNone | XIMStatusNone, XNClientWindow,
+		                drawable, nullptr);
+		if (xic) {
 			/*XGetICValues(ic, XNFilterEvents, &fevent, NULL);
 			mask = ExposureMask | KeyPressMask | FocusChangeMask;
 			XSelectInput(display, window, mask|fevent);*/
@@ -113,7 +123,8 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		log_warn(HASH_WINDOW, WARNING_SUSPICIOUS, STRING_CONST("Unable to open X input method"));
 	}
 
-	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
+	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	window->display  = display;
 	window->visual   = visual;
 	window->screen   = (unsigned int)screen;
@@ -205,19 +216,47 @@ window_maximize(window_t* window) {
 	event.xclient.data.l[1] = (long)atom_horizontal;
 	event.xclient.data.l[2] = (long)atom_vertical;
 
-	XSendEvent(window->display, DefaultRootWindow(window->display), False, SubstructureNotifyMask, &event);
+	XSendEvent(window->display, XRootWindow(window->display, (int)window->screen), False,
+	           SubstructureNotifyMask, &event);
 	XFlush(window->display);
 	XSync(window->display, False);
 }
 
 void
 window_minimize(window_t* window) {
-	FOUNDATION_UNUSED(window);
+	if (window_is_minimized(window))
+		return;
+	XIconifyWindow(window->display, window->drawable, (int)window->screen);
+	XFlush(window->display);
+	XSync(window->display, False);
+	window_event_post(WINDOWEVENT_RESIZE, window);
 }
 
 void
 window_restore(window_t* window) {
-	if (window_is_maximized(window)) {
+	if (window_is_minimized(window)) {
+		XEvent event = {0};
+		Atom atom_changestate = XInternAtom(window->display, "WM_CHANGE_STATE", False);
+
+		event.type = ClientMessage;
+		event.xclient.window = window->drawable;
+		event.xclient.message_type = atom_changestate;
+		event.xclient.format = 32;
+		event.xclient.data.l[0] = NormalState;
+
+		XSendEvent(window->display, XRootWindow(window->display, (int)window->screen), False,
+		           SubstructureRedirectMask | SubstructureNotifyMask, &event);
+		XFlush(window->display);
+		XSync(window->display, False);
+		window_event_post(WINDOWEVENT_RESIZE, window);
+		window_event_post(WINDOWEVENT_REDRAW, window);
+
+		XSetInputFocus(window->display, window->drawable, RevertToParent, CurrentTime);
+		XFlush(window->display);
+		XSync(window->display, False);
+
+	}
+	else if (window_is_maximized(window)) {
 		XEvent event = {0};
 		Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
 		Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
@@ -231,24 +270,27 @@ window_restore(window_t* window) {
 		event.xclient.data.l[1] = (long)atom_horizontal;
 		event.xclient.data.l[2] = (long)atom_vertical;
 
-		XSendEvent(window->display, DefaultRootWindow(window->display), False, SubstructureNotifyMask, &event);
+		XSendEvent(window->display, XRootWindow(window->display, (int)window->screen), False,
+		           SubstructureNotifyMask, &event);
 		XFlush(window->display);
 		XSync(window->display, False);
 	}
 }
 
 void
-window_resize(window_t* window, unsigned int width, unsigned int height) {
-	FOUNDATION_UNUSED(window);
-	FOUNDATION_UNUSED(width);
-	FOUNDATION_UNUSED(height);
+window_resize(window_t* window, int width, int height) {
+	window_restore(window);
+	XResizeWindow(window->display, window->drawable, (unsigned int)width, (unsigned int)height);
+	XFlush(window->display);
+	XSync(window->display, False);
 }
 
 void
 window_move(window_t* window, int x, int y) {
-	FOUNDATION_UNUSED(window);
-	FOUNDATION_UNUSED(x);
-	FOUNDATION_UNUSED(y);
+	window_restore(window);
+	XMoveWindow(window->display, window->drawable, x, y);
+	XFlush(window->display);
+	XSync(window->display, False);
 }
 
 bool
@@ -268,33 +310,56 @@ window_is_maximized(window_t* window) {
 	Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 
 	Atom actual_type;
-    int actual_format;
-    unsigned long i, num_items, bytes_after;
-    Atom* atoms = 0;
-    bool is_maximized = false;
+	int actual_format;
+	unsigned long i, num_items, bytes_after;
+	Atom* atoms = 0;
+	bool is_maximized = false;
 
-    XGetWindowProperty(window->display, window->drawable, atom_wmstate, 0, 32, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
-    for (i = 0; i < num_items; ++i) {
-        if (atoms[i] == atom_horizontal) {
-            is_maximized = true;
-            break;
-        }
-    }
-    
-    XFree(atoms);
-    return is_maximized;
+	XGetWindowProperty(window->display, window->drawable, atom_wmstate, 0, 32, False, XA_ATOM,
+	                   &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+	for (i = 0; i < num_items; ++i) {
+		if (atoms[i] == atom_horizontal) {
+			is_maximized = true;
+			break;
+		}
+	}
+
+	if (atoms)
+		XFree(atoms);
+	return is_maximized;
 }
 
 bool
 window_is_minimized(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return false;
+	Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
+	Atom atom_hidden = XInternAtom(window->display, "_NET_WM_STATE_HIDDEN", False);
+
+	Atom actual_type;
+	int actual_format;
+	unsigned long i, num_items, bytes_after;
+	Atom* atoms = 0;
+	bool is_minimized = false;
+
+	XGetWindowProperty(window->display, window->drawable, atom_wmstate, 0, 32, False, XA_ATOM,
+	                   &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+	for (i = 0; i < num_items; ++i) {
+		if (atoms[i] == atom_hidden) {
+			is_minimized = true;
+			break;
+		}
+	}
+
+	if (atoms)
+		XFree(atoms);
+	return is_minimized;
 }
 
 bool
 window_has_focus(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return true;
+	Window focus;
+	int revert;
+	XGetInputFocus(window->display, &focus, &revert);
+	return focus == window->drawable;
 }
 
 void
@@ -325,26 +390,42 @@ window_set_title(window_t* window, const char* title) {
 
 int
 window_width(window_t* window) {
-	FOUNDATION_UNUSED(window);
+	Window root;
+	int x, y;
+	unsigned int width, height, border, depth;
+	if (XGetGeometry(window->display, window->drawable, &root, &x, &y,
+	                 &width, &height, &border, &depth))
+		return (int)width;
 	return 0;
 }
 
 int
 window_height(window_t* window) {
-	FOUNDATION_UNUSED(window);
+	Window root;
+	int x, y;
+	unsigned int width, height, border, depth;
+	if (XGetGeometry(window->display, window->drawable, &root, &x, &y,
+	                 &width, &height, &border, &depth))
+		return (int)height;
 	return 0;
 }
 
 int
 window_position_x(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return 0;
+	Window child;
+	int x, y;
+	Window root = XRootWindow(window->display, (int)window->screen);
+	XTranslateCoordinates(window->display, window->drawable, root, 0, 0, &x, &y, &child);
+	return x;
 }
 
 int
 window_position_y(window_t* window) {
-	FOUNDATION_UNUSED(window);
-	return 0;
+	Window child;
+	int x, y;
+	Window root = XRootWindow(window->display, (int)window->screen);
+	XTranslateCoordinates(window->display, window->drawable, root, 0, 0, &x, &y, &child);
+	return y;
 }
 
 void

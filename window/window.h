@@ -49,7 +49,7 @@ WINDOW_API void
 window_restore(window_t* window);
 
 WINDOW_API void
-window_resize(window_t* window, unsigned int width, unsigned int height);
+window_resize(window_t* window, int width, int height);
 
 WINDOW_API void
 window_move(window_t* window, int x, int y);
@@ -99,8 +99,8 @@ window_fit_to_screen(window_t* window);
 #if FOUNDATION_PLATFORM_WINDOWS
 
 WINDOW_API window_t*
-window_create(unsigned int adapter, const char* title, size_t length, unsigned int width,
-              unsigned int height, bool show);
+window_create(unsigned int adapter, const char* title, size_t length, int width,
+              int height, bool show);
 
 WINDOW_API window_t*
 window_allocate(void* hwnd);
@@ -140,8 +140,8 @@ window_content_view(window_t* window);   //NSView*
 #elif FOUNDATION_PLATFORM_LINUX
 
 WINDOW_API window_t*
-window_create(unsigned int adapter, const char* title, size_t length, unsigned int width,
-              unsigned int height, bool show);
+window_create(unsigned int adapter, const char* title, size_t length, int width,
+              int height, bool show);
 
 WINDOW_API void*
 window_display(window_t* window);
