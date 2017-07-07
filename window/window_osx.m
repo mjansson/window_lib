@@ -134,7 +134,7 @@ window_restore(window_t* window) {
 }
 
 void
-window_resize(window_t* window, unsigned int width, unsigned int height) {
+window_resize(window_t* window, int width, int height) {
 	if (!window || !window->nswindow)
 		return;
 
