@@ -116,8 +116,8 @@ default_process:
 }
 
 window_t*
-window_create(unsigned int adapter, const char* title, size_t length, unsigned int width,
-              unsigned int height, bool show) {
+window_create(unsigned int adapter, const char* title, size_t length, int width,
+              int height, bool show) {
 	wchar_t wndclassname[64];
 	window_t* window;
 	WNDCLASSW wc;
@@ -135,7 +135,7 @@ window_create(unsigned int adapter, const char* title, size_t length, unsigned i
 		static atomic32_t counter = {0};
 		_snwprintf_s(wndclassname, sizeof(wndclassname), _TRUNCATE,
 		             L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d", time_current(),
-		             atomic_incr32(&counter));
+		             atomic_incr32(&counter, memory_order_relaxed));
 		wc.lpfnWndProc    = (WNDPROC)_window_proc;
 		wc.cbClsExtra     = 0;
 		wc.cbWndExtra     = 0;
@@ -331,7 +331,7 @@ window_restore(window_t* window) {
 }
 
 void
-window_resize(window_t* window, unsigned int width, unsigned int height) {
+window_resize(window_t* window, int width, int height) {
 	RECT rect = {0};
 	if (window_is_maximized(window))
 		window_restore(window);
