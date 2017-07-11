@@ -90,7 +90,8 @@ window_deallocate(window_t* window) {
 }
 
 void*
-window_content_view(window_t* window) {
+window_view(window_t* window, unsigned int tag) {
+	FOUNDATION_UNUSED(tag);
 	return (__bridge void *)(window && window->nswindow ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
 }
 

@@ -135,7 +135,7 @@ WINDOW_API void
 window_initialize(window_t* window, void* nswindow);
 
 WINDOW_API void*
-window_content_view(window_t* window);   //NSView*
+window_view(window_t* window, unsigned int tag);   //NSView*
 
 #elif FOUNDATION_PLATFORM_LINUX
 
