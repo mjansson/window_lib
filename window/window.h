@@ -79,7 +79,7 @@ WINDOW_API bool
 window_is_cursor_locked(window_t* window);
 
 WINDOW_API void
-window_set_title(window_t* window, const char* title);
+window_set_title(window_t* window, const char* title, size_t length);
 
 WINDOW_API int
 window_width(window_t* window);

@@ -228,15 +228,15 @@ window_is_cursor_locked(window_t* window) {
 }
 
 void
-window_set_title(window_t* window, const char* title) {
+window_set_title(window_t* window, const char* title, size_t length) {
 	if (!window || !window->nswindow)
 		return;
 
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	@autoreleasepool {
-		NSString* titlestr = [NSString stringWithUTF8String:title];
-		if (titlestr)
-			[nswindow setTitle:titlestr];
+		NSString* nsstr = [[NSString alloc] initWithBytes:title length:length encoding:NSUTF8StringEncoding];
+		if (nsstr)
+			[nswindow setTitle:nsstr];
 	}
 }
 

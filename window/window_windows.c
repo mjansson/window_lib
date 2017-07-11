@@ -419,8 +419,8 @@ window_is_cursor_locked(window_t* window) {
 }
 
 void
-window_set_title(window_t* window, const char* title) {
-	wchar_t* wstr = wstring_allocate_from_string(title, 0);
+window_set_title(window_t* window, const char* title, size_t length) {
+	wchar_t* wstr = wstring_allocate_from_string(title, length);
 	SetWindowTextW(window->hwnd, wstr);
 	wstring_deallocate(wstr);
 }

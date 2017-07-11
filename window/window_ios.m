@@ -236,7 +236,7 @@ bool window_is_cursor_locked( window_t* window )
 }
 
 
-void window_set_title( window_t* window, const char* title )
+void window_set_title( window_t* window, const char* title, size_t length)
 {
 }
 

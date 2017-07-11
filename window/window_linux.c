@@ -383,9 +383,10 @@ window_is_cursor_locked(window_t* window) {
 }
 
 void
-window_set_title(window_t* window, const char* title) {
+window_set_title(window_t* window, const char* title, size_t length) {
 	FOUNDATION_UNUSED(window);
 	FOUNDATION_UNUSED(title);
+	FOUNDATION_UNUSED(length);
 }
 
 int
