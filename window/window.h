@@ -96,6 +96,12 @@ window_position_y(window_t* window);
 WINDOW_API void
 window_fit_to_screen(window_t* window);
 
+WINDOW_API int
+window_screen_width(unsigned int adapter);
+
+WINDOW_API int
+window_screen_height(unsigned int adapter);
+
 #if FOUNDATION_PLATFORM_WINDOWS
 
 WINDOW_API window_t*
@@ -119,12 +125,6 @@ window_hdc(window_t* window);
 
 WINDOW_API void
 window_release_hdc(void* hwnd, void* hdc);
-
-WINDOW_API int
-window_screen_width(unsigned int adapter);
-
-WINDOW_API int
-window_screen_height(unsigned int adapter);
 
 #elif FOUNDATION_PLATFORM_MACOS
 

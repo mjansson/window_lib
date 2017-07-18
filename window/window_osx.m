@@ -278,6 +278,18 @@ window_position_y(window_t* window) {
 	return 0;
 }
 
+int
+window_screen_width(unsigned int adapter) {
+	FOUNDATION_UNUSED(adapter);
+	return 0;
+}
+
+int
+window_screen_height(unsigned int adapter) {
+	FOUNDATION_UNUSED(adapter);
+	return 0;
+}
+
 void
 window_fit_to_screen(window_t* window) {
 	if (!window || !window->nswindow)
