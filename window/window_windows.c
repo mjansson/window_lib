@@ -116,6 +116,19 @@ default_process:
 }
 
 window_t*
+window_allocate(void* hwnd) {
+	window_t* window = memory_allocate(0, sizeof(window_t), 0,
+	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	window_initialize(window, hwnd);
+	return window;
+}
+
+void
+window_initialize(window_t* window, void* hwnd) {
+	window->hwnd = hwnd;
+}
+
+window_t*
 window_create(unsigned int adapter, const char* title, size_t length, int width,
               int height, bool show) {
 	wchar_t wndclassname[64];
