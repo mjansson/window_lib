@@ -115,29 +115,14 @@ default_process:
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-window_t*
-window_allocate(void* hwnd) {
-	window_t* window = memory_allocate(0, sizeof(window_t), 0,
-	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
-	window_initialize(window, hwnd);
-	return window;
-}
-
 void
-window_initialize(window_t* window, void* hwnd) {
-	window->hwnd = hwnd;
-}
-
-window_t*
-window_create(unsigned int adapter, const char* title, size_t length, int width,
-              int height, bool show) {
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
+              int width, int height, bool show) {
 	wchar_t wndclassname[64];
-	window_t* window;
 	WNDCLASSW wc;
 	RECT rect;
 
-	window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
-	                         MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	memset(window, 0, sizeof(window_t));
 	window->instance = GetModuleHandle(0);
 	window->created = true;
 	window->adapter = adapter;
@@ -244,8 +229,8 @@ window_create(unsigned int adapter, const char* title, size_t length, int width,
 		string_const_t errmsg = system_error_message(err);
 		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, "Unable to create window: %.*s (%d)",
 		           STRING_FORMAT(errmsg), err);
-		window_deallocate(window);
-		return 0;
+		window_finalize(window);
+		return;
 	}
 
 	if (show) {
@@ -253,14 +238,18 @@ window_create(unsigned int adapter, const char* title, size_t length, int width,
 		if (thread_is_main())
 			window_event_process();
 	}
-
-	return window;
 }
 
 window_t*
-window_allocate_from_hwnd(void* hwnd) {
+window_allocate(void* hwnd) {
 	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
 	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	window_initialize(window, hwnd);
+	return window;
+}
+
+void
+window_initialize(window_t* window, void* hwnd) {
 	window->instance = GetModuleHandle(0);
 	window->created = false;
 	window->adapter = WINDOW_ADAPTER_DEFAULT; //TODO: Get the corresponding adapter for the window
@@ -268,8 +257,6 @@ window_allocate_from_hwnd(void* hwnd) {
 	window->hwnd = hwnd;
 	window->last_paint = -1;
 	window->last_resize = -1;
-
-	return window;
 }
 
 void*

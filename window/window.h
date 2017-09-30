@@ -104,9 +104,9 @@ window_screen_height(unsigned int adapter);
 
 #if FOUNDATION_PLATFORM_WINDOWS
 
-WINDOW_API window_t*
-window_create(unsigned int adapter, const char* title, size_t length, int width,
-              int height, bool show);
+WINDOW_API void
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
+              int width, int height, bool show);
 
 WINDOW_API window_t*
 window_allocate(void* hwnd);
@@ -139,9 +139,9 @@ window_view(window_t* window, unsigned int tag);   //NSView*
 
 #elif FOUNDATION_PLATFORM_LINUX
 
-WINDOW_API window_t*
-window_create(unsigned int adapter, const char* title, size_t length, int width,
-              int height, bool show);
+WINDOW_API void
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
+              int width, int height, bool show);
 
 WINDOW_API void*
 window_display(window_t* window);
