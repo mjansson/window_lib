@@ -16,6 +16,7 @@
 #include <foundation/array.h>
 #include <foundation/event.h>
 #include <foundation/semaphore.h>
+#include <foundation/log.h>
 
 #if FOUNDATION_PLATFORM_WINDOWS
 #include <foundation/windows.h>
@@ -79,7 +80,12 @@ _window_event_remove(window_t* window) {
 void
 window_event_post(window_event_id id, window_t* window) {
 	if (_window_stream)
-		event_post(_window_stream, id, sizeof(window_t*), 0, &window, 0);
+		event_post(_window_stream, id, 0, 0, &window, sizeof(window_t*));
+}
+
+window_t*
+window_event_window(event_t* event) {
+	return *(window_t**)&event->payload[0];
 }
 
 void

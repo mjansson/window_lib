@@ -32,3 +32,8 @@ event namespace to this function.
 WINDOW_API void
 window_event_handle(event_t* event);
 
+/*! Get window related to the event
+\param event Window event
+\return Window */
+WINDOW_API window_t*
+window_event_window(event_t* event);

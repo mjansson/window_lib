@@ -25,14 +25,15 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	LRESULT result;
 
 	if (msg == WM_CREATE) {
+		FOUNDATION_STATIC_ASSERT(sizeof(LONG_PTR) == sizeof(window_t*), "Type size mismatch");
 		window = (window_t*)((CREATESTRUCT*)lparam)->lpCreateParams;
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
 		window_event_post(WINDOWEVENT_CREATE, window);
 		return 0;
 	}
 
-	//log_debugf(HASH_WINDOW, STRING_CONST("WND message 0x%x for window 0x%" PRIfixPTR), msg, hwnd);
 	window = (window_t*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+	//log_debugf(HASH_WINDOW, STRING_CONST("WND message 0x%x for hwnd 0x%" PRIfixPTR " : window 0x%" PRIfixPTR), msg, hwnd, window);
 
 	//_input_service_process_native( hwnd, msg, wparam, lparam );
 
