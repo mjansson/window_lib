@@ -69,7 +69,8 @@ window_initialize(window_t* window, void* nswindow) {
 	WindowDelegate* delegate = [[WindowDelegate alloc] init];
 	delegate.window = window;
 	window->delegate = (__bridge_retained void*)delegate;
-	[(__bridge NSWindow*)window->nswindow setDelegate:delegate];
+	if (window->nswindow)
+		[(__bridge NSWindow*)window->nswindow setDelegate:delegate];
 	window_event_post(WINDOWEVENT_CREATE, window);
 
 	if (window_is_visible(window))
@@ -94,8 +95,8 @@ window_deallocate(window_t* window) {
 void*
 window_view(window_t* window, unsigned int tag) {
 	FOUNDATION_UNUSED(tag);
-	return (__bridge void*)(window &&
-	                        window->nswindow ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
+	return (__bridge void*)((window && window->nswindow) ?
+	                        [(__bridge NSWindow*)window->nswindow contentView] : 0);
 }
 
 unsigned int
