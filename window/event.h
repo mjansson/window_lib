@@ -37,3 +37,11 @@ window_event_handle(event_t* event);
 \return Window */
 WINDOW_API window_t*
 window_event_window(event_t* event);
+
+#if FOUNDATION_PLATFORM_WINDOWS
+
+WINDOW_API void
+window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsigned int msg,
+                         uintptr_t wparam, uintptr_t lparam);
+
+#endif

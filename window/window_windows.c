@@ -35,7 +35,7 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	window = (window_t*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	//log_debugf(HASH_WINDOW, STRING_CONST("WND message 0x%x for hwnd 0x%" PRIfixPTR " : window 0x%" PRIfixPTR), msg, hwnd, window);
 
-	//_input_service_process_native( hwnd, msg, wparam, lparam );
+	window_event_post_native(WINDOWEVENT_NATIVE, window, hwnd, msg, wparam, lparam);
 
 	if (!window)
 		goto default_process;

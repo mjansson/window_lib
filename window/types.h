@@ -39,7 +39,9 @@ typedef enum window_event_id {
 	/*! Window lost focus */
 	WINDOWEVENT_LOSTFOCUS,
 	/*! Window needs to be redrawn */
-	WINDOWEVENT_REDRAW
+	WINDOWEVENT_REDRAW,
+	/*! Native event */
+	WINDOWEVENT_NATIVE
 } window_event_id;
 
 #define WINDOW_ADAPTER_DEFAULT ((unsigned int)-1)
