@@ -44,4 +44,9 @@ WINDOW_API void
 window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsigned int msg,
                          uintptr_t wparam, uintptr_t lparam);
 
+#elif FOUNDATION_PLATFORM_LINUX
+
+WINDOW_API void
+window_event_post_native(window_event_id id, window_t* window, void* xevent);
+
 #endif

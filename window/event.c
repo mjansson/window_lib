@@ -90,7 +90,15 @@ window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsig
                          uintptr_t wparam, uintptr_t lparam) {
 	if (_window_stream)
 		event_post_varg(_window_stream, id, 0, 0, &window, sizeof(window_t), &hwnd, sizeof(void*),
-		                &wparam, sizeof(uintptr_t), &lparam, sizeof(uintptr_t), nullptr, 0);
+		                &wparam, sizeof(uintptr_t), &lparam, sizeof(uintptr_t), nullptr, nullptr);
+}
+
+#elif FOUNDATION_PLATFORM_LINUX
+
+void
+window_event_post_native(window_event_id id, window_t* window, void* xevent) {
+	if (_window_stream)
+		event_post_varg(_window_stream, id, 0, 0, &window, sizeof(window_t), xevent, sizeof(XEvent), nullptr, nullptr);
 }
 
 #endif
@@ -123,6 +131,9 @@ window_event_process(void) {
 			if (True == XFilterEvent(&event, window->drawable))
 				continue;
 
+			window_event_post_native(WINDOWEVENT_NATIVE, window, &event);
+
+			XVisibilityEvent* visibility;
 			switch (event.type) {
 			case ClientMessage:
 				if (event.xclient.data.l[0] == (long)window->atom_delete)
@@ -140,25 +151,24 @@ window_event_process(void) {
 				}
 				break;
 
-			case VisibilityNotify: {
-					XVisibilityEvent* visibility = (XVisibilityEvent*)&event;
-					if (visibility->state == VisibilityFullyObscured) {
-						if (window->visible)
-							window_event_post(WINDOWEVENT_HIDE, window);
-						window->visible = false;
-					}
-					else {
-						if (!window->visible) {
-							window_event_post(WINDOWEVENT_SHOW, window);
-							if (window->last_paint != window_event_token) {
-								window_event_post(WINDOWEVENT_REDRAW, window);
-								window->last_paint = window_event_token;
-							}
-						}
-						window->visible = true;
-					}
-					break;
+			case VisibilityNotify:
+				visibility = (XVisibilityEvent*)&event;
+				if (visibility->state == VisibilityFullyObscured) {
+					if (window->visible)
+						window_event_post(WINDOWEVENT_HIDE, window);
+					window->visible = false;
 				}
+				else {
+					if (!window->visible) {
+						window_event_post(WINDOWEVENT_SHOW, window);
+						if (window->last_paint != window_event_token) {
+							window_event_post(WINDOWEVENT_REDRAW, window);
+							window->last_paint = window_event_token;
+						}
+					}
+					window->visible = true;
+				}
+				break;
 
 			case FocusIn:
 				if (!window->focus)

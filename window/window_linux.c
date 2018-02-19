@@ -47,15 +47,15 @@ _get_xvisual(Display* display, int screen, unsigned int color, unsigned int dept
 #endif
 }
 
-window_t*
-window_create(unsigned int adapter, const char* title, size_t length,
-              int width, int height, bool show) {
+void
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
+              unsigned int width, unsigned int height, bool show) {
 	FOUNDATION_UNUSED(length);
 
 	Display* display = XOpenDisplay(0);
 	if (!display) {
 		log_error(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to open X display"));
-		goto fail;
+		return;
 	}
 
 	int screen = (adapter != WINDOW_ADAPTER_DEFAULT) ? (int)adapter : DefaultScreen(display);
@@ -63,7 +63,7 @@ window_create(unsigned int adapter, const char* title, size_t length,
 	if (!visual) {
 		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL,
 		           STRING_CONST("Unable to get X visual for screen %d"), screen);
-		goto fail;
+		return;
 	}
 
 	Colormap colormap = XCreateColormap(display, XRootWindow(display, screen), visual->visual,
@@ -86,8 +86,8 @@ window_create(unsigned int adapter, const char* title, size_t length,
 
 	XSizeHints* sizehints = XAllocSizeHints();
 	if (sizehints) {
-		sizehints->base_width  = width;
-		sizehints->base_height = height;
+		sizehints->base_width  = (int)width;
+		sizehints->base_height = (int)height;
 		sizehints->flags = PBaseSize;
 	}
 	XSetStandardProperties(display, drawable, title, title, None, 0, 0, sizehints);
@@ -123,8 +123,6 @@ window_create(unsigned int adapter, const char* title, size_t length,
 		log_warn(HASH_WINDOW, WARNING_SUSPICIOUS, STRING_CONST("Unable to open X input method"));
 	}
 
-	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
-	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	window->display  = display;
 	window->visual   = visual;
 	window->screen   = (unsigned int)screen;
@@ -137,12 +135,6 @@ window_create(unsigned int adapter, const char* title, size_t length,
 	_window_event_add(window);
 
 	window_event_post(WINDOWEVENT_CREATE, window);
-
-	return window;
-
-fail:
-
-	return 0;
 }
 
 void*
@@ -389,25 +381,25 @@ window_set_title(window_t* window, const char* title, size_t length) {
 	FOUNDATION_UNUSED(length);
 }
 
-int
+unsigned int
 window_width(window_t* window) {
 	Window root;
 	int x, y;
 	unsigned int width, height, border, depth;
 	if (XGetGeometry(window->display, window->drawable, &root, &x, &y,
 	                 &width, &height, &border, &depth))
-		return (int)width;
+		return width;
 	return 0;
 }
 
-int
+unsigned int
 window_height(window_t* window) {
 	Window root;
 	int x, y;
 	unsigned int width, height, border, depth;
 	if (XGetGeometry(window->display, window->drawable, &root, &x, &y,
 	                 &width, &height, &border, &depth))
-		return (int)height;
+		return height;
 	return 0;
 }
 

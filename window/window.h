@@ -81,10 +81,10 @@ window_is_cursor_locked(window_t* window);
 WINDOW_API void
 window_set_title(window_t* window, const char* title, size_t length);
 
-WINDOW_API int
+WINDOW_API unsigned int
 window_width(window_t* window);
 
-WINDOW_API int
+WINDOW_API unsigned int
 window_height(window_t* window);
 
 WINDOW_API int
@@ -106,7 +106,7 @@ window_screen_height(unsigned int adapter);
 
 WINDOW_API void
 window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              int width, int height, bool show);
+              unsigned int width, unsigned int height, bool show);
 
 WINDOW_API window_t*
 window_allocate(void* hwnd);
@@ -141,7 +141,7 @@ window_view(window_t* window, unsigned int tag);   //NSView*
 
 WINDOW_API void
 window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              int width, int height, bool show);
+              unsigned int width, unsigned int height, bool show);
 
 WINDOW_API void*
 window_display(window_t* window);

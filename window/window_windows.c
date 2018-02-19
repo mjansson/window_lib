@@ -118,7 +118,7 @@ default_process:
 
 void
 window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              int width, int height, bool show) {
+              unsigned int width, unsigned int height, bool show) {
 	wchar_t wndclassname[64];
 	WNDCLASSW wc;
 	RECT rect;
@@ -426,14 +426,14 @@ window_set_title(window_t* window, const char* title, size_t length) {
 	wstring_deallocate(wstr);
 }
 
-int
+unsigned int
 window_width(window_t* window) {
 	RECT rect;
 	GetClientRect((HWND)window->hwnd, &rect);
 	return rect.right - rect.left;
 }
 
-int
+unsigned int
 window_height(window_t* window) {
 	RECT rect;
 	GetClientRect((HWND)window->hwnd, &rect);
