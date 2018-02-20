@@ -193,6 +193,18 @@ window_adapter(window_t* window) {
 	return WINDOW_ADAPTER_DEFAULT;
 }
 
+int
+window_screen_width(unsigned int adapter) {
+	FOUNDATION_UNUSED(adapter);
+	return 800;
+}
+
+int
+window_screen_height(unsigned int adapter) {
+	FOUNDATION_UNUSED(adapter);
+	return 600;
+}
+
 void
 window_maximize(window_t* window) {
 	XEvent event = {0};
