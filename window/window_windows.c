@@ -283,6 +283,7 @@ window_release_hdc(void* hwnd, void* hdc) {
 
 int
 window_screen_width(unsigned int adapter) {
+	FOUNDATION_UNUSED(adapter);
 	//if( !adapter )
 	return GetSystemMetrics(SM_CXSCREEN);
 	//else not implemented, use GetDeviceCaps?
@@ -290,6 +291,7 @@ window_screen_width(unsigned int adapter) {
 
 int
 window_screen_height(unsigned int adapter) {
+	FOUNDATION_UNUSED(adapter);
 	//if( !adapter )
 	return GetSystemMetrics(SM_CYSCREEN);
 	//else not implemented, use GetDeviceCaps?
@@ -456,6 +458,7 @@ window_position_y(window_t* window) {
 
 void
 window_fit_to_screen(window_t* window) {
+	FOUNDATION_UNUSED(window);
 }
 
 #endif

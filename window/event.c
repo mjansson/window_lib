@@ -88,9 +88,11 @@ window_event_post(window_event_id id, window_t* window) {
 void
 window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsigned int msg,
                          uintptr_t wparam, uintptr_t lparam) {
+	FOUNDATION_UNUSED(msg);
 	if (_window_stream)
 		event_post_varg(_window_stream, id, 0, 0, &window, sizeof(window_t), &hwnd, sizeof(void*),
-		                &wparam, sizeof(uintptr_t), &lparam, sizeof(uintptr_t), nullptr, nullptr);
+		                &msg, sizeof(unsigned int), &wparam, sizeof(uintptr_t), &lparam, sizeof(uintptr_t),
+		                nullptr, nullptr);
 }
 
 #elif FOUNDATION_PLATFORM_LINUX
