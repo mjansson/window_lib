@@ -247,8 +247,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/debug,
-					../../../../foundation_lib/lib/macosx/debug,
+					../../../lib/macos/debug,
+					../../../../foundation_lib/lib/macos/debug,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
@@ -301,8 +301,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/release,
-					../../../../foundation_lib/lib/macosx/release,
+					../../../lib/macos/release,
+					../../../../foundation_lib/lib/macos/release,
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -314,7 +314,7 @@
 		45B216951918C2EC00B89D7D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CONFIGURATION_BUILD_DIR = ../../../lib/macosx/debug;
+				CONFIGURATION_BUILD_DIR = ../../../lib/macos/debug;
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -328,7 +328,7 @@
 		45B216961918C2EC00B89D7D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CONFIGURATION_BUILD_DIR = ../../../lib/macosx/release;
+				CONFIGURATION_BUILD_DIR = ../../../lib/macos/release;
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -384,8 +384,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/deploy,
-					../../../../foundation_lib/lib/macosx/deploy,
+					../../../lib/macos/deploy,
+					../../../../foundation_lib/lib/macos/deploy,
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -397,7 +397,7 @@
 		45B216A3191953F600B89D7D /* Deploy */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CONFIGURATION_BUILD_DIR = ../../../lib/macosx/release;
+				CONFIGURATION_BUILD_DIR = ../../../lib/macos/release;
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -453,8 +453,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/profile,
-					../../../../foundation_lib/lib/macosx/profile,
+					../../../lib/macos/profile,
+					../../../../foundation_lib/lib/macos/profile,
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -466,7 +466,7 @@
 		45B216A51919540500B89D7D /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CONFIGURATION_BUILD_DIR = ../../../lib/macosx/release;
+				CONFIGURATION_BUILD_DIR = ../../../lib/macos/release;
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",

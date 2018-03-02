@@ -50,13 +50,13 @@
 		451385751939C0C300BA2092 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		451385761939C0C300BA2092 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		451385771939C0C300BA2092 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		4513857C1939C0F500BA2092 /* libwindow.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwindow.a; path = ../../../lib/macosx/debug/libwindow.a; sourceTree = "<group>"; };
+		4513857C1939C0F500BA2092 /* libwindow.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwindow.a; path = ../../../lib/macos/debug/libwindow.a; sourceTree = "<group>"; };
 		451385BF1939C1A000BA2092 /* test-window.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "test-window.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		451385F31939C1C300BA2092 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../test/window/main.c; sourceTree = "<group>"; };
 		451385F51939C1D200BA2092 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ../../../test/window/osx/Images.xcassets; sourceTree = "<group>"; };
 		451385F61939C1D200BA2092 /* test-window.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "test-window.plist"; path = "../../../test/window/osx/test-window.plist"; sourceTree = "<group>"; };
 		451385F71939C1D200BA2092 /* test-window.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "test-window.xib"; path = "../../../test/window/osx/test-window.xib"; sourceTree = "<group>"; };
-		451386001939C2A700BA2092 /* libwindow.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwindow.a; path = ../../../lib/macosx/debug/libwindow.a; sourceTree = "<group>"; };
+		451386001939C2A700BA2092 /* libwindow.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwindow.a; path = ../../../lib/macos/debug/libwindow.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -261,7 +261,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/debug;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macos/debug;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -287,8 +287,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/debug,
-					../../../../foundation_lib/lib/macosx/debug,
+					../../../lib/macos/debug,
+					../../../../foundation_lib/lib/macos/debug,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
@@ -310,7 +310,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/release;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macos/release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -336,8 +336,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/release,
-					../../../../foundation_lib/lib/macosx/release,
+					../../../lib/macos/release,
+					../../../../foundation_lib/lib/macos/release,
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -352,7 +352,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				OTHER_LDFLAGS = "-lfoundation";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -365,7 +365,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				OTHER_LDFLAGS = "-lfoundation";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -382,7 +382,7 @@
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -405,7 +405,7 @@
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -432,7 +432,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/profile;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macos/profile;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -458,8 +458,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/profile,
-					../../../../foundation_lib/lib/macosx/profile,
+					../../../lib/macos/profile,
+					../../../../foundation_lib/lib/macos/profile,
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -474,7 +474,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				OTHER_LDFLAGS = "-lfoundation";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -491,7 +491,7 @@
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -518,7 +518,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CONFIGURATION_BUILD_DIR = ../../../bin/macosx/deploy;
+				CONFIGURATION_BUILD_DIR = ../../../bin/macos/deploy;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -544,8 +544,8 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../lib/macosx/deploy,
-					../../../../foundation_lib/lib/macosx/deploy,
+					../../../lib/macos/deploy,
+					../../../../foundation_lib/lib/macos/deploy,
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -560,7 +560,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				OTHER_LDFLAGS = "-lfoundation";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -577,7 +577,7 @@
 				INFOPLIST_FILE = "../../../test/window/osx/test-window.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/mjansson/projects/window_lib/lib/macosx/debug,
+					/Users/mjansson/projects/window_lib/lib/macos/debug,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
