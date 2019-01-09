@@ -80,7 +80,7 @@ _window_event_remove(window_t* window) {
 void
 window_event_post(window_event_id id, window_t* window) {
 	if (_window_stream)
-		event_post(_window_stream, id, 0, 0, &window, sizeof(window_t*));
+		event_post(_window_stream, (int)id, 0, 0, &window, sizeof(window_t*));
 }
 
 #if FOUNDATION_PLATFORM_WINDOWS
@@ -90,7 +90,7 @@ window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsig
                          uintptr_t wparam, uintptr_t lparam) {
 	FOUNDATION_UNUSED(msg);
 	if (_window_stream)
-		event_post_varg(_window_stream, id, 0, 0, &window, sizeof(window_t*), &hwnd, sizeof(void*),
+		event_post_varg(_window_stream, (int)id, 0, 0, &window, sizeof(window_t*), &hwnd, sizeof(void*),
 		                &msg, sizeof(unsigned int), &wparam, sizeof(uintptr_t), &lparam, sizeof(uintptr_t),
 		                nullptr, nullptr);
 }
@@ -100,7 +100,7 @@ window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsig
 void
 window_event_post_native(window_event_id id, window_t* window, void* xevent) {
 	if (_window_stream)
-		event_post_varg(_window_stream, id, 0, 0, &window, sizeof(window_t*), xevent, sizeof(XEvent), nullptr, nullptr);
+		event_post_varg(_window_stream, (int)id, 0, 0, &window, sizeof(window_t*), xevent, sizeof(XEvent), nullptr, nullptr);
 }
 
 #endif
