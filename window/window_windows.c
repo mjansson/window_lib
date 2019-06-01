@@ -1,12 +1,13 @@
 /* window_windows.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
  * https://github.com/rampantpixels/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -33,7 +34,9 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	}
 
 	window = (window_t*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-	//log_debugf(HASH_WINDOW, STRING_CONST("WND message 0x%x for hwnd 0x%" PRIfixPTR " : window 0x%" PRIfixPTR), msg, hwnd, window);
+	/*log_debugf(HASH_WINDOW,
+	           STRING_CONST("WND message 0x%x for hwnd 0x%" PRIfixPTR " : window 0x%" PRIfixPTR),
+	           msg, hwnd, window);*/
 
 	window_event_post_native(WINDOWEVENT_NATIVE, window, hwnd, msg, wparam, lparam);
 
@@ -41,74 +44,86 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 		goto default_process;
 
 	switch (msg) {
-	case WM_NCHITTEST:
-		result = DefWindowProc(hwnd, msg, wparam, lparam);
-		if ((result == HTBORDER) || (result == HTLEFT) || (result == HTRIGHT) || (result == HTSIZE) ||
-		        (result == HTBOTTOM) || (result == HTBOTTOMLEFT) || (result == HTBOTTOMRIGHT) ||
-		        (result == HTTOP) || (result == HTTOPLEFT) || (result == HTTOPRIGHT))
-			result = HTCLIENT;
-		return result;
+		case WM_NCHITTEST:
+			result = DefWindowProc(hwnd, msg, wparam, lparam);
+			if (window->flags & WINDOW_FLAG_NORESIZE) {
+				if ((result == HTBORDER) || (result == HTLEFT) || (result == HTRIGHT) ||
+				    (result == HTSIZE) || (result == HTBOTTOM) || (result == HTBOTTOMLEFT) ||
+				    (result == HTBOTTOMRIGHT) || (result == HTTOP) || (result == HTTOPLEFT) ||
+				    (result == HTTOPRIGHT))
+					result = HTCLIENT;
+			}
+			return result;
 
-	case WM_ENTERSIZEMOVE:
-		window->is_resizing = true;
-		break;
+		case WM_ENTERSIZEMOVE:
+			window->is_resizing = true;
+			break;
 
-	case WM_EXITSIZEMOVE:
-		window->is_resizing = false;
-		break;
+		case WM_EXITSIZEMOVE:
+			window->is_resizing = false;
+			break;
 
-	case WM_SIZE:
-		if (!window->last_resize != window_event_token)
-			window_event_post(WINDOWEVENT_RESIZE, window);
-		window->last_resize = window_event_token;
-		break;
-
-	case WM_SETFOCUS:
-		window_event_post(WINDOWEVENT_GOTFOCUS, window);
-		break;
-
-	case WM_KILLFOCUS:
-		window_event_post(WINDOWEVENT_LOSTFOCUS, window);
-		break;
-
-	case WM_SETCURSOR:
-		/*if (window_cursor(window)) {
-			window_set_cursor(window, window_cursor(window));
-			return TRUE;
-		}*/
-		break;
-
-	case WM_WINDOWPOSCHANGED: {
-			WINDOWPOS* wpos = (WINDOWPOS*)lparam;
-			if (wpos->flags & SWP_HIDEWINDOW)
+		case WM_SIZE:
+			if ((wparam == SIZE_MINIMIZED) && window->is_visible) {
 				window_event_post(WINDOWEVENT_HIDE, window);
-			else if(wpos->flags & SWP_SHOWWINDOW)
+				window->is_visible = false;
+			} else if ((wparam == SIZE_RESTORED) && !window->is_visible) {
 				window_event_post(WINDOWEVENT_SHOW, window);
-		}
-		break;
+				window->is_visible = true;
+			} else if (!window->last_resize != window_event_token) {
+				window_event_post(WINDOWEVENT_RESIZE, window);
+			}
+			window->last_resize = window_event_token;
+			break;
 
-	case WM_NCPAINT:
-	case WM_PAINT:
-		if (window->last_paint != window_event_token)
-			window_event_post(WINDOWEVENT_REDRAW, window);
-		window->last_paint = window_event_token;
-		break;
+		case WM_SETFOCUS:
+			window_event_post(WINDOWEVENT_GOTFOCUS, window);
+			break;
 
-	case WM_CLOSE:
-		window_event_post(WINDOWEVENT_CLOSE, window);
-		return TRUE;
+		case WM_KILLFOCUS:
+			window_event_post(WINDOWEVENT_LOSTFOCUS, window);
+			break;
 
-	case WM_DESTROY:
-		window_event_post(WINDOWEVENT_DESTROY, window);
-		break;
+		case WM_SETCURSOR:
+			/*if (window_cursor(window)) {
+			    window_set_cursor(window, window_cursor(window));
+			    return TRUE;
+			}*/
+			break;
 
-	case WM_UNICHAR:
-		if (wparam == 0xFFFF)  //UNICODE_NOCHAR
+		case WM_WINDOWPOSCHANGED: {
+			WINDOWPOS* wpos = (WINDOWPOS*)lparam;
+			if ((wpos->flags & SWP_HIDEWINDOW) && window->is_visible) {
+				window_event_post(WINDOWEVENT_HIDE, window);
+				window->is_visible = false;
+			} else if ((wpos->flags & SWP_SHOWWINDOW) && !window->is_visible) {
+				window_event_post(WINDOWEVENT_SHOW, window);
+				window->is_visible = true;
+			}
+		} break;
+
+		case WM_NCPAINT:
+		case WM_PAINT:
+			if (window->last_paint != window_event_token)
+				window_event_post(WINDOWEVENT_REDRAW, window);
+			window->last_paint = window_event_token;
+			break;
+
+		case WM_CLOSE:
+			window_event_post(WINDOWEVENT_CLOSE, window);
 			return TRUE;
-		return FALSE;
 
-	default:
-		break;
+		case WM_DESTROY:
+			window_event_post(WINDOWEVENT_DESTROY, window);
+			break;
+
+		case WM_UNICHAR:
+			if (wparam == 0xFFFF)  // UNICODE_NOCHAR
+				return TRUE;
+			return FALSE;
+
+		default:
+			break;
 	}
 
 default_process:
@@ -118,7 +133,7 @@ default_process:
 
 void
 window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              unsigned int width, unsigned int height, bool show) {
+              unsigned int width, unsigned int height, unsigned int flags) {
 	wchar_t wndclassname[64];
 	WNDCLASSW wc;
 	RECT rect;
@@ -129,56 +144,55 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 	window->adapter = adapter;
 	window->last_paint = -1;
 	window->last_resize = -1;
+	window->flags = flags;
 
 	do {
 		static atomic32_t counter = {0};
 		_snwprintf_s(wndclassname, sizeof(wndclassname), _TRUNCATE,
-		             L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d", time_current(),
-		             atomic_incr32(&counter, memory_order_relaxed));
-		wc.lpfnWndProc    = (WNDPROC)_window_proc;
-		wc.cbClsExtra     = 0;
-		wc.cbWndExtra     = 0;
-		wc.hInstance      = (HINSTANCE)window->instance;
-		wc.style          = CS_OWNDC;
-		wc.hIcon          = LoadIcon((HINSTANCE)window->instance, MAKEINTRESOURCE(102));
-		wc.hCursor        = LoadCursor(0, IDC_ARROW);
-		wc.hbrBackground  = CreateSolidBrush(RGB(0, 0, 0));
-		wc.lpszMenuName   = 0;
-		wc.lpszClassName  = wndclassname;
+		             L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d",
+		             time_current(), atomic_incr32(&counter, memory_order_relaxed));
+		wc.lpfnWndProc = (WNDPROC)_window_proc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = (HINSTANCE)window->instance;
+		wc.style = CS_OWNDC;
+		wc.hIcon = LoadIcon((HINSTANCE)window->instance, MAKEINTRESOURCE(102));
+		wc.hCursor = LoadCursor(0, IDC_ARROW);
+		wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+		wc.lpszMenuName = 0;
+		wc.lpszClassName = wndclassname;
 		if (!wc.hIcon)
-			wc.hIcon      = LoadIcon(0, IDI_WINLOGO);
-	}
-	while (!RegisterClassW(&wc));
+			wc.hIcon = LoadIcon(0, IDI_WINLOGO);
+	} while (!RegisterClassW(&wc));
 
 	window->wstyle = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-	if (true/*!fullscreen*/) {
-		//if( _flags & NOSYSTEMMENU )
-		//	window->wstyle |= WS_OVERLAPPED;
-		//else
-		//window->wstyle |= WS_OVERLAPPEDWINDOW;
-		window->wstyle |= WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
-	}
-	else {
+	if (!(flags & WINDOW_FLAG_FULLSCREEN)) {
+		if (flags & WINDOW_FLAG_NOSYSTEMMENU)
+			window->wstyle |= WS_OVERLAPPED | WS_CAPTION;
+		else
+			window->wstyle |= WS_OVERLAPPEDWINDOW;
+		if (flags & WINDOW_FLAG_NORESIZE)
+			window->wstyle &= ~(WS_THICKFRAME);
+	} else {
 		window->wstyle |= WS_POPUP;
 	}
 
-	rect.left   = 0;
-	rect.top    = 0;
-	rect.right  = width;
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = width;
 	rect.bottom = height;
 
-	//if( !fullscreen )
-	{
+	if (!(flags & WINDOW_FLAG_FULLSCREEN)) {
 		AdjustWindowRect(&rect, window->wstyle, FALSE);
-		rect.right  -= rect.left;
+		rect.right -= rect.left;
 		rect.bottom -= rect.top;
-		rect.left    = 0;
-		rect.top     = 0;
+		rect.left = 0;
+		rect.top = 0;
 
 		int pad_x = rect.right - width;
 		int pad_y = rect.bottom - height;
 
-		//Constrain to screen and maintain aspect
+		// Constrain to screen and maintain aspect
 		int screen_width = window_screen_width(adapter);
 		int screen_height = window_screen_height(adapter);
 
@@ -192,13 +206,12 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 			if ((width_factor < height_factor) && (width_factor < 1)) {
 				width = new_width;
 				height = (int)((real)height * width_factor);
-				rect.right  = width + pad_x;
+				rect.right = width + pad_x;
 				rect.bottom = height + pad_y;
-			}
-			else if (height_factor < 1) {
+			} else if (height_factor < 1) {
 				width = (int)((real)width * height_factor);
 				height = new_height;
-				rect.right  = width + pad_x;
+				rect.right = width + pad_x;
 				rect.bottom = height + pad_y;
 			}
 		}
@@ -213,17 +226,17 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 		rect.left   += info.rcWork.left;
 		rect.top    += info.rcWork.top;*/
 		rect.left = CW_USEDEFAULT;
-		rect.top  = CW_USEDEFAULT;
-	}
-	else {
+		rect.top = CW_USEDEFAULT;
+	} else {
 		rect.left = CW_USEDEFAULT;
-		rect.top  = CW_USEDEFAULT;
+		rect.top = CW_USEDEFAULT;
 	}
 
 	wchar_t* titlestr = wstring_allocate_from_string(title, length);
-	window->hwnd = CreateWindowExW(/*fullscreen ? WS_EX_TOPMOST :*/ 0, wndclassname, titlestr,
-	               window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0, 0,
-	               (HINSTANCE)window->instance, window);
+	window->hwnd =
+	    CreateWindowExW((flags & WINDOW_FLAG_FULLSCREEN) ? WS_EX_TOPMOST : 0, wndclassname,
+	                    titlestr, window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0,
+	                    0, (HINSTANCE)window->instance, window);
 	wstring_deallocate(titlestr);
 	if (!window->hwnd) {
 		int err = system_error();
@@ -234,7 +247,7 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 		return;
 	}
 
-	if (show) {
+	if (!(flags & WINDOW_FLAG_NOSHOW)) {
 		ShowWindow((HWND)window->hwnd, SW_SHOW);
 		if (thread_is_main())
 			window_event_process();
@@ -253,8 +266,8 @@ void
 window_initialize(window_t* window, void* hwnd) {
 	window->instance = GetModuleHandle(0);
 	window->created = false;
-	window->adapter = WINDOW_ADAPTER_DEFAULT; //TODO: Get the corresponding adapter for the window
-	window->wstyle = 0; //TODO: Get wstyle from the window
+	window->adapter = WINDOW_ADAPTER_DEFAULT;  // TODO: Get the corresponding adapter for the window
+	window->wstyle = 0;                        // TODO: Get wstyle from the window
 	window->hwnd = hwnd;
 	window->last_paint = -1;
 	window->last_resize = -1;
@@ -284,17 +297,17 @@ window_release_hdc(void* hwnd, void* hdc) {
 int
 window_screen_width(unsigned int adapter) {
 	FOUNDATION_UNUSED(adapter);
-	//if( !adapter )
+	// if( !adapter )
 	return GetSystemMetrics(SM_CXSCREEN);
-	//else not implemented, use GetDeviceCaps?
+	// else not implemented, use GetDeviceCaps?
 }
 
 int
 window_screen_height(unsigned int adapter) {
 	FOUNDATION_UNUSED(adapter);
-	//if( !adapter )
+	// if( !adapter )
 	return GetSystemMetrics(SM_CYSCREEN);
-	//else not implemented, use GetDeviceCaps?
+	// else not implemented, use GetDeviceCaps?
 }
 
 void
@@ -392,7 +405,7 @@ window_show_cursor(window_t* window, bool show, bool lock) {
 	ShowCursor(show ? TRUE : FALSE);
 
 	/*if( show && window_cursor( window ) )
-		window_set_cursor( window, window_cursor( window ) );*/
+	    window_set_cursor( window, window_cursor( window ) );*/
 
 	if (!window->cursor_lock && lock) {
 		POINT pt;

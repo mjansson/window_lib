@@ -1,12 +1,13 @@
 /* event.h  -  Window library events  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
  * https://github.com/rampantpixels/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -35,8 +36,8 @@ window_event_handle(event_t* event);
 /*! Get window related to the event
 \param event Window event
 \return Window */
-WINDOW_API window_t*
-window_event_window(event_t* event);
+WINDOW_API const window_t*
+window_event_window(const event_t* event);
 
 #if FOUNDATION_PLATFORM_WINDOWS
 

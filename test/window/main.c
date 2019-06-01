@@ -1,12 +1,13 @@
 /* main.c  -  Window test  -  Public Domain  -  2013 Mattias Jansson / Rampant Pixels
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
  * https://github.com/rampantpixels/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -62,7 +63,8 @@ DECLARE_TEST(window, createdestroy) {
 	thread_sleep(100);
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
-	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
+	window = window_allocate(0);
+	window_create(window, WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, 0);
 #elif FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
 	window = window_allocate(delegate_window());
 #endif
@@ -79,24 +81,24 @@ DECLARE_TEST(window, createdestroy) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_CREATE:
-			got_create++;
-			break;
-		case WINDOWEVENT_GOTFOCUS:
-			got_focus++;
-			break;
-		case WINDOWEVENT_SHOW:
-			got_show++;
-			break;
-		case WINDOWEVENT_REDRAW:
-			got_redraw++;
-			break;
-		case WINDOWEVENT_RESIZE:
-			got_resize++;
-			break;
-		default:
-			got_other++;
-			break;
+			case WINDOWEVENT_CREATE:
+				got_create++;
+				break;
+			case WINDOWEVENT_GOTFOCUS:
+				got_focus++;
+				break;
+			case WINDOWEVENT_SHOW:
+				got_show++;
+				break;
+			case WINDOWEVENT_REDRAW:
+				got_redraw++;
+				break;
+			case WINDOWEVENT_RESIZE:
+				got_resize++;
+				break;
+			default:
+				got_other++;
+				break;
 		}
 	}
 	EXPECT_INTEQ(got_create, 1);
@@ -115,27 +117,27 @@ DECLARE_TEST(window, createdestroy) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_DESTROY:
-			got_destroy++;
-			break;
-		case WINDOWEVENT_HIDE:
-			got_hide++;
-			break;
-		case WINDOWEVENT_LOSTFOCUS:
-			got_unfocus++;
-			break;
-		default:
-			got_other++;
-			break;
+			case WINDOWEVENT_DESTROY:
+				got_destroy++;
+				break;
+			case WINDOWEVENT_HIDE:
+				got_hide++;
+				break;
+			case WINDOWEVENT_LOSTFOCUS:
+				got_unfocus++;
+				break;
+			default:
+				got_other++;
+				break;
 		}
 	}
 #if FOUNDATION_PLATFORM_MACOS
-	EXPECT_INTEQ(got_destroy, 0); //Does not destroy actual NS window
+	EXPECT_INTEQ(got_destroy, 0);  // Does not destroy actual NS window
 #else
 	EXPECT_INTEQ(got_destroy, 1);
 #endif
-	EXPECT_INTLE(got_hide, 1); //Potential event
-	EXPECT_INTLE(got_unfocus, 1); //Potential event
+	EXPECT_INTLE(got_hide, 1);     // Potential event
+	EXPECT_INTLE(got_unfocus, 1);  // Potential event
 	EXPECT_INTEQ(got_other, 0);
 
 	EXPECT_FALSE(window_is_open(window));
@@ -157,7 +159,8 @@ DECLARE_TEST(window, sizemove) {
 	thread_sleep(100);
 
 #if FOUNDATION_PLATFORM_WINDOWS || FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_BSD
-	window = window_create(WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, true);
+	window = window_allocate(0);
+	window_create(window, WINDOW_ADAPTER_DEFAULT, STRING_CONST("Window test"), 800, 600, 0);
 #elif FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
 	window = window_allocate(delegate_window());
 #endif
@@ -166,7 +169,7 @@ DECLARE_TEST(window, sizemove) {
 	window_event_process();
 	stream = window_event_stream();
 	block = event_stream_process(stream);
-	//Ignore initial batch of events in this test
+	// Ignore initial batch of events in this test
 
 	EXPECT_NE(window, 0);
 	EXPECT_TRUE(window_is_open(window));
@@ -176,7 +179,7 @@ DECLARE_TEST(window, sizemove) {
 #if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_ANDROID
 	EXPECT_TRUE(window_is_maximized(window));
 #else
-	//EXPECT_FALSE(window_is_maximized(window));
+	// EXPECT_FALSE(window_is_maximized(window));
 #endif
 
 	window_maximize(window);
@@ -190,17 +193,17 @@ DECLARE_TEST(window, sizemove) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_RESIZE:
-			got_resize++;
-			break;
-		case WINDOWEVENT_REDRAW:
-			got_redraw++;
-			break;
-		default:
-			log_warnf(HASH_TEST, WARNING_INVALID_VALUE, STRING_CONST("Got invalid window event: %d"),
-			          event->id);
-			got_other++;
-			break;
+			case WINDOWEVENT_RESIZE:
+				got_resize++;
+				break;
+			case WINDOWEVENT_REDRAW:
+				got_redraw++;
+				break;
+			default:
+				log_warnf(HASH_TEST, WARNING_INVALID_VALUE,
+				          STRING_CONST("Got invalid window event: %d"), event->id);
+				got_other++;
+				break;
 		}
 	}
 	EXPECT_INTEQ(got_resize, 1);
@@ -222,15 +225,15 @@ DECLARE_TEST(window, sizemove) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_RESIZE:
-			got_resize++;
-			break;
-		case WINDOWEVENT_REDRAW:
-			got_redraw++;
-			break;
-		default:
-			got_other++;
-			break;
+			case WINDOWEVENT_RESIZE:
+				got_resize++;
+				break;
+			case WINDOWEVENT_REDRAW:
+				got_redraw++;
+				break;
+			default:
+				got_other++;
+				break;
 		}
 	}
 	EXPECT_INTEQ(got_resize, 1);
@@ -259,18 +262,18 @@ DECLARE_TEST(window, sizemove) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_RESIZE:
-			got_resize++;
-			break;
-		case WINDOWEVENT_REDRAW:
-			got_redraw++;
-			break;
-		default:
-			got_other++;
-			break;
+			case WINDOWEVENT_RESIZE:
+				got_resize++;
+				break;
+			case WINDOWEVENT_REDRAW:
+				got_redraw++;
+				break;
+			default:
+				got_other++;
+				break;
 		}
 	}
-	//Can get two resize && redraw for restore and resize
+	// Can get two resize && redraw for restore and resize
 	EXPECT_INTGE(got_resize, 1);
 	EXPECT_INTLE(got_resize, 2);
 	EXPECT_INTGE(got_redraw, 1);
@@ -293,7 +296,6 @@ DECLARE_TEST(window, sizemove) {
 	window_event_process();
 	block = event_stream_process(stream);
 
-
 	EXPECT_INTEQ(window_position_x(window), base_x + 100);
 	EXPECT_INTEQ(window_position_y(window), base_y + 200);
 	EXPECT_FALSE(window_is_maximized(window));
@@ -309,18 +311,18 @@ DECLARE_TEST(window, sizemove) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_RESIZE:
-			got_resize++;
-			break;
-		case WINDOWEVENT_REDRAW:
-			got_redraw++;
-			break;
-		case WINDOWEVENT_LOSTFOCUS:
-			got_unfocus++;
-			break;
-		default:
-			got_other++;
-			break;
+			case WINDOWEVENT_RESIZE:
+				got_resize++;
+				break;
+			case WINDOWEVENT_REDRAW:
+				got_redraw++;
+				break;
+			case WINDOWEVENT_LOSTFOCUS:
+				got_unfocus++;
+				break;
+			default:
+				got_other++;
+				break;
 		}
 	}
 	EXPECT_INTEQ(got_resize, 1);
@@ -341,18 +343,18 @@ DECLARE_TEST(window, sizemove) {
 	got_other = 0;
 	while ((event = event_next(block, event))) {
 		switch (event->id) {
-		case WINDOWEVENT_RESIZE:
-			got_resize++;
-			break;
-		case WINDOWEVENT_REDRAW:
-			got_redraw++;
-			break;
-		case WINDOWEVENT_GOTFOCUS:
-			got_focus++;
-			break;
-		default:
-			got_other++;
-			break;
+			case WINDOWEVENT_RESIZE:
+				got_resize++;
+				break;
+			case WINDOWEVENT_REDRAW:
+				got_redraw++;
+				break;
+			case WINDOWEVENT_GOTFOCUS:
+				got_focus++;
+				break;
+			default:
+				got_other++;
+				break;
 		}
 	}
 	EXPECT_INTEQ(got_resize, 1);
@@ -386,16 +388,13 @@ test_window_declare(void) {
 	ADD_TEST(window, sizemove);
 }
 
-static test_suite_t test_window_suite = {
-	test_window_application,
-	test_window_memory_system,
-	test_window_config,
-	test_window_declare,
-	test_window_initialize,
-	test_window_finalize,
-	0
-};
-
+static test_suite_t test_window_suite = {test_window_application,
+                                         test_window_memory_system,
+                                         test_window_config,
+                                         test_window_declare,
+                                         test_window_initialize,
+                                         test_window_finalize,
+                                         0};
 
 #if FOUNDATION_PLATFORM_ANDROID || FOUNDATION_PLATFORM_IOS
 
@@ -419,4 +418,3 @@ test_suite_define(void) {
 }
 
 #endif
-

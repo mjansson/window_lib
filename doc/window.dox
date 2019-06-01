@@ -156,14 +156,14 @@
 while maintaining the current aspect ratio of the window in the process.
 \param window Window
 
-\fn window_t* window_create( unsigned int adapter, const char* title, unsigned int width, unsigned int height, bool show )
+\fn window_t* window_create( unsigned int adapter, const char* title, unsigned int width, unsigned int height, unsigned int flags )
 \brief Create new window (Windows/Linux only)
 \details Create a new window with the given properties (Windows/Linux only).
 \param adapter Adapter ID (use WINDOW_ADAPTER_DEFAULT for default)
 \param title Window title
 \param width Width
 \param height Height
-\param show Make window visible on creation if true or create invisible if false
+\param flags Creations flags controlling menus, appearance and visibility (see WINDOW_FLAG_* defines)
 \return Window
 
 \fn window_t* window_allocate_from_hwnd( void* hwnd )

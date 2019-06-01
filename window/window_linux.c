@@ -1,12 +1,13 @@
 /* window_linux.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
  * https://github.com/rampantpixels/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -30,17 +31,22 @@ _get_xvisual(Display* display, int screen, unsigned int color, unsigned int dept
 	return 0;
 #else
 	int config[13];
-	int cbits  = (color > 16) ? 8 : 5;
-	int dbits  = (depth > 0) ? 15 : 0;
-	int sbits  = (stencil > 0) ? 1 : 0;
+	int cbits = (color > 16) ? 8 : 5;
+	int dbits = (depth > 0) ? 15 : 0;
+	int sbits = (stencil > 0) ? 1 : 0;
 
-	config[0]  = GLX_DOUBLEBUFFER;
-	config[1]  = GLX_RGBA;
-	config[2]  = GLX_GREEN_SIZE  ; config[3]  = cbits;
-	config[4]  = GLX_RED_SIZE    ; config[5]  = cbits;
-	config[6]  = GLX_BLUE_SIZE   ; config[7]  = cbits;
-	config[8]  = GLX_DEPTH_SIZE  ; config[9]  = dbits;
-	config[10] = GLX_STENCIL_SIZE; config[11] = sbits;
+	config[0] = GLX_DOUBLEBUFFER;
+	config[1] = GLX_RGBA;
+	config[2] = GLX_GREEN_SIZE;
+	config[3] = cbits;
+	config[4] = GLX_RED_SIZE;
+	config[5] = cbits;
+	config[6] = GLX_BLUE_SIZE;
+	config[7] = cbits;
+	config[8] = GLX_DEPTH_SIZE;
+	config[9] = dbits;
+	config[10] = GLX_STENCIL_SIZE;
+	config[11] = sbits;
 	config[12] = None;
 
 	return glXChooseVisual(display, screen, config);
@@ -48,8 +54,15 @@ _get_xvisual(Display* display, int screen, unsigned int color, unsigned int dept
 }
 
 void
+window_allocate(void) {
+	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
+	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	return window;
+}
+
+void
 window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              unsigned int width, unsigned int height, bool show) {
+              unsigned int width, unsigned int height, unsigned int flags) {
 	FOUNDATION_UNUSED(length);
 
 	Display* display = XOpenDisplay(0);
@@ -66,27 +79,29 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 		return;
 	}
 
-	Colormap colormap = XCreateColormap(display, XRootWindow(display, screen), visual->visual,
-	                                    AllocNone);
+	Colormap colormap =
+	    XCreateColormap(display, XRootWindow(display, screen), visual->visual, AllocNone);
 
-	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %d with dimensions %ux%u"), screen,
-	           width, height);
+	log_debugf(HASH_WINDOW, STRING_CONST("Creating window on screen %d with dimensions %ux%u"),
+	           screen, width, height);
 
 	XSetWindowAttributes attrib;
-	attrib.colormap         = colormap;
+	attrib.colormap = colormap;
 	attrib.background_pixel = 0;
-	attrib.border_pixel     = 0;
-	attrib.event_mask       = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask |
-	                          EnterWindowMask | LeaveWindowMask | PointerMotionMask | Button1MotionMask | Button2MotionMask |
-	                          Button3MotionMask | Button4MotionMask | Button5MotionMask | ButtonMotionMask | KeyPressMask |
-	                          KeyReleaseMask | KeymapStateMask | VisibilityChangeMask | FocusChangeMask;
-	Window drawable = XCreateWindow(display, XRootWindow(display, screen), 0, 0,
-	                                (unsigned int)width, (unsigned int)height, 0, visual->depth, InputOutput,
-	                                visual->visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
+	attrib.border_pixel = 0;
+	attrib.event_mask = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask |
+	                    EnterWindowMask | LeaveWindowMask | PointerMotionMask | Button1MotionMask |
+	                    Button2MotionMask | Button3MotionMask | Button4MotionMask |
+	                    Button5MotionMask | ButtonMotionMask | KeyPressMask | KeyReleaseMask |
+	                    KeymapStateMask | VisibilityChangeMask | FocusChangeMask;
+	Window drawable =
+	    XCreateWindow(display, XRootWindow(display, screen), 0, 0, (unsigned int)width,
+	                  (unsigned int)height, 0, visual->depth, InputOutput, visual->visual,
+	                  CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &attrib);
 
 	XSizeHints* sizehints = XAllocSizeHints();
 	if (sizehints) {
-		sizehints->base_width  = (int)width;
+		sizehints->base_width = (int)width;
 		sizehints->base_height = (int)height;
 		sizehints->flags = PBaseSize;
 	}
@@ -94,7 +109,7 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 	if (sizehints)
 		XFree(sizehints);
 
-	if (show) {
+	if (!(flags & WINDOW_FLAG_NOSHOW)) {
 		XMapWindow(display, drawable);
 		XRaiseWindow(display, drawable);
 		XFlush(display);
@@ -108,28 +123,27 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 	XIC xic = 0;
 	XIM xim = XOpenIM(display, 0, 0, 0);
 	if (xim) {
-		xic = XCreateIC(xim, XNInputStyle, XIMPreeditNone | XIMStatusNone, XNClientWindow,
-		                drawable, nullptr);
+		xic = XCreateIC(xim, XNInputStyle, XIMPreeditNone | XIMStatusNone, XNClientWindow, drawable,
+		                nullptr);
 		if (xic) {
 			/*XGetICValues(ic, XNFilterEvents, &fevent, NULL);
 			mask = ExposureMask | KeyPressMask | FocusChangeMask;
 			XSelectInput(display, window, mask|fevent);*/
+		} else {
+			log_warn(HASH_WINDOW, WARNING_SUSPICIOUS,
+			         STRING_CONST("Unable to create X input context"));
 		}
-		else {
-			log_warn(HASH_WINDOW, WARNING_SUSPICIOUS, STRING_CONST("Unable to create X input context"));
-		}
-	}
-	else {
+	} else {
 		log_warn(HASH_WINDOW, WARNING_SUSPICIOUS, STRING_CONST("Unable to open X input method"));
 	}
 
-	window->display  = display;
-	window->visual   = visual;
-	window->screen   = (unsigned int)screen;
+	window->display = display;
+	window->visual = visual;
+	window->screen = (unsigned int)screen;
 	window->drawable = drawable;
-	window->xim      = xim;
-	window->xic      = xic;
-	window->created  = true;
+	window->xim = xim;
+	window->xic = xic;
+	window->created = true;
 	window->atom_delete = atom_delete;
 
 	_window_event_add(window);
@@ -259,8 +273,7 @@ window_restore(window_t* window) {
 		XFlush(window->display);
 		XSync(window->display, False);
 
-	}
-	else if (window_is_maximized(window)) {
+	} else if (window_is_maximized(window)) {
 		XEvent event = {0};
 		Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
 		Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
@@ -320,7 +333,8 @@ window_is_maximized(window_t* window) {
 	bool is_maximized = false;
 
 	XGetWindowProperty(window->display, window->drawable, atom_wmstate, 0, 32, False, XA_ATOM,
-	                   &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+	                   &actual_type, &actual_format, &num_items, &bytes_after,
+	                   (unsigned char**)&atoms);
 	for (i = 0; i < num_items; ++i) {
 		if (atoms[i] == atom_horizontal) {
 			is_maximized = true;
@@ -345,7 +359,8 @@ window_is_minimized(window_t* window) {
 	bool is_minimized = false;
 
 	XGetWindowProperty(window->display, window->drawable, atom_wmstate, 0, 32, False, XA_ATOM,
-	                   &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+	                   &actual_type, &actual_format, &num_items, &bytes_after,
+	                   (unsigned char**)&atoms);
 	for (i = 0; i < num_items; ++i) {
 		if (atoms[i] == atom_hidden) {
 			is_minimized = true;
@@ -398,8 +413,8 @@ window_width(window_t* window) {
 	Window root;
 	int x, y;
 	unsigned int width, height, border, depth;
-	if (XGetGeometry(window->display, window->drawable, &root, &x, &y,
-	                 &width, &height, &border, &depth))
+	if (XGetGeometry(window->display, window->drawable, &root, &x, &y, &width, &height, &border,
+	                 &depth))
 		return width;
 	return 0;
 }
@@ -409,8 +424,8 @@ window_height(window_t* window) {
 	Window root;
 	int x, y;
 	unsigned int width, height, border, depth;
-	if (XGetGeometry(window->display, window->drawable, &root, &x, &y,
-	                 &width, &height, &border, &depth))
+	if (XGetGeometry(window->display, window->drawable, &root, &x, &y, &width, &height, &border,
+	                 &depth))
 		return height;
 	return 0;
 }
