@@ -453,4 +453,72 @@ window_fit_to_screen(window_t* window) {
 	FOUNDATION_UNUSED(window);
 }
 
+int
+window_event_loop(void) {
+	// TODO: Reimplement as blocking loop
+	if (!semaphore_try_wait(&_windows_lock, 0))
+		return;
+	for (size_t iwin = 0, wsize = array_size(_windows); iwin < wsize; ++iwin) {
+		window_t* window = _windows[iwin];
+		while (XPending(window->display)) {
+			XEvent event;
+			XNextEvent(window->display, &event);
+			if (True == XFilterEvent(&event, window->drawable))
+				continue;
+
+			window_event_post_native(WINDOWEVENT_NATIVE, window, &event);
+
+			XVisibilityEvent* visibility;
+			switch (event.type) {
+				case ClientMessage:
+					if (event.xclient.data.l[0] == (long)window->atom_delete)
+						window_event_post(WINDOWEVENT_CLOSE, window);
+					break;
+
+				case ConfigureNotify:
+					if (window->last_resize != window_event_token) {
+						window_event_post(WINDOWEVENT_RESIZE, window);
+						window->last_resize = window_event_token;
+					}
+					if (window->last_paint != window_event_token) {
+						window_event_post(WINDOWEVENT_REDRAW, window);
+						window->last_paint = window_event_token;
+					}
+					break;
+
+				case VisibilityNotify:
+					visibility = (XVisibilityEvent*)&event;
+					if (visibility->state == VisibilityFullyObscured) {
+						if (window->visible)
+							window_event_post(WINDOWEVENT_HIDE, window);
+						window->visible = false;
+					} else {
+						if (!window->visible) {
+							window_event_post(WINDOWEVENT_SHOW, window);
+							if (window->last_paint != window_event_token) {
+								window_event_post(WINDOWEVENT_REDRAW, window);
+								window->last_paint = window_event_token;
+							}
+						}
+						window->visible = true;
+					}
+					break;
+
+				case FocusIn:
+					if (!window->focus)
+						window_event_post(WINDOWEVENT_GOTFOCUS, window);
+					window->focus = true;
+					break;
+
+				case FocusOut:
+					if (window->focus)
+						window_event_post(WINDOWEVENT_LOSTFOCUS, window);
+					window->focus = false;
+					break;
+			}
+		}
+	}
+	semaphore_post(&_windows_lock);
+}
+
 #endif

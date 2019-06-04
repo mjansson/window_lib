@@ -247,11 +247,8 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 		return;
 	}
 
-	if (!(flags & WINDOW_FLAG_NOSHOW)) {
+	if (!(flags & WINDOW_FLAG_NOSHOW))
 		ShowWindow((HWND)window->hwnd, SW_SHOW);
-		if (thread_is_main())
-			window_event_process();
-	}
 }
 
 window_t*
@@ -472,6 +469,35 @@ window_position_y(window_t* window) {
 void
 window_fit_to_screen(window_t* window) {
 	FOUNDATION_UNUSED(window);
+}
+
+static DWORD window_message_loop_thread;
+
+int
+window_message_loop(void) {
+	window_message_loop_thread = GetThreadId(GetCurrentThread());
+
+	MSG msg;
+	BOOL got = 1;
+	while (got > 0) {
+		got = GetMessage(&msg, 0, 0, 0);
+		// log_debugf(HASH_WINDOW, STRING_CONST("Got message: 0x%04x (%d)"), msg.message, got);
+		if (got > 0) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		} else if (got < 0) {
+			log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL,
+			           STRING_CONST("Error retrieving Windows messages: %d"), (int)got);
+		}
+		++window_event_token;
+	}
+	return got;
+}
+
+void
+window_message_quit(void) {
+	if (window_message_loop_thread)
+		PostThreadMessage(window_message_loop_thread, WM_QUIT, 0, 0);
 }
 
 #endif

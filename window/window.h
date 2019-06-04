@@ -31,6 +31,15 @@ window_module_is_initialized(void);
 WINDOW_API version_t
 window_module_version(void);
 
+//! Main window message loop. Blocks until application termination
+//  \return 0 if success, <0 if error
+WINDOW_API int
+window_message_loop(void);
+
+//! Signal main window message loop to quit
+WINDOW_API void
+window_message_quit(void);
+
 WINDOW_API void
 window_finalize(window_t* window);
 
