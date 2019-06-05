@@ -41,7 +41,7 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	window_event_post_native(WINDOWEVENT_NATIVE, window, hwnd, msg, wparam, lparam);
 
 	if (!window)
-		goto default_process;
+		return DefWindowProc(hwnd, msg, wparam, lparam);
 
 	switch (msg) {
 		case WM_NCHITTEST:
@@ -122,11 +122,41 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 				return TRUE;
 			return FALSE;
 
+		case WM_INPUT: {
+			UINT size;
+			GetRawInputData((HRAWINPUT)lparam, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER));
+			LPBYTE lpb = memory_allocate(HASH_WINDOW, size, 0, MEMORY_PERSISTENT);
+
+			GetRawInputData((HRAWINPUT)lparam, RID_INPUT, lpb, &size, sizeof(RAWINPUTHEADER));
+
+			RAWINPUT* raw = (RAWINPUT*)lpb;
+			if (raw->header.dwType == RIM_TYPEKEYBOARD) {
+				log_debugf(HASH_WINDOW,
+				           STRING_CONST(" Kbd: make=%04x Flags:%04x Reserved:%04x "
+				                        "ExtraInformation:%08x, msg=%04x VK=%04x"),
+				           raw->data.keyboard.MakeCode, raw->data.keyboard.Flags,
+				           raw->data.keyboard.Reserved, raw->data.keyboard.ExtraInformation,
+				           raw->data.keyboard.Message, raw->data.keyboard.VKey);
+			} else if (raw->header.dwType == RIM_TYPEMOUSE) {
+				log_debugf(
+				    HASH_WINDOW,
+				    STRING_CONST(
+				        "Mouse: usFlags=%04x ulButtons=%04x usButtonFlags=%04x usButtonData=%04x "
+				        "ulRawButtons=%04x lLastX=%04x lLastY=%04x ulExtraInformation=%04x"),
+				    raw->data.mouse.usFlags, raw->data.mouse.ulButtons,
+				    raw->data.mouse.usButtonFlags, raw->data.mouse.usButtonData,
+				    raw->data.mouse.ulRawButtons, raw->data.mouse.lLastX, raw->data.mouse.lLastY,
+				    raw->data.mouse.ulExtraInformation);
+			}
+
+			LPARAM ret = DefRawInputProc(&raw, 1, sizeof(RAWINPUTHEADER));
+			memory_deallocate(lpb);
+			return ret;
+		}
+
 		default:
 			break;
 	}
-
-default_process:
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -249,6 +279,38 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 
 	if (!(flags & WINDOW_FLAG_NOSHOW))
 		ShowWindow((HWND)window->hwnd, SW_SHOW);
+
+#if 1
+	RAWINPUTDEVICE rid[4];
+	// Mouse
+	rid[0].usUsagePage = 0x01;
+	rid[0].usUsage = 0x02;
+	rid[0].dwFlags = RIDEV_NOLEGACY;
+	rid[0].hwndTarget = window->hwnd;
+	// Keyboard
+	rid[1].usUsagePage = 0x01;
+	rid[1].usUsage = 0x06;
+	rid[1].dwFlags = RIDEV_NOLEGACY;
+	rid[1].hwndTarget = window->hwnd;
+	// Game pad
+	rid[2].usUsagePage = 0x01;
+	rid[2].usUsage = 0x05;
+	rid[2].dwFlags = 0;
+	rid[2].hwndTarget = window->hwnd;
+	// Joystick
+	rid[3].usUsagePage = 0x01;
+	rid[3].usUsage = 0x04;
+	rid[3].dwFlags = 0;
+	rid[3].hwndTarget = window->hwnd;
+
+	if (!RegisterRawInputDevices(rid, sizeof(rid) / sizeof(rid[0]), sizeof(rid[0]))) {
+		int err = system_error();
+		string_const_t errmsg = system_error_message(err);
+		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL,
+		           STRING_CONST("Failed to register raw input: %.*s (0x%x)"), STRING_FORMAT(errmsg),
+		           err);
+	}
+#endif
 }
 
 window_t*
@@ -481,7 +543,7 @@ window_message_loop(void) {
 	BOOL got = 1;
 	while (got > 0) {
 		got = GetMessage(&msg, 0, 0, 0);
-		// log_debugf(HASH_WINDOW, STRING_CONST("Got message: 0x%04x (%d)"), msg.message, got);
+		log_debugf(HASH_WINDOW, STRING_CONST("Got message: 0x%04x (%d)"), msg.message, got);
 		if (got > 0) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

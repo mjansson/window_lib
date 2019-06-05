@@ -1,12 +1,13 @@
 /* window.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
  * https://github.com/rampantpixels/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -23,7 +24,8 @@ static int
 _x11_error_handler(Display* display, XErrorEvent* event) {
 	char errmsg[512];
 	XGetErrorText(display, event->error_code, errmsg, sizeof(errmsg));
-	log_warnf(HASH_WINDOW, WARNING_SYSTEM_CALL_FAIL, STRING_CONST("X error event occurred: %s"), errmsg);
+	log_warnf(HASH_WINDOW, WARNING_SYSTEM_CALL_FAIL, STRING_CONST("X error event occurred: %s"),
+	          errmsg);
 	return 0;
 }
 
@@ -38,8 +40,6 @@ window_module_initialize(const window_config_t config) {
 	if (_window_event_initialize() < 0)
 		return -1;
 
-	_window_initialized = true;
-
 #if FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
 	_window_class_reference();
 #endif
@@ -51,6 +51,8 @@ window_module_initialize(const window_config_t config) {
 #if FOUNDATION_PLATFORM_LINUX
 	XSetErrorHandler(_x11_error_handler);
 #endif
+
+	_window_initialized = true;
 
 	return 0;
 }
