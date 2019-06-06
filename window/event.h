@@ -39,8 +39,8 @@ window_event_window(const event_t* event);
 #if FOUNDATION_PLATFORM_WINDOWS
 
 WINDOW_API void
-window_event_post_native(window_event_id id, window_t* window, void* hwnd, unsigned int msg,
-                         uintptr_t wparam, uintptr_t lparam);
+window_event_post_native(window_event_id id, window_t* window, void* hwnd, uintptr_t msg,
+                         uintptr_t wparam, uintptr_t lparam, void* buffer, size_t size);
 
 #elif FOUNDATION_PLATFORM_LINUX
 
