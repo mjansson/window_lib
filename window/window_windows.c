@@ -113,11 +113,11 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 		case WM_CLOSE:
 			window_event_post(WINDOWEVENT_CLOSE, window);
-			return TRUE;
+			return 0;
 
 		case WM_DESTROY:
 			window_event_post(WINDOWEVENT_DESTROY, window);
-			break;
+			return 0;
 
 		case WM_UNICHAR:
 			if (wparam == 0xFFFF)  // UNICODE_NOCHAR
