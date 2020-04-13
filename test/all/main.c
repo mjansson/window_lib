@@ -149,7 +149,7 @@ main_initialize(void) {
 	memset(&application, 0, sizeof(application));
 	application.name = string_const(STRING_CONST("Window library test suite"));
 	application.short_name = string_const(STRING_CONST("test_all"));
-	application.company = string_const(STRING_CONST("Rampant Pixels"));
+	application.company = string_const(STRING_CONST(""));
 	application.version = window_module_version();
 	application.flags = APPLICATION_UTILITY;
 	application.exception_handler = test_exception_handler;
