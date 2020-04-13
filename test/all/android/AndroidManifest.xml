@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.rampantpixels.window.test"
+          package="com.maniccoder.window.test"
           android:versionCode="2"
           android:versionName="1.2.5">
 

@@ -1,12 +1,13 @@
-/* internal.h  -  Window library internals  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
+/* internal.h  -  Window library internals  -  Public Domain  -  2014 Mattias Jansson
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
- * https://github.com/rampantpixels/window_lib
+ * https://github.com/mjansson/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -17,13 +18,13 @@
 #include <window/types.h>
 
 #if FOUNDATION_PLATFORM_WINDOWS
-#  include <foundation/windows.h>
+#include <foundation/windows.h>
 #endif
 #if FOUNDATION_PLATFORM_LINUX
-#  include <X11/Xlib.h>
-#  include <X11/Xutil.h>
-#  include <X11/Xatom.h>
-#  include <X11/extensions/xf86vmode.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/extensions/xf86vmode.h>
 #endif
 
 WINDOW_EXTERN int

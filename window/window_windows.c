@@ -1,10 +1,10 @@
-/* window_windows.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
+/* window_windows.c  -  Window library  -  Public Domain  -  2014 Mattias Jansson
  *
  * This library provides a cross-platform window library in C11 providing basic support data types
  * and functions to create and manage windows in a platform-independent fashion. The latest source
  * code is always available at
  *
- * https://github.com/rampantpixels/window_lib
+ * https://github.com/mjansson/window_lib
  *
  * This library is put in the public domain; you can redistribute it and/or modify it without any
  * restrictions.
@@ -48,10 +48,9 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 		case WM_NCHITTEST:
 			result = DefWindowProc(hwnd, msg, wparam, lparam);
 			if (window->flags & WINDOW_FLAG_NORESIZE) {
-				if ((result == HTBORDER) || (result == HTLEFT) || (result == HTRIGHT) ||
-				    (result == HTSIZE) || (result == HTBOTTOM) || (result == HTBOTTOMLEFT) ||
-				    (result == HTBOTTOMRIGHT) || (result == HTTOP) || (result == HTTOPLEFT) ||
-				    (result == HTTOPRIGHT))
+				if ((result == HTBORDER) || (result == HTLEFT) || (result == HTRIGHT) || (result == HTSIZE) ||
+				    (result == HTBOTTOM) || (result == HTBOTTOMLEFT) || (result == HTBOTTOMRIGHT) ||
+				    (result == HTTOP) || (result == HTTOPLEFT) || (result == HTTOPRIGHT))
 					result = HTCLIENT;
 			}
 			return result;
@@ -133,8 +132,7 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 				buffer = memory_allocate(HASH_WINDOW, size, 0, MEMORY_PERSISTENT);
 			GetRawInputData((HRAWINPUT)lparam, RID_INPUT, buffer, &size, sizeof(RAWINPUTHEADER));
 
-			window_event_post_native(WINDOWEVENT_NATIVE, window, hwnd, msg, wparam, lparam, buffer,
-			                         size);
+			window_event_post_native(WINDOWEVENT_NATIVE, window, hwnd, msg, wparam, lparam, buffer, size);
 
 			RAWINPUT* raw = (RAWINPUT*)buffer;
 			LPARAM ret = DefRawInputProc(&raw, 1, sizeof(RAWINPUTHEADER));
@@ -153,8 +151,8 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 }
 
 void
-window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              unsigned int width, unsigned int height, unsigned int flags) {
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length, unsigned int width,
+              unsigned int height, unsigned int flags) {
 	wchar_t wndclassname[64];
 	WNDCLASSW wc;
 	RECT rect;
@@ -170,8 +168,8 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 	do {
 		static atomic32_t counter = {0};
 		_snwprintf_s(wndclassname, sizeof(wndclassname), _TRUNCATE,
-		             L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d",
-		             time_current(), atomic_incr32(&counter, memory_order_relaxed));
+		             L"__window_lib_%" FOUNDATION_PREPROCESSOR_JOIN(L, PRIx64) L"%d", time_current(),
+		             atomic_incr32(&counter, memory_order_relaxed));
 		wc.lpfnWndProc = (WNDPROC)_window_proc;
 		wc.cbClsExtra = 0;
 		wc.cbWndExtra = 0;
@@ -255,15 +253,14 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 
 	wchar_t* titlestr = wstring_allocate_from_string(title, length);
 	window->hwnd =
-	    CreateWindowExW((flags & WINDOW_FLAG_FULLSCREEN) ? WS_EX_TOPMOST : 0, wndclassname,
-	                    titlestr, window->wstyle, rect.left, rect.top, rect.right, rect.bottom, 0,
-	                    0, (HINSTANCE)window->instance, window);
+	    CreateWindowExW((flags & WINDOW_FLAG_FULLSCREEN) ? WS_EX_TOPMOST : 0, wndclassname, titlestr, window->wstyle,
+	                    rect.left, rect.top, rect.right, rect.bottom, 0, 0, (HINSTANCE)window->instance, window);
 	wstring_deallocate(titlestr);
 	if (!window->hwnd) {
 		int err = system_error();
 		string_const_t errmsg = system_error_message(err);
-		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, "Unable to create window: %.*s (%d)",
-		           STRING_FORMAT(errmsg), err);
+		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, "Unable to create window: %.*s (%d)", STRING_FORMAT(errmsg),
+		           err);
 		window_finalize(window);
 		return;
 	}
@@ -296,16 +293,14 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 	if (!RegisterRawInputDevices(rid, sizeof(rid) / sizeof(rid[0]), sizeof(rid[0]))) {
 		int err = system_error();
 		string_const_t errmsg = system_error_message(err);
-		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL,
-		           STRING_CONST("Failed to register raw input: %.*s (0x%x)"), STRING_FORMAT(errmsg),
-		           err);
+		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Failed to register raw input: %.*s (0x%x)"),
+		           STRING_FORMAT(errmsg), err);
 	}
 }
 
 window_t*
 window_allocate(void* hwnd) {
-	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0,
-	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	window_initialize(window, hwnd);
 	return window;
 }
@@ -410,8 +405,7 @@ void
 window_move(window_t* window, int x, int y) {
 	if (window_is_maximized(window))
 		window_restore(window);
-	SetWindowPos((HWND)window->hwnd, 0, x, y, 0, 0,
-	             SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER);
+	SetWindowPos((HWND)window->hwnd, 0, x, y, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER);
 }
 
 bool
@@ -439,8 +433,7 @@ window_is_minimized(window_t* window) {
 	memset(&plc, 0, sizeof(WINDOWPLACEMENT));
 	plc.length = sizeof(WINDOWPLACEMENT);
 	GetWindowPlacement((HWND)window->hwnd, &plc);
-	return (plc.showCmd == SW_MINIMIZE) || (plc.showCmd == SW_SHOWMINIMIZED) ||
-	       (plc.showCmd == SW_HIDE);
+	return (plc.showCmd == SW_MINIMIZE) || (plc.showCmd == SW_SHOWMINIMIZED) || (plc.showCmd == SW_HIDE);
 }
 
 bool
@@ -522,6 +515,11 @@ window_fit_to_screen(window_t* window) {
 	FOUNDATION_UNUSED(window);
 }
 
+void
+window_close(window_t* window) {
+	DestroyWindow((HWND)window->hwnd);
+}
+
 static DWORD window_message_loop_thread;
 
 int
@@ -537,8 +535,8 @@ window_message_loop(void) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else if (got < 0) {
-			log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL,
-			           STRING_CONST("Error retrieving Windows messages: %d"), (int)got);
+			log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Error retrieving Windows messages: %d"),
+			           (int)got);
 		}
 		++window_event_token;
 	}

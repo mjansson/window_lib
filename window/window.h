@@ -1,10 +1,10 @@
-/* window.h  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
+/* window.h  -  Window library  -  Public Domain  -  2014 Mattias Jansson
  *
  * This library provides a cross-platform window library in C11 providing basic support data types
  * and functions to create and manage windows in a platform-independent fashion. The latest source
  * code is always available at
  *
- * https://github.com/rampantpixels/window_lib
+ * https://github.com/mjansson/window_lib
  *
  * This library is put in the public domain; you can redistribute it and/or modify it without any
  * restrictions.
@@ -64,6 +64,9 @@ window_resize(window_t* window, int width, int height);
 WINDOW_API void
 window_move(window_t* window, int x, int y);
 
+WINDOW_API void
+window_close(window_t* window);
+
 WINDOW_API bool
 window_is_open(window_t* window);
 
@@ -115,8 +118,8 @@ window_screen_height(unsigned int adapter);
 #if FOUNDATION_PLATFORM_WINDOWS
 
 WINDOW_API void
-window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              unsigned int width, unsigned int height, unsigned int flags);
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length, unsigned int width,
+              unsigned int height, unsigned int flags);
 
 WINDOW_API window_t*
 window_allocate(void* hwnd);
@@ -153,8 +156,8 @@ WINDOW_API window_t*
 window_allocate(void);
 
 WINDOW_API void
-window_create(window_t* window, unsigned int adapter, const char* title, size_t length,
-              unsigned int width, unsigned int height, unsigned int flags);
+window_create(window_t* window, unsigned int adapter, const char* title, size_t length, unsigned int width,
+              unsigned int height, unsigned int flags);
 
 WINDOW_API void*
 window_display(window_t* window);

@@ -1,12 +1,13 @@
-/* window_osx.m  -  Window library  -  Public Domain  -  2014 Mattias Jansson / Rampant Pixels
+/* window_osx.m  -  Window library  -  Public Domain  -  2014 Mattias Jansson
  *
- * This library provides a cross-platform window library in C11 providing basic support data types and
- * functions to create and manage windows in a platform-independent fashion. The latest source code is
- * always available at
+ * This library provides a cross-platform window library in C11 providing basic support data types
+ * and functions to create and manage windows in a platform-independent fashion. The latest source
+ * code is always available at
  *
- * https://github.com/rampantpixels/window_lib
+ * https://github.com/mjansson/window_lib
  *
- * This library is put in the public domain; you can redistribute it and/or modify it without any restrictions.
+ * This library is put in the public domain; you can redistribute it and/or modify it without any
+ * restrictions.
  *
  */
 
@@ -19,9 +20,8 @@
 
 static volatile int _dummy_window_class_reference = 0;
 
-@interface WindowDelegate :
-	NSObject<NSWindowDelegate>
-	@property(nonatomic, assign) window_t* window;
+@interface WindowDelegate : NSObject <NSWindowDelegate>
+@property (nonatomic, assign) window_t* window;
 @end
 
 @implementation WindowView
@@ -56,8 +56,8 @@ static volatile int _dummy_window_class_reference = 0;
 
 window_t*
 window_allocate(void* nswindow) {
-	window_t* window = memory_allocate(0, sizeof(window_t), 0,
-	                                   MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	window_t* window =
+	    memory_allocate(0, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	window_initialize(window, nswindow);
 	return window;
 }
@@ -96,7 +96,8 @@ void*
 window_view(window_t* window, unsigned int tag) {
 	FOUNDATION_UNUSED(tag);
 	return (__bridge void*)((window && window->nswindow) ?
-	                        [(__bridge NSWindow*)window->nswindow contentView] : 0);
+	                            [(__bridge NSWindow*)window->nswindow contentView] :
+	                            0);
 }
 
 unsigned int
@@ -152,7 +153,7 @@ window_resize(window_t* window, int width, int height) {
 	new_rect.size.height = height;
 	new_rect = [nswindow frameRectForContentRect:new_rect];
 	if (!math_real_eq((real)new_rect.size.width, (real)frame_rect.size.width, 100) ||
-	        !math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
+	    !math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
 		NSUInteger style_mask = [nswindow styleMask];
 		NSUInteger resize_mask = style_mask | NSResizableWindowMask;
 		[nswindow setStyleMask:resize_mask];
@@ -204,7 +205,8 @@ window_is_minimized(window_t* window) {
 
 bool
 window_has_focus(window_t* window) {
-	return window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow));
+	return window && window->nswindow &&
+	       ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow));
 }
 
 void
@@ -233,8 +235,9 @@ window_set_title(window_t* window, const char* title, size_t length) {
 		return;
 
 	@autoreleasepool {
-		NSString* nsstr = [[NSString alloc] initWithBytes:title length:length encoding:
-		                   NSUTF8StringEncoding];
+		NSString* nsstr = [[NSString alloc] initWithBytes:title
+		                                           length:length
+		                                         encoding:NSUTF8StringEncoding];
 		if (nsstr)
 			[(__bridge NSWindow*)window->nswindow setTitle:nsstr];
 	}
@@ -243,8 +246,8 @@ window_set_title(window_t* window, const char* title, size_t length) {
 int
 window_width(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)
-		               window->nswindow frame]];
+		NSRect rect = [(__bridge NSWindow*)window->nswindow
+		    contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
 		return (int)rect.size.width;
 	}
 	return 0;
@@ -253,8 +256,8 @@ window_width(window_t* window) {
 int
 window_height(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)
-		               window->nswindow frame]];
+		NSRect rect = [(__bridge NSWindow*)window->nswindow
+		    contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
 		return (int)rect.size.height;
 	}
 	return 0;
@@ -305,8 +308,8 @@ window_fit_to_screen(window_t* window) {
 
 	NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
 	if ((new_rect.size.width < frame_rect.size.width) ||
-	        (new_rect.size.height < frame_rect.size.height)) {
-		//Maintain aspect
+	    (new_rect.size.height < frame_rect.size.height)) {
+		// Maintain aspect
 		double width_factor = new_rect.size.width / frame_rect.size.width;
 		double height_factor = new_rect.size.height / frame_rect.size.height;
 

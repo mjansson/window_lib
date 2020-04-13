@@ -1,4 +1,4 @@
-package com.rampantpixels.window.test;
+package com.maniccoder.window.test;
 
 import android.os.Bundle;
 import android.app.NativeActivity;
