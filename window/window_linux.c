@@ -519,70 +519,88 @@ window_fit_to_screen(window_t* window) {
 	FOUNDATION_UNUSED(window);
 }
 
+static bool window_exit_loop;
+
 int
 window_message_loop(void) {
-	while (window_default_display) {
-		XEvent event;
-		XNextEvent(window_default_display, &event);
+	window_exit_loop = false;
+	while (window_default_display && !window_exit_loop) {
 
-		mutex_lock(window_mutex);
-		for (size_t iwin = 0, wsize = array_size(window_list); iwin < wsize; ++iwin) {
-			window_t* window = window_list[iwin];
-			if (True == XFilterEvent(&event, window->drawable))
-				continue;
+		int fd = ConnectionNumber(window_default_display);
 
-			window_event_post_native(WINDOWEVENT_NATIVE, window, &event);
+		fd_set fdset;
+		FD_ZERO(&fdset);
+		FD_SET(fd, &fdset);
 
-			XVisibilityEvent* visibility;
-			switch (event.type) {
-				case ClientMessage:
-					if (event.xclient.data.l[0] == (long)window->atom_delete)
-						window_event_post(WINDOWEVENT_CLOSE, window);
-					break;
+		int res = select(fd + 1, &fdset, 0, 0, 0);
+		if (res > 0) {
+			XLockDisplay(window_default_display);
+			mutex_lock(window_mutex);
+			while (XPending(window_default_display)) {
+				XEvent event;
+				XNextEvent(window_default_display, &event);
 
-				case ConfigureNotify:
-					if (window->last_resize != window_event_token) {
-						window_event_post(WINDOWEVENT_RESIZE, window);
-						window->last_resize = window_event_token;
-					}
-					if (window->last_paint != window_event_token) {
-						window_event_post(WINDOWEVENT_REDRAW, window);
-						window->last_paint = window_event_token;
-					}
-					break;
+				for (size_t iwin = 0, wsize = array_size(window_list); iwin < wsize; ++iwin) {
+					window_t* window = window_list[iwin];
+					if (True == XFilterEvent(&event, window->drawable))
+						continue;
 
-				case VisibilityNotify:
-					visibility = (XVisibilityEvent*)&event;
-					if (visibility->state == VisibilityFullyObscured) {
-						if (window->visible)
-							window_event_post(WINDOWEVENT_HIDE, window);
-						window->visible = false;
-					} else {
-						if (!window->visible) {
-							window_event_post(WINDOWEVENT_SHOW, window);
+					window_event_post_native(WINDOWEVENT_NATIVE, window, &event);
+
+					XVisibilityEvent* visibility;
+					switch (event.type) {
+						case ClientMessage:
+							if (event.xclient.data.l[0] == (long)window->atom_delete)
+								window_event_post(WINDOWEVENT_CLOSE, window);
+							break;
+
+						case ConfigureNotify:
+							if (window->last_resize != window_event_token) {
+								window_event_post(WINDOWEVENT_RESIZE, window);
+								window->last_resize = window_event_token;
+							}
 							if (window->last_paint != window_event_token) {
 								window_event_post(WINDOWEVENT_REDRAW, window);
 								window->last_paint = window_event_token;
 							}
-						}
-						window->visible = true;
+							break;
+
+						case VisibilityNotify:
+							visibility = (XVisibilityEvent*)&event;
+							if (visibility->state == VisibilityFullyObscured) {
+								if (window->visible)
+									window_event_post(WINDOWEVENT_HIDE, window);
+								window->visible = false;
+							} else {
+								if (!window->visible) {
+									window_event_post(WINDOWEVENT_SHOW, window);
+									if (window->last_paint != window_event_token) {
+										window_event_post(WINDOWEVENT_REDRAW, window);
+										window->last_paint = window_event_token;
+									}
+								}
+								window->visible = true;
+							}
+							break;
+
+						case FocusIn:
+							if (!window->focus)
+								window_event_post(WINDOWEVENT_GOTFOCUS, window);
+							window->focus = true;
+							break;
+
+						case FocusOut:
+							if (window->focus)
+								window_event_post(WINDOWEVENT_LOSTFOCUS, window);
+							window->focus = false;
+							break;
 					}
-					break;
-
-				case FocusIn:
-					if (!window->focus)
-						window_event_post(WINDOWEVENT_GOTFOCUS, window);
-					window->focus = true;
-					break;
-
-				case FocusOut:
-					if (window->focus)
-						window_event_post(WINDOWEVENT_LOSTFOCUS, window);
-					window->focus = false;
-					break;
+				}
 			}
+			
+			mutex_unlock(window_mutex);
+			XUnlockDisplay(window_default_display);
 		}
-		mutex_unlock(window_mutex);
 	}
 	return 0;
 }
@@ -590,7 +608,17 @@ window_message_loop(void) {
 void
 window_message_quit(void) {
 	if (window_default_display) {
-		//XSendEvent(window_default_display, )
+		window_exit_loop = true;
+
+		XLockDisplay(window_default_display);
+		XClientMessageEvent event;
+		memset(&event, 0, sizeof(event));
+		event.type = ClientMessage;
+		if (array_size(window_list))
+			event.window = window_list[0]->drawable;
+		event.format = 32;
+		XSendEvent(window_default_display, event.window, False, 0, (XEvent*)&event);
+		XUnlockDisplay(window_default_display);
 	}
 }
 
