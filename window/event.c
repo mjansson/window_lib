@@ -55,29 +55,6 @@ _window_event_finalize(void) {
 	event_stream_deallocate(_window_stream);
 }
 
-#if FOUNDATION_PLATFORM_LINUX
-
-void
-_window_event_add(window_t* window) {
-	semaphore_wait(&_windows_lock);
-	array_push(_windows, window);
-	semaphore_post(&_windows_lock);
-}
-
-void
-_window_event_remove(window_t* window) {
-	semaphore_wait(&_windows_lock);
-	for (size_t iwin = 0, wsize = array_size(_windows); iwin < wsize; ++iwin) {
-		if (_windows[iwin] == window) {
-			array_erase(_windows, iwin);
-			break;
-		}
-	}
-	semaphore_post(&_windows_lock);
-}
-
-#endif
-
 void
 window_event_post(window_event_id id, window_t* window) {
 	if (_window_stream)

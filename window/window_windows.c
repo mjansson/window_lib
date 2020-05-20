@@ -526,9 +526,9 @@ int
 window_message_loop(void) {
 	window_message_loop_thread = GetThreadId(GetCurrentThread());
 
-	MSG msg;
 	BOOL got = 1;
 	while (got > 0) {
+		MSG msg;
 		got = GetMessage(&msg, 0, 0, 0);
 		// log_debugf(HASH_WINDOW, STRING_CONST("Got message: 0x%04x (%d)"), msg.message, got);
 		if (got > 0) {

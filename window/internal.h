@@ -42,23 +42,13 @@ _window_class_reference(void);
 
 #endif
 
-#if FOUNDATION_PLATFORM_IOS
+#if FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_IOS
 
 WINDOW_EXTERN void
 _window_native_initialize(void);
 
 WINDOW_EXTERN void
 _window_native_finalize(void);
-
-#endif
-
-#if FOUNDATION_PLATFORM_LINUX
-
-WINDOW_EXTERN void
-_window_event_add(window_t* window);
-
-WINDOW_EXTERN void
-_window_event_remove(window_t* window);
 
 #endif
 

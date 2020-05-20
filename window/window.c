@@ -43,12 +43,12 @@ window_module_initialize(const window_config_t config) {
 	_window_class_reference();
 #endif
 
-#if FOUNDATION_PLATFORM_IOS
-	_window_native_initialize();
-#endif
-
 #if FOUNDATION_PLATFORM_LINUX
 	XSetErrorHandler(_x11_error_handler);
+#endif
+
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_LINUX
+	_window_native_initialize();
 #endif
 
 	_window_initialized = true;
@@ -58,7 +58,7 @@ window_module_initialize(const window_config_t config) {
 
 void
 window_module_finalize(void) {
-#if FOUNDATION_PLATFORM_IOS
+#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_LINUX
 	_window_native_finalize();
 #endif
 

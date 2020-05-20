@@ -24,8 +24,44 @@
 #define _NET_WM_STATE_ADD 1
 //#define _NET_WM_STATE_TOGGLE 2
 
+static Display* window_default_display;
+
+static window_t** window_list;
+static mutex_t* window_mutex;
+
+static void
+window_add(window_t* window) {
+	mutex_lock(window_mutex);
+	array_push(window_list, window);
+	mutex_unlock(window_mutex);
+}
+
+static void
+window_remove(window_t* window) {
+	mutex_lock(window_mutex);
+	for (size_t iwin = 0, wsize = array_size(window_list); iwin < wsize; ++iwin) {
+		if (window_list[iwin] == window) {
+			array_erase(window_list, iwin);
+			break;
+		}
+	}
+	mutex_unlock(window_mutex);
+}
+
+void
+_window_native_initialize(void) {
+	window_mutex = mutex_allocate(STRING_CONST("window_list"));
+	window_list = 0;
+}
+
+void
+_window_native_finalize(void) {
+	mutex_deallocate(window_mutex);
+	array_deallocate(window_list);
+}
+
 static XVisualInfo*
-_get_xvisual(Display* display, int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
+window_get_xvisual(Display* display, int screen, unsigned int color, unsigned int depth, unsigned int stencil) {
 #if FOUNDATION_PLATFORM_LINUX_RASPBERRYPI
 	return 0;
 #else
@@ -52,7 +88,7 @@ _get_xvisual(Display* display, int screen, unsigned int color, unsigned int dept
 #endif
 }
 
-void
+window_t*
 window_allocate(void) {
 	window_t* window = memory_allocate(HASH_WINDOW, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	return window;
@@ -63,14 +99,20 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
               unsigned int height, unsigned int flags) {
 	FOUNDATION_UNUSED(length);
 
-	Display* display = XOpenDisplay(0);
+	// TODO: Only default display supported right now. When multiple display support is added, the event
+	//       loop must be refactored to one thread per display to maintain blocking
+	Display* display = window_default_display;
+	if (!display) {
+		window_default_display = XOpenDisplay(0);
+		display = window_default_display;
+	}
 	if (!display) {
 		log_error(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to open X display"));
 		return;
 	}
 
 	int screen = (adapter != WINDOW_ADAPTER_DEFAULT) ? (int)adapter : DefaultScreen(display);
-	XVisualInfo* visual = _get_xvisual(display, screen, 24, 16, 0);
+	XVisualInfo* visual = window_get_xvisual(display, screen, 24, 16, 0);
 	if (!visual) {
 		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to get X visual for screen %d"), screen);
 		return;
@@ -137,7 +179,7 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 	window->created = true;
 	window->atom_delete = atom_delete;
 
-	_window_event_add(window);
+	window_add(window);
 
 	window_event_post(WINDOWEVENT_CREATE, window);
 }
@@ -165,7 +207,7 @@ window_visual(window_t* window) {
 void
 window_finalize(window_t* window) {
 	if (window->created)
-		_window_event_remove(window);
+		window_remove(window);
 
 	if (window->created && window->drawable) {
 		XDestroyWindow(window->display, window->drawable);
@@ -441,15 +483,14 @@ window_fit_to_screen(window_t* window) {
 }
 
 int
-window_event_loop(void) {
-	// TODO: Reimplement as blocking loop
-	if (!semaphore_try_wait(&_windows_lock, 0))
-		return;
-	for (size_t iwin = 0, wsize = array_size(_windows); iwin < wsize; ++iwin) {
-		window_t* window = _windows[iwin];
-		while (XPending(window->display)) {
-			XEvent event;
-			XNextEvent(window->display, &event);
+window_message_loop(void) {
+	while (window_default_display) {
+		XEvent event;
+		XNextEvent(window_default_display, &event);
+
+		mutex_lock(window_mutex);
+		for (size_t iwin = 0, wsize = array_size(window_list); iwin < wsize; ++iwin) {
+			window_t* window = window_list[iwin];
 			if (True == XFilterEvent(&event, window->drawable))
 				continue;
 
@@ -504,8 +545,16 @@ window_event_loop(void) {
 					break;
 			}
 		}
+		mutex_unlock(window_mutex);
 	}
-	semaphore_post(&_windows_lock);
+	return 0;
+}
+
+void
+window_message_quit(void) {
+	if (window_default_display) {
+		//XSendEvent(window_default_display, )
+	}
 }
 
 #endif
