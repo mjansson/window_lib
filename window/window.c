@@ -15,6 +15,7 @@
 #include <window/internal.h>
 
 #include <foundation/foundation.h>
+#include <foundation/stacktrace.h>
 
 static bool _window_initialized = false;
 
@@ -25,6 +26,16 @@ _x11_error_handler(Display* display, XErrorEvent* event) {
 	char errmsg[512];
 	XGetErrorText(display, event->error_code, errmsg, sizeof(errmsg));
 	log_warnf(HASH_WINDOW, WARNING_SYSTEM_CALL_FAIL, STRING_CONST("X error event occurred: %s"), errmsg);
+
+	void* frame[64];
+	size_t frame_count = stacktrace_capture(frame, sizeof(frame) / sizeof(frame[0]), 0);
+	if (frame_count) {
+		size_t capacity = 8 * 1024;
+		char* buffer = memory_allocate(HASH_WINDOW, capacity, 0, MEMORY_PERSISTENT);
+		string_t stacktrace = stacktrace_resolve(buffer, capacity, frame, frame_count, 0);
+		log_infof(HASH_WINDOW, STRING_CONST("Stack trace:\n%.*s"), STRING_FORMAT(stacktrace));
+		memory_deallocate(buffer);
+	}
 	return 0;
 }
 
@@ -44,6 +55,7 @@ window_module_initialize(const window_config_t config) {
 #endif
 
 #if FOUNDATION_PLATFORM_LINUX
+	XInitThreads();
 	XSetErrorHandler(_x11_error_handler);
 #endif
 

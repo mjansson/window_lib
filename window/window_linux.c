@@ -111,9 +111,12 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 		return;
 	}
 
+	XLockDisplay(display);
+
 	int screen = (adapter != WINDOW_ADAPTER_DEFAULT) ? (int)adapter : DefaultScreen(display);
 	XVisualInfo* visual = window_get_xvisual(display, screen, 24, 16, 0);
 	if (!visual) {
+		XUnlockDisplay(display);
 		log_errorf(HASH_WINDOW, ERROR_SYSTEM_CALL_FAIL, STRING_CONST("Unable to get X visual for screen %d"), screen);
 		return;
 	}
@@ -170,6 +173,8 @@ window_create(window_t* window, unsigned int adapter, const char* title, size_t 
 		log_warn(HASH_WINDOW, WARNING_SUSPICIOUS, STRING_CONST("Unable to open X input method"));
 	}
 
+	XUnlockDisplay(display);
+
 	window->display = display;
 	window->visual = visual;
 	window->screen = (unsigned int)screen;
@@ -209,6 +214,9 @@ window_finalize(window_t* window) {
 	if (window->created)
 		window_remove(window);
 
+	if (window->display)
+		XLockDisplay(window->display);
+
 	if (window->created && window->drawable) {
 		XDestroyWindow(window->display, window->drawable);
 		XFlush(window->display);
@@ -223,8 +231,10 @@ window_finalize(window_t* window) {
 	}
 	window->visual = 0;
 
-	if (window->display)
+	if (window->display) {
+		XUnlockDisplay(window->display);
 		XCloseDisplay(window->display);
+	}
 	window->display = 0;
 }
 
@@ -254,6 +264,8 @@ window_screen_height(unsigned int adapter) {
 
 void
 window_maximize(window_t* window) {
+	XLockDisplay(window->display);
+
 	XEvent event = {0};
 	Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
 	Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
@@ -271,21 +283,26 @@ window_maximize(window_t* window) {
 	           &event);
 	XFlush(window->display);
 	XSync(window->display, False);
+
+	XUnlockDisplay(window->display);
 }
 
 void
 window_minimize(window_t* window) {
 	if (window_is_minimized(window))
 		return;
+	XLockDisplay(window->display);
 	XIconifyWindow(window->display, window->drawable, (int)window->screen);
 	XFlush(window->display);
 	XSync(window->display, False);
+	XUnlockDisplay(window->display);
 	window_event_post(WINDOWEVENT_RESIZE, window);
 }
 
 void
 window_restore(window_t* window) {
 	if (window_is_minimized(window)) {
+		XLockDisplay(window->display);
 		XEvent event = {0};
 		Atom atom_changestate = XInternAtom(window->display, "WM_CHANGE_STATE", False);
 
@@ -305,8 +322,9 @@ window_restore(window_t* window) {
 		XSetInputFocus(window->display, window->drawable, RevertToParent, CurrentTime);
 		XFlush(window->display);
 		XSync(window->display, False);
-
+		XUnlockDisplay(window->display);
 	} else if (window_is_maximized(window)) {
+		XLockDisplay(window->display);
 		XEvent event = {0};
 		Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
 		Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
@@ -324,23 +342,28 @@ window_restore(window_t* window) {
 		           &event);
 		XFlush(window->display);
 		XSync(window->display, False);
+		XUnlockDisplay(window->display);
 	}
 }
 
 void
 window_resize(window_t* window, int width, int height) {
 	window_restore(window);
+	XLockDisplay(window->display);
 	XResizeWindow(window->display, window->drawable, (unsigned int)width, (unsigned int)height);
 	XFlush(window->display);
 	XSync(window->display, False);
+	XUnlockDisplay(window->display);
 }
 
 void
 window_move(window_t* window, int x, int y) {
 	window_restore(window);
+	XLockDisplay(window->display);
 	XMoveWindow(window->display, window->drawable, x, y);
 	XFlush(window->display);
 	XSync(window->display, False);
+	XUnlockDisplay(window->display);
 }
 
 bool
@@ -356,6 +379,7 @@ window_is_visible(window_t* window) {
 
 bool
 window_is_maximized(window_t* window) {
+	XLockDisplay(window->display);
 	Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
 	Atom atom_horizontal = XInternAtom(window->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 
@@ -376,11 +400,14 @@ window_is_maximized(window_t* window) {
 
 	if (atoms)
 		XFree(atoms);
+	XUnlockDisplay(window->display);
+
 	return is_maximized;
 }
 
 bool
 window_is_minimized(window_t* window) {
+	XLockDisplay(window->display);
 	Atom atom_wmstate = XInternAtom(window->display, "_NET_WM_STATE", False);
 	Atom atom_hidden = XInternAtom(window->display, "_NET_WM_STATE_HIDDEN", False);
 
@@ -401,6 +428,8 @@ window_is_minimized(window_t* window) {
 
 	if (atoms)
 		XFree(atoms);
+	XUnlockDisplay(window->display);
+
 	return is_minimized;
 }
 
@@ -408,7 +437,9 @@ bool
 window_has_focus(window_t* window) {
 	Window focus;
 	int revert;
+	XLockDisplay(window->display);
 	XGetInputFocus(window->display, &focus, &revert);
+	XUnlockDisplay(window->display);
 	return focus == window->drawable;
 }
 
@@ -443,28 +474,32 @@ unsigned int
 window_width(window_t* window) {
 	Window root;
 	int x, y;
-	unsigned int width, height, border, depth;
-	if (XGetGeometry(window->display, window->drawable, &root, &x, &y, &width, &height, &border, &depth))
-		return width;
-	return 0;
+	unsigned int width = 0, height, border, depth;
+	if (XGetGeometry(window->display, window->drawable, &root, &x, &y, &width, &height, &border, &depth) == 0)
+		width = 0;
+	return width;
 }
 
 unsigned int
 window_height(window_t* window) {
 	Window root;
 	int x, y;
-	unsigned int width, height, border, depth;
-	if (XGetGeometry(window->display, window->drawable, &root, &x, &y, &width, &height, &border, &depth))
-		return height;
-	return 0;
+	unsigned int width, height = 0, border, depth;
+	XLockDisplay(window->display);
+	if (XGetGeometry(window->display, window->drawable, &root, &x, &y, &width, &height, &border, &depth) == 0)
+		height = 0;
+	XUnlockDisplay(window->display);
+	return height;
 }
 
 int
 window_position_x(window_t* window) {
 	Window child;
 	int x, y;
+	XLockDisplay(window->display);
 	Window root = XRootWindow(window->display, (int)window->screen);
 	XTranslateCoordinates(window->display, window->drawable, root, 0, 0, &x, &y, &child);
+	XUnlockDisplay(window->display);
 	return x;
 }
 
@@ -472,8 +507,10 @@ int
 window_position_y(window_t* window) {
 	Window child;
 	int x, y;
+	XLockDisplay(window->display);
 	Window root = XRootWindow(window->display, (int)window->screen);
 	XTranslateCoordinates(window->display, window->drawable, root, 0, 0, &x, &y, &child);
+	XUnlockDisplay(window->display);
 	return y;
 }
 
