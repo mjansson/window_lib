@@ -61,7 +61,9 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 		case WM_EXITSIZEMOVE:
 			window->is_resizing = false;
+			window_event_post(WINDOWEVENT_MOVE, window);
 			window_event_post(WINDOWEVENT_RESIZE, window);
+			window->last_resize = window_event_token;
 			break;
 
 		case WM_SIZE:
@@ -72,6 +74,7 @@ _window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 				window_event_post(WINDOWEVENT_SHOW, window);
 				window->is_visible = true;
 			} else if (!window->last_resize != window_event_token) {
+				window_event_post(WINDOWEVENT_MOVE, window);
 				window_event_post(WINDOWEVENT_RESIZE, window);
 			}
 			window->last_resize = window_event_token;

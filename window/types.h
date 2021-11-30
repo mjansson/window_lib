@@ -27,6 +27,8 @@ typedef enum window_event_id {
 	WINDOWEVENT_CREATE = 1,
 	/*! Window was resized */
 	WINDOWEVENT_RESIZE,
+	/*! Window was moved */
+	WINDOWEVENT_MOVE,
 	/*! Window close requested */
 	WINDOWEVENT_CLOSE,
 	/*! Window was destroyed */
