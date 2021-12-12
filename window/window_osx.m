@@ -56,8 +56,7 @@ static volatile int _dummy_window_class_reference = 0;
 
 window_t*
 window_allocate(void* nswindow) {
-	window_t* window =
-	    memory_allocate(0, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
+	window_t* window = memory_allocate(0, sizeof(window_t), 0, MEMORY_PERSISTENT | MEMORY_ZERO_INITIALIZED);
 	window_initialize(window, nswindow);
 	return window;
 }
@@ -95,9 +94,7 @@ window_deallocate(window_t* window) {
 void*
 window_view(window_t* window, unsigned int tag) {
 	FOUNDATION_UNUSED(tag);
-	return (__bridge void*)((window && window->nswindow) ?
-	                            [(__bridge NSWindow*)window->nswindow contentView] :
-	                            0);
+	return (__bridge void*)((window && window->nswindow) ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
 }
 
 unsigned int
@@ -155,7 +152,7 @@ window_resize(window_t* window, int width, int height) {
 	if (!math_real_eq((real)new_rect.size.width, (real)frame_rect.size.width, 100) ||
 	    !math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
 		NSUInteger style_mask = [nswindow styleMask];
-		NSUInteger resize_mask = style_mask | NSResizableWindowMask;
+		NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
 		[nswindow setStyleMask:resize_mask];
 		[nswindow setFrame:new_rect display:TRUE];
 		[nswindow setStyleMask:style_mask];
@@ -205,8 +202,7 @@ window_is_minimized(window_t* window) {
 
 bool
 window_has_focus(window_t* window) {
-	return window && window->nswindow &&
-	       ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow));
+	return window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow));
 }
 
 void
@@ -235,30 +231,28 @@ window_set_title(window_t* window, const char* title, size_t length) {
 		return;
 
 	@autoreleasepool {
-		NSString* nsstr = [[NSString alloc] initWithBytes:title
-		                                           length:length
-		                                         encoding:NSUTF8StringEncoding];
+		NSString* nsstr = [[NSString alloc] initWithBytes:title length:length encoding:NSUTF8StringEncoding];
 		if (nsstr)
 			[(__bridge NSWindow*)window->nswindow setTitle:nsstr];
 	}
 }
 
-int
+unsigned int
 window_width(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect = [(__bridge NSWindow*)window->nswindow
-		    contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
-		return (int)rect.size.width;
+		NSRect rect =
+		    [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		return (uint)rect.size.width;
 	}
 	return 0;
 }
 
-int
+unsigned int
 window_height(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect = [(__bridge NSWindow*)window->nswindow
-		    contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
-		return (int)rect.size.height;
+		NSRect rect =
+		    [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		return (uint)rect.size.height;
 	}
 	return 0;
 }
@@ -303,12 +297,11 @@ window_fit_to_screen(window_t* window) {
 	NSRect frame_rect = [nswindow frame];
 
 	NSUInteger style_mask = [nswindow styleMask];
-	NSUInteger resize_mask = style_mask | NSResizableWindowMask;
+	NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
 	[nswindow setStyleMask:resize_mask];
 
 	NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
-	if ((new_rect.size.width < frame_rect.size.width) ||
-	    (new_rect.size.height < frame_rect.size.height)) {
+	if ((new_rect.size.width < frame_rect.size.width) || (new_rect.size.height < frame_rect.size.height)) {
 		// Maintain aspect
 		double width_factor = new_rect.size.width / frame_rect.size.width;
 		double height_factor = new_rect.size.height / frame_rect.size.height;
@@ -322,6 +315,15 @@ window_fit_to_screen(window_t* window) {
 	}
 
 	[nswindow setStyleMask:style_mask];
+}
+
+int
+window_message_loop(void) {
+	return 0;
+}
+
+void
+window_message_quit(void) {
 }
 
 void
