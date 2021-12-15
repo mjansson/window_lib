@@ -25,40 +25,40 @@
 
 tick_t window_event_token;
 
-static event_stream_t* _window_stream = 0;
+static event_stream_t* window_stream = 0;
 
-bool _window_app_started = false;
-bool _window_app_paused = true;
+bool window_app_started = false;
+bool window_app_paused = true;
 
 #if FOUNDATION_PLATFORM_LINUX
-static semaphore_t _windows_lock;
-static window_t** _windows;
+static semaphore_t windows_lock;
+static window_t** windows;
 #endif
 
 int
-_window_event_initialize(void) {
-	_window_stream = event_stream_allocate(1024);
+window_event_initialize(void) {
+	window_stream = event_stream_allocate(1024);
 	window_event_token = 1;
 #if FOUNDATION_PLATFORM_LINUX
-	semaphore_initialize(&_windows_lock, 1);
-	_windows = 0;
+	semaphore_initialize(&windows_lock, 1);
+	windows = 0;
 #endif
 	return 0;
 }
 
 void
-_window_event_finalize(void) {
+window_event_finalize(void) {
 #if FOUNDATION_PLATFORM_LINUX
-	array_deallocate(_windows);
-	semaphore_finalize(&_windows_lock);
+	array_deallocate(windows);
+	semaphore_finalize(&windows_lock);
 #endif
-	event_stream_deallocate(_window_stream);
+	event_stream_deallocate(window_stream);
 }
 
 void
 window_event_post(window_event_id id, window_t* window) {
-	if (_window_stream)
-		event_post(_window_stream, (int)id, 0, 0, &window, sizeof(window_t*));
+	if (window_stream)
+		event_post(window_stream, (int)id, 0, 0, &window, sizeof(window_t*));
 }
 
 #if FOUNDATION_PLATFORM_WINDOWS
@@ -66,8 +66,8 @@ window_event_post(window_event_id id, window_t* window) {
 void
 window_event_post_native(window_event_id id, window_t* window, void* hwnd, uintptr_t msg, uintptr_t wparam,
                          uintptr_t lparam, void* buffer, size_t size) {
-	if (_window_stream)
-		event_post_varg(_window_stream, (int)id, 0, 0, &window, sizeof(window_t*), &hwnd, sizeof(void*), &msg,
+	if (window_stream)
+		event_post_varg(window_stream, (int)id, 0, 0, &window, sizeof(window_t*), &hwnd, sizeof(void*), &msg,
 		                sizeof(uintptr_t), &wparam, sizeof(uintptr_t), &lparam, sizeof(uintptr_t),
 		                size ? buffer : nullptr, size, nullptr, nullptr);
 }
@@ -76,8 +76,8 @@ window_event_post_native(window_event_id id, window_t* window, void* hwnd, uintp
 
 void
 window_event_post_native(window_event_id id, window_t* window, void* xevent) {
-	if (_window_stream)
-		event_post_varg(_window_stream, (int)id, 0, 0, &window, sizeof(window_t*), xevent, sizeof(XEvent), nullptr,
+	if (window_stream)
+		event_post_varg(window_stream, (int)id, 0, 0, &window, sizeof(window_t*), xevent, sizeof(XEvent), nullptr,
 		                nullptr);
 }
 
@@ -90,16 +90,16 @@ window_event_window(const event_t* event) {
 
 event_stream_t*
 window_event_stream(void) {
-	return _window_stream;
+	return window_stream;
 }
 
 void
 window_event_handle(event_t* event) {
 	if (event->id == FOUNDATIONEVENT_START) {
-		_window_app_started = true;
-		_window_app_paused = false;
+		window_app_started = true;
+		window_app_paused = false;
 	} else if (event->id == FOUNDATIONEVENT_PAUSE)
-		_window_app_paused = true;
+		window_app_paused = true;
 	else if (event->id == FOUNDATIONEVENT_RESUME)
-		_window_app_paused = false;
+		window_app_paused = false;
 }

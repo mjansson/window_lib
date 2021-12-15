@@ -28,29 +28,29 @@
 #endif
 
 WINDOW_EXTERN int
-_window_event_initialize(void);
+window_event_initialize(void);
 
 WINDOW_EXTERN void
-_window_event_finalize(void);
+window_event_finalize(void);
 
 WINDOW_EXTERN tick_t window_event_token;
 
 #if FOUNDATION_PLATFORM_MACOS || FOUNDATION_PLATFORM_IOS
 
 WINDOW_EXTERN void
-_window_class_reference(void);
+window_class_reference(void);
 
 #endif
 
 #if FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_IOS
 
 WINDOW_EXTERN void
-_window_native_initialize(void);
+window_native_initialize(void);
 
 WINDOW_EXTERN void
-_window_native_finalize(void);
+window_native_finalize(void);
 
 #endif
 
-WINDOW_EXTERN bool _window_app_started;
-WINDOW_EXTERN bool _window_app_paused;
+WINDOW_EXTERN bool window_app_started;
+WINDOW_EXTERN bool window_app_paused;

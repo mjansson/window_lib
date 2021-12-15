@@ -49,13 +49,13 @@ window_remove(window_t* window) {
 }
 
 void
-_window_native_initialize(void) {
+window_native_initialize(void) {
 	window_mutex = mutex_allocate(STRING_CONST("window_list"));
 	window_list = 0;
 }
 
 void
-_window_native_finalize(void) {
+window_native_finalize(void) {
 	mutex_deallocate(window_mutex);
 	array_deallocate(window_list);
 }
@@ -521,11 +521,17 @@ window_fit_to_screen(window_t* window) {
 
 static bool window_exit_loop;
 
+#if FOUNDATION_COMPILER_CLANG
+#pragma clang diagnostic push
+#if __has_warning("-Wreserved-identifier")
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
+#endif
+
 int
 window_message_loop(void) {
 	window_exit_loop = false;
 	while (window_default_display && !window_exit_loop) {
-
 		int fd = ConnectionNumber(window_default_display);
 
 		fd_set fdset;
@@ -597,7 +603,7 @@ window_message_loop(void) {
 					}
 				}
 			}
-			
+
 			mutex_unlock(window_mutex);
 			XUnlockDisplay(window_default_display);
 		}
