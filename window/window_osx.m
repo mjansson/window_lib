@@ -327,7 +327,7 @@ window_message_quit(void) {
 }
 
 void
-_window_class_reference(void) {
+window_class_reference(void) {
 	[WindowView referenceClass];
 	[WindowViewController referenceClass];
 }
