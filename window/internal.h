@@ -42,7 +42,7 @@ window_class_reference(void);
 
 #endif
 
-#if FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_IOS
+#if FOUNDATION_PLATFORM_LINUX || FOUNDATION_PLATFORM_APPLE
 
 WINDOW_EXTERN void
 window_native_initialize(void);

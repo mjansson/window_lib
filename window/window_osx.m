@@ -17,8 +17,22 @@
 
 #include <window/internal.h>
 #include <foundation/apple.h>
+#include <foundation/semaphore.h>
 
-static volatile int _dummy_window_class_reference = 0;
+static volatile int dummy_window_class_reference = 0;
+static semaphore_t window_quit_semaphore;
+static bool window_exit_loop;
+
+void
+window_native_initialize(void) {
+	semaphore_initialize(&window_quit_semaphore, 0);
+	window_exit_loop = 0;
+}
+
+void
+window_native_finalize(void) {
+	semaphore_finalize(&window_quit_semaphore);
+}
 
 @interface WindowDelegate : NSObject <NSWindowDelegate>
 @property (nonatomic, assign) window_t* window;
@@ -28,7 +42,7 @@ static volatile int _dummy_window_class_reference = 0;
 
 + (void)referenceClass {
 	log_debug(0, STRING_CONST("WindowView class referenced"));
-	++_dummy_window_class_reference;
+	++dummy_window_class_reference;
 }
 
 - (BOOL)acceptsFirstResponder {
@@ -49,7 +63,7 @@ static volatile int _dummy_window_class_reference = 0;
 
 + (void)referenceClass {
 	log_debug(0, STRING_CONST("WindowViewController class referenced"));
-	++_dummy_window_class_reference;
+	++dummy_window_class_reference;
 }
 
 @end
@@ -319,11 +333,16 @@ window_fit_to_screen(window_t* window) {
 
 int
 window_message_loop(void) {
+	while (!window_exit_loop) {
+		semaphore_wait(&window_quit_semaphore);
+	}
 	return 0;
 }
 
 void
 window_message_quit(void) {
+	window_exit_loop = true;
+	semaphore_post(&window_quit_semaphore);
 }
 
 void

@@ -59,7 +59,7 @@ window_module_initialize(const window_config_t config) {
 	XSetErrorHandler(x11_error_handler);
 #endif
 
-#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_LINUX
+#if FOUNDATION_PLATFORM_APPLE || FOUNDATION_PLATFORM_LINUX
 	window_native_initialize();
 #endif
 
@@ -70,7 +70,7 @@ window_module_initialize(const window_config_t config) {
 
 void
 window_module_finalize(void) {
-#if FOUNDATION_PLATFORM_IOS || FOUNDATION_PLATFORM_LINUX
+#if FOUNDATION_PLATFORM_APPLE || FOUNDATION_PLATFORM_LINUX
 	window_native_finalize();
 #endif
 
