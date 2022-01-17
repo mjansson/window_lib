@@ -19,6 +19,8 @@
 #include <foundation/apple.h>
 #include <foundation/semaphore.h>
 
+#import <QuartzCore/QuartzCore.h>
+
 static volatile int dummy_window_class_reference = 0;
 static semaphore_t window_quit_semaphore;
 static bool window_exit_loop;
@@ -43,6 +45,15 @@ window_native_finalize(void) {
 + (void)referenceClass {
 	log_debug(0, STRING_CONST("WindowView class referenced"));
 	++dummy_window_class_reference;
+}
+
++ (Class)layerClass {
+    return [CAMetalLayer class];
+}
+
+- (CALayer *)makeBackingLayer
+{
+	return [CAMetalLayer layer];
 }
 
 - (BOOL)acceptsFirstResponder {
@@ -82,8 +93,11 @@ window_initialize(window_t* window, void* nswindow) {
 	WindowDelegate* delegate = [[WindowDelegate alloc] init];
 	delegate.window = window;
 	window->delegate = (__bridge_retained void*)delegate;
-	if (window->nswindow)
-		[(__bridge NSWindow*)window->nswindow setDelegate:delegate];
+	if (window->nswindow) {
+		dispatch_sync(dispatch_get_main_queue(), ^{
+			[(__bridge NSWindow*)window->nswindow setDelegate:delegate];
+		});
+	}
 	window_event_post(WINDOWEVENT_CREATE, window);
 
 	if (window_is_visible(window))
@@ -108,7 +122,11 @@ window_deallocate(window_t* window) {
 void*
 window_view(window_t* window, unsigned int tag) {
 	FOUNDATION_UNUSED(tag);
-	return (__bridge void*)((window && window->nswindow) ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
+	__block void* view = nullptr;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		view = (__bridge void*)((window && window->nswindow) ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
+	});
+	return view;
 }
 
 unsigned int
@@ -195,7 +213,11 @@ window_is_visible(window_t* window) {
 	if (!window || !window->nswindow)
 		return false;
 
-	return [(__bridge NSWindow*)window->nswindow isVisible];
+	__block bool is_visible = false;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		is_visible = [(__bridge NSWindow*)window->nswindow isVisible];
+	});
+	return is_visible;
 }
 
 bool
@@ -216,7 +238,11 @@ window_is_minimized(window_t* window) {
 
 bool
 window_has_focus(window_t* window) {
-	return window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow));
+	__block bool has_focus = false;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		has_focus = (window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow)));
+	});
+	return has_focus;
 }
 
 void
@@ -254,8 +280,10 @@ window_set_title(window_t* window, const char* title, size_t length) {
 unsigned int
 window_width(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect =
-		    [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		__block NSRect rect;
+		dispatch_sync(dispatch_get_main_queue(), ^{
+			rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		});
 		return (uint)rect.size.width;
 	}
 	return 0;
@@ -264,8 +292,10 @@ window_width(window_t* window) {
 unsigned int
 window_height(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect =
-		    [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		__block NSRect rect;
+		dispatch_sync(dispatch_get_main_queue(), ^{
+			rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		});
 		return (uint)rect.size.height;
 	}
 	return 0;
@@ -274,7 +304,10 @@ window_height(window_t* window) {
 int
 window_position_x(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect = [(__bridge NSWindow*)window->nswindow frame];
+		__block NSRect rect;
+		dispatch_sync(dispatch_get_main_queue(), ^{
+			rect = [(__bridge NSWindow*)window->nswindow frame];
+		});
 		return (int)rect.origin.x;
 	}
 	return 0;
@@ -283,7 +316,10 @@ window_position_x(window_t* window) {
 int
 window_position_y(window_t* window) {
 	if (window && window->nswindow) {
-		NSRect rect = [(__bridge NSWindow*)window->nswindow frame];
+		__block NSRect rect;
+		dispatch_sync(dispatch_get_main_queue(), ^{
+			rect = [(__bridge NSWindow*)window->nswindow frame];
+		});
 		return (int)rect.origin.y;
 	}
 	return 0;
@@ -305,30 +341,32 @@ void
 window_fit_to_screen(window_t* window) {
 	if (!window || !window->nswindow)
 		return;
+    
+	dispatch_async(dispatch_get_main_queue(), ^{
+		NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+		NSScreen* screen = [nswindow screen];
+		NSRect frame_rect = [nswindow frame];
 
-	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
-	NSScreen* screen = [nswindow screen];
-	NSRect frame_rect = [nswindow frame];
+		NSUInteger style_mask = [nswindow styleMask];
+		NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
+		[nswindow setStyleMask:resize_mask];
 
-	NSUInteger style_mask = [nswindow styleMask];
-	NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
-	[nswindow setStyleMask:resize_mask];
+		NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
+		if ((new_rect.size.width < frame_rect.size.width) || (new_rect.size.height < frame_rect.size.height)) {
+			// Maintain aspect
+			double width_factor = new_rect.size.width / frame_rect.size.width;
+			double height_factor = new_rect.size.height / frame_rect.size.height;
 
-	NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
-	if ((new_rect.size.width < frame_rect.size.width) || (new_rect.size.height < frame_rect.size.height)) {
-		// Maintain aspect
-		double width_factor = new_rect.size.width / frame_rect.size.width;
-		double height_factor = new_rect.size.height / frame_rect.size.height;
+			if (width_factor < height_factor)
+				new_rect.size.height = new_rect.size.height * width_factor;
+			else
+				new_rect.size.width = new_rect.size.width * height_factor;
 
-		if (width_factor < height_factor)
-			new_rect.size.height = new_rect.size.height * width_factor;
-		else
-			new_rect.size.width = new_rect.size.width * height_factor;
+			[nswindow setFrame:new_rect display:TRUE];
+		}
 
-		[nswindow setFrame:new_rect display:TRUE];
-	}
-
-	[nswindow setStyleMask:style_mask];
+		[nswindow setStyleMask:style_mask];
+	});
 }
 
 int
