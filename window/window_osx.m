@@ -140,10 +140,13 @@ window_maximize(window_t* window) {
 	if (!window || !window->nswindow)
 		return;
 
-	if (window_is_maximized(window))
-		return;
+	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		if ([nswindow isZoomed])
+			return;
 
-	[(__bridge NSWindow*)window->nswindow zoom:nil];
+		[nswindow zoom:nil];
+	});
 }
 
 void
@@ -151,7 +154,9 @@ window_minimize(window_t* window) {
 	if (!window || !window->nswindow)
 		return;
 
-	[(__bridge NSWindow*)window->nswindow miniaturize:nil];
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		[(__bridge NSWindow*)window->nswindow miniaturize:nil];
+	});
 }
 
 void
@@ -159,11 +164,13 @@ window_restore(window_t* window) {
 	if (!window || !window->nswindow)
 		return;
 
-	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
-	if (window_is_minimized(window))
-		[nswindow deminiaturize:nil];
-	else if (window_is_maximized(window))
-		[nswindow zoom:nil];
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+		if ([nswindow isMiniaturized])
+			[nswindow deminiaturize:nil];
+		else if ([nswindow isZoomed])
+			[nswindow zoom:nil];
+	});
 }
 
 void
@@ -171,24 +178,26 @@ window_resize(window_t* window, int width, int height) {
 	if (!window || !window->nswindow)
 		return;
 
-	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
-	if (window_is_maximized(window))
-		[nswindow zoom:nil];
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+		if ([nswindow isZoomed])
+			[nswindow zoom:nil];
 
-	NSRect frame_rect = [nswindow frame];
+		NSRect frame_rect = [nswindow frame];
 
-	NSRect new_rect = frame_rect;
-	new_rect.size.width = width;
-	new_rect.size.height = height;
-	new_rect = [nswindow frameRectForContentRect:new_rect];
-	if (!math_real_eq((real)new_rect.size.width, (real)frame_rect.size.width, 100) ||
-	    !math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
-		NSUInteger style_mask = [nswindow styleMask];
-		NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
-		[nswindow setStyleMask:resize_mask];
-		[nswindow setFrame:new_rect display:TRUE];
-		[nswindow setStyleMask:style_mask];
-	}
+		NSRect new_rect = frame_rect;
+		new_rect.size.width = width;
+		new_rect.size.height = height;
+		new_rect = [nswindow frameRectForContentRect:new_rect];
+		if (!math_real_eq((real)new_rect.size.width, (real)frame_rect.size.width, 100) ||
+			!math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
+			NSUInteger style_mask = [nswindow styleMask];
+			NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
+			[nswindow setStyleMask:resize_mask];
+			[nswindow setFrame:new_rect display:TRUE];
+			[nswindow setStyleMask:style_mask];
+		}
+	});
 }
 
 void
@@ -198,7 +207,9 @@ window_move(window_t* window, int x, int y) {
 
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	NSPoint pt = {x, y};
-	[nswindow setFrameOrigin:pt];
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		[nswindow setFrameOrigin:pt];
+	});
 }
 
 bool
@@ -225,7 +236,11 @@ window_is_maximized(window_t* window) {
 	if (!window || !window->nswindow)
 		return false;
 
-	return [(__bridge NSWindow*)window->nswindow isZoomed];
+	__block bool is_maxi = false;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		is_maxi = [(__bridge NSWindow*)window->nswindow isZoomed];
+	});
+	return is_maxi;
 }
 
 bool
@@ -233,7 +248,11 @@ window_is_minimized(window_t* window) {
 	if (!window || !window->nswindow)
 		return false;
 
-	return [(__bridge NSWindow*)window->nswindow isMiniaturized];
+	__block bool is_mini = false;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		is_mini = [(__bridge NSWindow*)window->nswindow isMiniaturized];
+	});
+	return is_mini;
 }
 
 bool
