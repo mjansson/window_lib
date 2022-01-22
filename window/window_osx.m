@@ -48,11 +48,10 @@ window_native_finalize(void) {
 }
 
 + (Class)layerClass {
-    return [CAMetalLayer class];
+	return [CAMetalLayer class];
 }
 
-- (CALayer *)makeBackingLayer
-{
+- (CALayer*)makeBackingLayer {
 	return [CAMetalLayer layer];
 }
 
@@ -95,7 +94,7 @@ window_initialize(window_t* window, void* nswindow) {
 	window->delegate = (__bridge_retained void*)delegate;
 	if (window->nswindow) {
 		dispatch_sync(dispatch_get_main_queue(), ^{
-			[(__bridge NSWindow*)window->nswindow setDelegate:delegate];
+		  [(__bridge NSWindow*)window->nswindow setDelegate:delegate];
 		});
 	}
 	window_event_post(WINDOWEVENT_CREATE, window);
@@ -124,7 +123,7 @@ window_view(window_t* window, unsigned int tag) {
 	FOUNDATION_UNUSED(tag);
 	__block void* view = nullptr;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		view = (__bridge void*)((window && window->nswindow) ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
+	  view = (__bridge void*)((window && window->nswindow) ? [(__bridge NSWindow*)window->nswindow contentView] : 0);
 	});
 	return view;
 }
@@ -142,10 +141,10 @@ window_maximize(window_t* window) {
 
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		if ([nswindow isZoomed])
-			return;
+	  if ([nswindow isZoomed])
+		  return;
 
-		[nswindow zoom:nil];
+	  [nswindow zoom:nil];
 	});
 }
 
@@ -155,7 +154,7 @@ window_minimize(window_t* window) {
 		return;
 
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		[(__bridge NSWindow*)window->nswindow miniaturize:nil];
+	  [(__bridge NSWindow*)window->nswindow miniaturize:nil];
 	});
 }
 
@@ -165,11 +164,11 @@ window_restore(window_t* window) {
 		return;
 
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
-		if ([nswindow isMiniaturized])
-			[nswindow deminiaturize:nil];
-		else if ([nswindow isZoomed])
-			[nswindow zoom:nil];
+	  NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+	  if ([nswindow isMiniaturized])
+		  [nswindow deminiaturize:nil];
+	  else if ([nswindow isZoomed])
+		  [nswindow zoom:nil];
 	});
 }
 
@@ -179,24 +178,24 @@ window_resize(window_t* window, int width, int height) {
 		return;
 
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
-		if ([nswindow isZoomed])
-			[nswindow zoom:nil];
+	  NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+	  if ([nswindow isZoomed])
+		  [nswindow zoom:nil];
 
-		NSRect frame_rect = [nswindow frame];
+	  NSRect frame_rect = [nswindow frame];
 
-		NSRect new_rect = frame_rect;
-		new_rect.size.width = width;
-		new_rect.size.height = height;
-		new_rect = [nswindow frameRectForContentRect:new_rect];
-		if (!math_real_eq((real)new_rect.size.width, (real)frame_rect.size.width, 100) ||
-			!math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
-			NSUInteger style_mask = [nswindow styleMask];
-			NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
-			[nswindow setStyleMask:resize_mask];
-			[nswindow setFrame:new_rect display:TRUE];
-			[nswindow setStyleMask:style_mask];
-		}
+	  NSRect new_rect = frame_rect;
+	  new_rect.size.width = width;
+	  new_rect.size.height = height;
+	  new_rect = [nswindow frameRectForContentRect:new_rect];
+	  if (!math_real_eq((real)new_rect.size.width, (real)frame_rect.size.width, 100) ||
+		  !math_real_eq((real)new_rect.size.height, (real)frame_rect.size.height, 100)) {
+		  NSUInteger style_mask = [nswindow styleMask];
+		  NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
+		  [nswindow setStyleMask:resize_mask];
+		  [nswindow setFrame:new_rect display:TRUE];
+		  [nswindow setStyleMask:style_mask];
+	  }
 	});
 }
 
@@ -208,7 +207,7 @@ window_move(window_t* window, int x, int y) {
 	NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
 	NSPoint pt = {x, y};
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		[nswindow setFrameOrigin:pt];
+	  [nswindow setFrameOrigin:pt];
 	});
 }
 
@@ -226,7 +225,7 @@ window_is_visible(window_t* window) {
 
 	__block bool is_visible = false;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		is_visible = [(__bridge NSWindow*)window->nswindow isVisible];
+	  is_visible = [(__bridge NSWindow*)window->nswindow isVisible];
 	});
 	return is_visible;
 }
@@ -238,7 +237,7 @@ window_is_maximized(window_t* window) {
 
 	__block bool is_maxi = false;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		is_maxi = [(__bridge NSWindow*)window->nswindow isZoomed];
+	  is_maxi = [(__bridge NSWindow*)window->nswindow isZoomed];
 	});
 	return is_maxi;
 }
@@ -250,7 +249,7 @@ window_is_minimized(window_t* window) {
 
 	__block bool is_mini = false;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		is_mini = [(__bridge NSWindow*)window->nswindow isMiniaturized];
+	  is_mini = [(__bridge NSWindow*)window->nswindow isMiniaturized];
 	});
 	return is_mini;
 }
@@ -259,7 +258,7 @@ bool
 window_has_focus(window_t* window) {
 	__block bool has_focus = false;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		has_focus = (window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow)));
+	  has_focus = (window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow)));
 	});
 	return has_focus;
 }
@@ -301,7 +300,8 @@ window_width(window_t* window) {
 	if (window && window->nswindow) {
 		__block NSRect rect;
 		dispatch_sync(dispatch_get_main_queue(), ^{
-			rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		  rect = [(__bridge NSWindow*)window->nswindow
+			  contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
 		});
 		return (uint)rect.size.width;
 	}
@@ -313,7 +313,8 @@ window_height(window_t* window) {
 	if (window && window->nswindow) {
 		__block NSRect rect;
 		dispatch_sync(dispatch_get_main_queue(), ^{
-			rect = [(__bridge NSWindow*)window->nswindow contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
+		  rect = [(__bridge NSWindow*)window->nswindow
+			  contentRectForFrameRect:[(__bridge NSWindow*)window->nswindow frame]];
 		});
 		return (uint)rect.size.height;
 	}
@@ -325,7 +326,7 @@ window_position_x(window_t* window) {
 	if (window && window->nswindow) {
 		__block NSRect rect;
 		dispatch_sync(dispatch_get_main_queue(), ^{
-			rect = [(__bridge NSWindow*)window->nswindow frame];
+		  rect = [(__bridge NSWindow*)window->nswindow frame];
 		});
 		return (int)rect.origin.x;
 	}
@@ -337,7 +338,7 @@ window_position_y(window_t* window) {
 	if (window && window->nswindow) {
 		__block NSRect rect;
 		dispatch_sync(dispatch_get_main_queue(), ^{
-			rect = [(__bridge NSWindow*)window->nswindow frame];
+		  rect = [(__bridge NSWindow*)window->nswindow frame];
 		});
 		return (int)rect.origin.y;
 	}
@@ -360,31 +361,31 @@ void
 window_fit_to_screen(window_t* window) {
 	if (!window || !window->nswindow)
 		return;
-    
+
 	dispatch_async(dispatch_get_main_queue(), ^{
-		NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
-		NSScreen* screen = [nswindow screen];
-		NSRect frame_rect = [nswindow frame];
+	  NSWindow* nswindow = (__bridge NSWindow*)window->nswindow;
+	  NSScreen* screen = [nswindow screen];
+	  NSRect frame_rect = [nswindow frame];
 
-		NSUInteger style_mask = [nswindow styleMask];
-		NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
-		[nswindow setStyleMask:resize_mask];
+	  NSUInteger style_mask = [nswindow styleMask];
+	  NSUInteger resize_mask = style_mask | NSWindowStyleMaskResizable;
+	  [nswindow setStyleMask:resize_mask];
 
-		NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
-		if ((new_rect.size.width < frame_rect.size.width) || (new_rect.size.height < frame_rect.size.height)) {
-			// Maintain aspect
-			double width_factor = new_rect.size.width / frame_rect.size.width;
-			double height_factor = new_rect.size.height / frame_rect.size.height;
+	  NSRect new_rect = [nswindow constrainFrameRect:frame_rect toScreen:screen];
+	  if ((new_rect.size.width < frame_rect.size.width) || (new_rect.size.height < frame_rect.size.height)) {
+		  // Maintain aspect
+		  double width_factor = new_rect.size.width / frame_rect.size.width;
+		  double height_factor = new_rect.size.height / frame_rect.size.height;
 
-			if (width_factor < height_factor)
-				new_rect.size.height = new_rect.size.height * width_factor;
-			else
-				new_rect.size.width = new_rect.size.width * height_factor;
+		  if (width_factor < height_factor)
+			  new_rect.size.height = new_rect.size.height * width_factor;
+		  else
+			  new_rect.size.width = new_rect.size.width * height_factor;
 
-			[nswindow setFrame:new_rect display:TRUE];
-		}
+		  [nswindow setFrame:new_rect display:TRUE];
+	  }
 
-		[nswindow setStyleMask:style_mask];
+	  [nswindow setStyleMask:style_mask];
 	});
 }
 
