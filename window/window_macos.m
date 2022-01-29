@@ -110,6 +110,8 @@ void
 window_finalize(window_t* window) {
 	if (window->delegate)
 		CFRelease(window->delegate);
+	window->delegate = nullptr;
+	window->nswindow = nullptr;
 }
 
 void

@@ -17,7 +17,7 @@ writer = generator.writer
 toolchain = generator.toolchain
 
 window_lib = generator.lib(module = 'window', sources = [
-  'event.c', 'version.c', 'window.c', 'window_android.c', 'window_ios.m', 'window_linux.c', 'window_osx.m', 'window_windows.c'])
+  'event.c', 'version.c', 'window.c', 'window_android.c', 'window_ios.m', 'window_linux.c', 'window_macos.m', 'window_windows.c'])
 
 #No test cases if we're a submodule
 if generator.is_subninja():
@@ -28,9 +28,9 @@ includepaths = generator.test_includepaths()
 gllibs = []
 glframeworks = []
 if target.is_macos():
-  glframeworks = ['OpenGL']
+  glframeworks = ['QuartzCore']
 elif target.is_ios():
-  glframeworks = ['QuartzCore', 'OpenGLES']
+  glframeworks = ['QuartzCore']
 if target.is_windows():
   gllibs = ['gdi32']
 if target.is_linux():
@@ -70,7 +70,7 @@ else:
   generator.bin(module = 'all', sources = ['main.c'], binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = dependlibs + gllibs, includepaths = includepaths)
   for test in test_cases:
     if target.is_macos():
-      test_resources = [os.path.join('osx', item) for item in ['test-' + test + '.plist', 'Images.xcassets', 'test-' + test + '.xib']]
+      test_resources = [os.path.join('macos', item) for item in ['test-' + test + '.plist', 'test-' + test + '.entitlements', 'Images.xcassets', 'test-' + test + '.xib']]
       generator.app(module = test, sources = ['main.c'], binname = 'test-' + test, basepath = 'test', implicit_deps = [window_lib], libs = ['test'] + dependlibs + gllibs, frameworks = glframeworks, resources = test_resources, includepaths = includepaths)
     else:
       generator.bin(module = test, sources = ['main.c'], binname = 'test-' + test, basepath = 'test', implicit_deps = [window_lib], libs = ['test'] + dependlibs + gllibs, frameworks = glframeworks, includepaths = includepaths)
