@@ -260,7 +260,11 @@ bool
 window_has_focus(window_t* window) {
 	__block bool has_focus = false;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-	  has_focus = (window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow)));
+	  @autoreleasepool {
+		  bool active = [[NSRunningApplication currentApplication] isActive];
+		  has_focus =
+			  active && (window && window->nswindow && ([NSApp mainWindow] == (__bridge NSWindow*)(window->nswindow)));
+	  }
 	});
 	return has_focus;
 }
