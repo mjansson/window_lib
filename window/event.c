@@ -53,6 +53,7 @@ window_event_finalize(void) {
 	semaphore_finalize(&windows_lock);
 #endif
 	event_stream_deallocate(window_stream);
+	window_stream = nullptr;
 }
 
 void
