@@ -67,7 +67,8 @@ if toolchain.is_monolithic() or target.is_ios() or target.is_android() or target
     generator.bin(module = '', sources = [os.path.join(module, 'main.c') for module in test_cases] + test_extrasources, binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = ['test'] + dependlibs + gllibs, frameworks = glframeworks, resources = test_resources, includepaths = includepaths)
 else:
   #Build one binary per test case
-  generator.bin(module = 'all', sources = ['main.c'], binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = dependlibs + gllibs, includepaths = includepaths)
+  if not generator.is_subninja:
+    generator.bin(module = 'all', sources = ['main.c'], binname = 'test-all', basepath = 'test', implicit_deps = [window_lib], libs = dependlibs + gllibs, includepaths = includepaths)
   for test in test_cases:
     if target.is_macos():
       test_resources = [os.path.join('macos', item) for item in ['test-' + test + '.plist', 'test-' + test + '.entitlements', 'Images.xcassets', 'test-' + test + '.xib']]
