@@ -28,10 +28,11 @@ class GCCToolchain(toolchain.Toolchain):
     self.linkcmd = '$toolchain$link $libpaths $configlibpaths $linkflags $linkarchflags $linkconfigflags $linkenvflags -o $out $in $libs $archlibs $oslibs'
 
     #Base flags
+    # No fast/unsafe math, the code relies on isfinite() guards which -ffinite-math-only
+    # (implied by -ffast-math) optimizes away to a constant true
     self.cflags = ['-D' + project.upper() + '_COMPILE=1',
                    '-funit-at-a-time', '-fstrict-aliasing',
-                   '-fno-math-errno','-ffinite-math-only', '-funsafe-math-optimizations',
-                   '-fno-trapping-math', '-ffast-math']
+                   '-fno-math-errno', '-fno-trapping-math']
     self.cwarnflags = ['-Wextra', '-Wall', '-Werror']
     self.cmoreflags = []
     self.mflags = []

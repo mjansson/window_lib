@@ -46,11 +46,15 @@ class ClangToolchain(toolchain.Toolchain):
       self.linkcmd = '$toolchain$link $libpaths $configlibpaths $linkflags $linkarchflags $linkconfigflags $linkenvflags -o $out $in $libs $archlibs $oslibs $frameworks'
 
     #Base flags
+    # No fast/unsafe math, the code relies on isfinite() guards which -ffinite-math-only
+    # (implied by -ffast-math) optimizes away to a constant true
     self.cflags = ['-D' + project.upper() + '_COMPILE=1',
                    '-fstrict-aliasing', '-fvisibility=hidden', '-fno-stack-protector',
-                   '-fno-math-errno','-ffinite-math-only', '-funsafe-math-optimizations',
-                   '-fno-trapping-math', '-ffast-math']
-    self.cwarnflags = ['-W', '-Werror', '-pedantic', '-Wall', '-Weverything',
+                   '-fno-math-errno', '-fno-trapping-math']
+    self.cwarnflags = ['-W', '-Werror', '-pedantic', '-Wall',
+                       # Tolerate warning options that only exist in some clang versions (e.g.
+                       # -Wno-pre-c11-compat, -Wno-unsafe-buffer-usage) instead of erroring out.
+                       '-Wno-unknown-warning-option',
                        '-Wno-c++98-compat', '-Wno-padded', '-Wno-documentation-unknown-command', '-Wno-declaration-after-statement',
                        '-Wno-implicit-fallthrough', '-Wno-static-in-inline', '-Wno-reserved-id-macro', '-Wno-disabled-macro-expansion',
                        '-Wno-pre-c11-compat', '-Wno-switch-default', '-Wno-cast-function-type-strict']

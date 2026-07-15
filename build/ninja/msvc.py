@@ -31,7 +31,9 @@ class MSVCToolchain(toolchain.Toolchain):
     self.linkcmd = '$toolchain$link $libpaths $configlibpaths $linkflags $linkarchflags $linkconfigflags /DEBUG /NOLOGO /SUBSYSTEM:CONSOLE /DYNAMICBASE /NXCOMPAT /MANIFEST /MANIFESTUAC:\"level=\'asInvoker\' uiAccess=\'false\'\" /TLBID:1 /PDB:$pdbpath /OUT:$out $in $libs $archlibs $oslibs'
     self.dllcmd = self.linkcmd + ' /DLL'
 
-    self.cflags = ['/D', '"' + project.upper() + '_COMPILE=1"', '/D', '"_UNICODE"',  '/D', '"UNICODE"', '/std:c17', '/experimental:c11atomics', '/Zi', '/Oi', '/Oy-', '/GS-', '/Gy-', '/Qpar-', '/fp:fast', '/fp:except-', '/Zc:forScope', '/Zc:wchar_t', '/GR-', '/openmp-']
+    # /fp:precise and not /fp:fast, the code relies on isfinite() guards and /fp:fast lets the
+    # compiler assume values are never NaN or infinity
+    self.cflags = ['/D', '"' + project.upper() + '_COMPILE=1"', '/D', '"_UNICODE"',  '/D', '"UNICODE"', '/std:c17', '/experimental:c11atomics', '/Zi', '/Oi', '/Oy-', '/GS-', '/Gy-', '/Qpar-', '/fp:precise', '/fp:except-', '/Zc:forScope', '/Zc:wchar_t', '/GR-', '/openmp-']
     self.cwarnflags = ['/W4', '/WX', '/wd4201'] #Ignore nameless union/struct which is allowed in C11
     self.cmoreflags = []
     self.arflags = ['/ignore:4221'] #Ignore empty object file warning]
@@ -134,8 +136,8 @@ class MSVCToolchain(toolchain.Toolchain):
         if int(major_version) >= 15:
           tools_basepath = os.path.join(installpath, 'VC', 'Tools', 'MSVC')
           tools_list = [item for item in os.listdir(tools_basepath) if os.path.isdir(os.path.join(tools_basepath, item))]
-          from distutils.version import StrictVersion
-          tools_list.sort(key=StrictVersion)
+          from packaging.version import Version
+          tools_list.sort(key=Version)
           self.toolchain = os.path.join(tools_basepath, tools_list[-1])
           self.toolchain_version = major_version + ".0"
           break
@@ -164,8 +166,8 @@ class MSVCToolchain(toolchain.Toolchain):
             if not toolchain == '':
               tools_basepath = os.path.join(toolchain, 'VC', 'Tools', 'MSVC')
               tools_list = [item for item in os.listdir(tools_basepath) if os.path.isdir(os.path.join(tools_basepath, item))]
-              from distutils.version import StrictVersion
-              tools_list.sort(key=StrictVersion)
+              from packaging.version import Version
+              tools_list.sort(key=Version)
               toolchain = os.path.join(tools_basepath, tools_list[-1])
               self.toolchain = toolchain
               self.toolchain_version = version
